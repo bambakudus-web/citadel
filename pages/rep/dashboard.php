@@ -13,17 +13,22 @@ $activeSessions  = $pdo->query("SELECT COUNT(*) FROM sessions WHERE active_statu
 
 $today     = date('l');
 $todayStmt = $pdo->prepare("SELECT t.*, u.full_name as lecturer_name FROM timetable t LEFT JOIN users u ON t.lecturer_id=u.id WHERE t.day_of_week=? ORDER BY t.start_time");
-$todayStmt->execute([$today]);
-$todayClasses = $todayStmt->fetchAll();
+$todayStmt->execute([$today]); $todayClasses = $todayStmt->fetchAll();
 
 $allClasses    = $pdo->query("SELECT DISTINCT course_code, course_name FROM timetable ORDER BY course_code")->fetchAll();
 $activeSession = $pdo->query("SELECT * FROM sessions WHERE active_status=1 ORDER BY start_time DESC LIMIT 1")->fetch();
 
 $liveAttendance = [];
 if ($activeSession) {
-    $la = $pdo->prepare("SELECT u.full_name, u.index_no, a.status, a.timestamp FROM attendance a JOIN users u ON a.student_id=u.id WHERE a.session_id=? ORDER BY a.timestamp DESC");
-    $la->execute([$activeSession['id']]);
-    $liveAttendance = $la->fetchAll();
+    $la = $pdo->prepare("SELECT u.full_name, u.index_no, a.status, a.timestamp FROM attendance a JOIN users u ON a.student_id=u.id WHERE a.session_id=? AND a.status IN ('present','late') ORDER BY a.timestamp DESC");
+    $la->execute([$activeSession['id']]); $liveAttendance = $la->fetchAll();
+}
+
+// Pending approvals count
+$pendingCount = 0;
+if ($activeSession) {
+    $pc = $pdo->prepare("SELECT COUNT(*) FROM attendance WHERE session_id=? AND status='pending'");
+    $pc->execute([$activeSession['id']]); $pendingCount = $pc->fetchColumn();
 }
 
 function generateCode(string $secret, int $window): string {
@@ -36,7 +41,7 @@ function generateCode(string $secret, int $window): string {
 $currentCode   = '';
 $timeRemaining = 120 - (time() % 120);
 if ($activeSession) {
-    $currentCode = generateCode($activeSession['secret_key'], (int)floor(time() / 30));
+    $currentCode = generateCode($activeSession['secret_key'], (int)floor(time() / 120));
 }
 
 $students  = $pdo->query("SELECT * FROM users WHERE role IN ('student','rep') ORDER BY full_name")->fetchAll();
@@ -45,7 +50,6 @@ $recentAtt = $pdo->query("SELECT a.*, u.full_name, u.index_no, s.course_code FRO
 $msg = ''; $msgType = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
-
     if ($action === 'start_session') {
         $courseCode = trim($_POST['course_code'] ?? '');
         $courseName = trim($_POST['course_name'] ?? '');
@@ -54,28 +58,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $pdo->prepare("INSERT INTO sessions (course_code, course_name, lecturer_id, secret_key, start_time, active_status) VALUES (?,?,?,?,NOW(),1)")->execute([$courseCode, $courseName, $userId, $secretKey]);
         header('Location: dashboard.php'); exit;
     }
-
     if ($action === 'end_session') {
         $sid = (int)($_POST['session_id'] ?? 0);
         $pdo->prepare("UPDATE sessions SET active_status=0, end_time=NOW() WHERE id=?")->execute([$sid]);
         header('Location: dashboard.php'); exit;
     }
-
     if ($action === 'add') {
-        $name  = trim($_POST['full_name'] ?? '');
-        $index = trim($_POST['index_no']  ?? '');
-        $email = trim($_POST['email']     ?? '') ?: ($index . '@citadel.edu');
+        $name = trim($_POST['full_name'] ?? ''); $index = trim($_POST['index_no'] ?? '');
+        $email = trim($_POST['email'] ?? '') ?: ($index . '@citadel.edu');
         $hash  = password_hash($index, PASSWORD_DEFAULT);
         if ($name && $index) {
             try {
                 $pdo->prepare("INSERT INTO users (full_name, index_no, email, password_hash, role) VALUES (?,?,?,?,'student')")->execute([$name, $index, $email, $hash]);
                 $msg = "Student $name added."; $msgType = 'success';
-                $students      = $pdo->query("SELECT * FROM users WHERE role IN ('student','rep') ORDER BY full_name")->fetchAll();
+                $students = $pdo->query("SELECT * FROM users WHERE role IN ('student','rep') ORDER BY full_name")->fetchAll();
                 $totalStudents = count($students);
             } catch (Exception $e) { $msg = "Error: Index or email already exists."; $msgType = 'error'; }
         } else { $msg = "Name and Index Number are required."; $msgType = 'error'; }
     }
-
     if ($action === 'edit') {
         $id = (int)($_POST['id'] ?? 0); $name = trim($_POST['full_name'] ?? ''); $index = trim($_POST['index_no'] ?? ''); $email = trim($_POST['email'] ?? '');
         if ($id && $name && $index) {
@@ -84,7 +84,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $students = $pdo->query("SELECT * FROM users WHERE role IN ('student','rep') ORDER BY full_name")->fetchAll();
         }
     }
-
     if ($action === 'delete') {
         $id = (int)($_POST['id'] ?? 0);
         if ($id) {
@@ -140,6 +139,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     .stat-card.green::before{background:linear-gradient(90deg,transparent,var(--rep),transparent)}
     .stat-card.gold::before{background:linear-gradient(90deg,transparent,var(--gold),transparent)}
     .stat-card.steel::before{background:linear-gradient(90deg,transparent,var(--steel),transparent)}
+    .stat-card.warn::before{background:linear-gradient(90deg,transparent,var(--warning),transparent)}
     .stat-label{font-size:.65rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-bottom:.4rem}
     .stat-value{font-size:1.9rem;font-weight:600;color:var(--text);line-height:1}
     .stat-sub{font-size:.7rem;color:var(--muted);margin-top:.35rem}
@@ -159,6 +159,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     .pill-gold{background:rgba(201,168,76,.12);color:var(--gold);border:1px solid rgba(201,168,76,.3)}
     .pill-rep{background:rgba(90,159,122,.12);color:var(--rep);border:1px solid rgba(90,159,122,.3)}
     .pill-steel{background:rgba(74,111,165,.12);color:var(--steel);border:1px solid rgba(74,111,165,.3)}
+    .pill-warn{background:rgba(224,160,80,.12);color:var(--warning);border:1px solid rgba(224,160,80,.3)}
     .tt-grid{display:flex;flex-direction:column;gap:.5rem}
     .tt-item{display:flex;align-items:center;gap:1rem;background:var(--surface2);border:1px solid var(--border);border-left:3px solid var(--rep);padding:.7rem 1rem;border-radius:2px}
     .tt-time{font-size:.75rem;color:var(--gold);min-width:100px;font-weight:500}
@@ -211,9 +212,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     .counter-value{font-size:1.5rem;font-weight:600;color:var(--text);line-height:1}
     .counter-label{font-size:.62rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-top:.2rem}
     .start-form{background:var(--surface2);border:1px solid var(--border);border-radius:2px;padding:1.6rem;max-width:500px}
-    .announce-box{background:var(--surface2);border:1px solid var(--border);border-left:3px solid var(--rep);padding:1rem 1.2rem;border-radius:2px;margin-bottom:1rem}
-    .announce-box textarea{width:100%;background:transparent;border:none;color:var(--text);font-family:'DM Sans',sans-serif;font-size:.88rem;resize:vertical;outline:none;min-height:80px}
-    .announce-box textarea::placeholder{color:var(--muted)}
+
+    /* Approvals */
+    .selfie-thumb{width:48px;height:48px;object-fit:cover;border-radius:50%;border:2px solid var(--border);cursor:pointer;transition:border-color .2s}
+    .selfie-thumb:hover{border-color:var(--rep)}
+    .pending-badge{background:var(--warning);color:#060910;font-size:.6rem;font-weight:700;padding:.15rem .45rem;border-radius:2px;margin-left:.4rem;display:none}
+
     @media(max-width:900px){.two-col{grid-template-columns:1fr}}
     @media(max-width:768px){.sidebar{transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}.main{margin-left:0}.content{padding:1.2rem}.topbar{padding:.9rem 1.2rem}.stats-grid{grid-template-columns:repeat(2,1fr)}.code-number{font-size:2.5rem}}
   </style>
@@ -238,6 +242,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
         <?= $activeSession ? '🟢 Live Session' : 'Start Session' ?>
       </a>
+      <a class="nav-item" id="approvals-nav" onclick="showSection('approvals',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        Approvals<span class="pending-badge" id="pending-badge"><?= $pendingCount ?></span>
+      </a>
       <div class="nav-section">Class Management</div>
       <a class="nav-item" onclick="showSection('students',this)">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Students
@@ -252,7 +260,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div class="sidebar-user">
       <div class="u-name"><?= htmlspecialchars($user['full_name'] ?? 'Ali Richard') ?></div>
       <div class="u-index">Rep · <?= htmlspecialchars($user['index_no'] ?? '52430540017') ?></div>
-      <a href="../../change_password.php" style="color:var(--muted);font-size:.78rem;display:block;margin-bottom:.4rem">Change Password</a><a href="../../logout.php">Sign out</a>
+      <a href="../../change_password.php" style="color:var(--muted);font-size:.78rem;display:block;margin-bottom:.4rem">Change Password</a>
+      <a href="../../logout.php">Sign out</a>
     </div>
   </aside>
 
@@ -279,6 +288,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           <div class="stat-card green"><div class="stat-label">Class Size</div><div class="stat-value"><?= $totalStudents ?></div><div class="stat-sub">HND CS Year 2</div></div>
           <div class="stat-card gold"><div class="stat-label">Today's Records</div><div class="stat-value"><?= $todayAttendance ?></div><div class="stat-sub"><?= date('d M Y') ?></div></div>
           <div class="stat-card steel"><div class="stat-label">Active Sessions</div><div class="stat-value"><?= $activeSessions ?></div><div class="stat-sub">Live right now</div></div>
+          <?php if ($pendingCount > 0): ?>
+          <div class="stat-card warn"><div class="stat-label">Pending Approvals</div><div class="stat-value"><?= $pendingCount ?></div><div class="stat-sub"><a href="#" onclick="showSection('approvals',document.getElementById('approvals-nav'));return false" style="color:var(--warning)">Review now →</a></div></div>
+          <?php endif; ?>
         </div>
         <div class="two-col">
           <div class="card">
@@ -286,10 +298,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div class="card-body">
               <?php if (empty($todayClasses)): ?><p style="color:var(--muted);font-size:.83rem">No classes today.</p>
               <?php else: ?><div class="tt-grid"><?php foreach ($todayClasses as $c): ?>
-                <div class="tt-item">
-                  <div class="tt-time"><?= substr($c['start_time'],0,5) ?> – <?= substr($c['end_time'],0,5) ?></div>
-                  <div><div class="tt-course-code"><?= htmlspecialchars($c['course_code']) ?></div><div class="tt-course-name"><?= htmlspecialchars($c['course_name']) ?></div><div class="tt-room">📍 <?= htmlspecialchars($c['room']) ?> · <?= htmlspecialchars($c['lecturer_name']) ?></div></div>
-                </div>
+                <div class="tt-item"><div class="tt-time"><?= substr($c['start_time'],0,5) ?> – <?= substr($c['end_time'],0,5) ?></div><div><div class="tt-course-code"><?= htmlspecialchars($c['course_code']) ?></div><div class="tt-course-name"><?= htmlspecialchars($c['course_name']) ?></div><div class="tt-room">📍 <?= htmlspecialchars($c['room']) ?> · <?= htmlspecialchars($c['lecturer_name']) ?></div></div></div>
               <?php endforeach; ?></div><?php endif; ?>
               <?php if ($activeSession): ?>
                 <button class="btn btn-rep" style="width:100%;justify-content:center;margin-top:1rem" onclick="showSection('session',document.getElementById('session-nav'))">View Live Code →</button>
@@ -305,7 +314,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
               <tbody>
                 <?php if (empty($recentAtt)): ?><tr><td colspan="4" style="color:var(--muted)">No records yet.</td></tr>
                 <?php else: foreach ($recentAtt as $r): ?>
-                  <tr><td><?= htmlspecialchars($r['full_name']) ?><br><small style="color:var(--muted)"><?= $r['index_no'] ?></small></td><td style="color:var(--gold);font-size:.78rem"><?= $r['course_code'] ?></td><td><span class="pill pill-<?= $r['status']==='present'?'green':($r['status']==='late'?'gold':'red') ?>"><?= $r['status'] ?></span></td><td style="color:var(--muted);font-size:.72rem"><?= date('H:i',strtotime($r['timestamp'])) ?></td></tr>
+                  <tr><td><?= htmlspecialchars($r['full_name']) ?><br><small style="color:var(--muted)"><?= $r['index_no'] ?></small></td><td style="color:var(--gold);font-size:.78rem"><?= $r['course_code'] ?></td><td><span class="pill pill-<?= $r['status']==='present'?'green':($r['status']==='late'?'gold':($r['status']==='pending'?'warn':'red')) ?>"><?= $r['status'] ?></span></td><td style="color:var(--muted);font-size:.72rem"><?= date('H:i',strtotime($r['timestamp'])) ?></td></tr>
                 <?php endforeach; endif; ?>
               </tbody></table>
             </div>
@@ -348,32 +357,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                   </div>
                   <div class="timer-text">seconds until<br>code refreshes</div>
                 </div>
-                <p style="font-size:.72rem;color:var(--muted)">Show this code to the class. Refreshes every 30 seconds.</p>
+                <p style="font-size:.72rem;color:var(--muted)">Show this code to the class. Refreshes every 2 minutes.</p>
               </div>
               <div class="attend-counter">
-                <div class="counter-item"><div class="counter-value" id="live-count"><?= count($liveAttendance) ?></div><div class="counter-label">Marked</div></div>
+                <div class="counter-item"><div class="counter-value" id="live-count"><?= count($liveAttendance) ?></div><div class="counter-label">Approved</div></div>
+                <div class="counter-item"><div class="counter-value" style="color:var(--warning)" id="pending-count"><?= $pendingCount ?></div><div class="counter-label">Pending</div></div>
                 <div class="counter-item"><div class="counter-value"><?= $totalStudents ?></div><div class="counter-label">Total</div></div>
-                <div class="counter-item"><div class="counter-value" style="color:var(--danger)"><?= $totalStudents - count($liveAttendance) ?></div><div class="counter-label">Absent</div></div>
               </div>
             </div>
             <div class="card">
-              <div class="card-head"><div class="card-head-title">Live Attendance</div><span class="pill pill-green" id="live-pill"><?= count($liveAttendance) ?> present</span></div>
+              <div class="card-head"><div class="card-head-title">Approved Students</div><span class="pill pill-green" id="live-pill"><?= count($liveAttendance) ?> present</span></div>
               <div class="card-body" style="padding:0;max-height:400px;overflow-y:auto">
                 <table class="data-table"><thead><tr><th>Student</th><th>Index</th><th>Status</th><th>Time</th></tr></thead>
                 <tbody id="live-tbody">
-                  <?php if(empty($liveAttendance)): ?><tr id="empty-row"><td colspan="4" style="color:var(--muted)">Waiting for students...</td></tr>
+                  <?php if(empty($liveAttendance)): ?><tr id="empty-row"><td colspan="4" style="color:var(--muted)">No approved students yet...</td></tr>
                   <?php else: foreach($liveAttendance as $a): ?>
-                    <tr><td><?= htmlspecialchars($a['full_name']) ?></td><td style="color:var(--gold);font-size:.78rem"><?= $a['index_no'] ?></td><td><span class="pill pill-<?= $a['status']==='present'?'green':'gold' ?>"><?= $a['status'] ?></span></td><td style="color:var(--muted);font-size:.72rem"><?= date('H:i:s',strtotime($a['timestamp'])) ?></td></tr>
+                    <tr><td><?= htmlspecialchars($a['full_name']) ?></td><td style="color:var(--gold);font-size:.78rem"><?= $a['index_no'] ?></td><td><span class="pill pill-green"><?= $a['status'] ?></span></td><td style="color:var(--muted);font-size:.72rem"><?= date('H:i:s',strtotime($a['timestamp'])) ?></td></tr>
                   <?php endforeach; endif; ?>
                 </tbody></table>
               </div>
             </div>
           </div>
-	<a class="nav-item" id="approvals-nav" onclick="showSection('approvals',this)">
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-  Approvals <span id="pending-badge" style="background:var(--warning);color:#060910;font-size:.6rem;padding:.1rem .4rem;border-radius:2px;margin-left:.3rem;display:none">0</span>
-</a>
-
         <?php else: ?>
           <div class="section-header"><div class="section-title">Start <span>Session</span></div></div>
           <?php if(!empty($todayClasses)): ?>
@@ -393,6 +397,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
               </div>
               <button type="submit" class="btn btn-rep" style="width:100%;justify-content:center;padding:.8rem">Start Attendance Session</button>
             </form>
+          </div>
+        <?php endif; ?>
+      </div>
+
+      <!-- APPROVALS -->
+      <div class="page-section" id="sec-approvals">
+        <div class="section-header">
+          <div class="section-title">Pending <span>Approvals</span></div>
+          <span class="pill pill-warn" id="approvals-count-badge"><?= $pendingCount ?> pending</span>
+        </div>
+        <?php if (!$activeSession): ?>
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:2px;padding:2rem;text-align:center;color:var(--muted)">No active session. Start a session to see pending approvals.</div>
+        <?php else: ?>
+          <div class="card">
+            <div class="card-body" style="padding:0;overflow-x:auto">
+              <table class="data-table">
+                <thead><tr><th>Student</th><th>Index</th><th>Selfie</th><th>Submitted</th><th>Actions</th></tr></thead>
+                <tbody id="approvals-tbody">
+                  <tr><td colspan="5" style="color:var(--muted);padding:1.5rem">Loading...</td></tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         <?php endif; ?>
       </div>
@@ -431,36 +457,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <?php $allAtt=$pdo->query("SELECT a.*,u.full_name,u.index_no,s.course_code FROM attendance a JOIN users u ON a.student_id=u.id JOIN sessions s ON a.session_id=s.id ORDER BY a.timestamp DESC LIMIT 100")->fetchAll();
             if(empty($allAtt)): ?><tr><td colspan="5" style="color:var(--muted)">No records yet.</td></tr>
             <?php else: foreach($allAtt as $r): ?>
-              <tr><td><?= htmlspecialchars($r['full_name']) ?></td><td style="color:var(--gold);font-size:.78rem"><?= $r['index_no'] ?></td><td><?= $r['course_code'] ?></td><td><span class="pill pill-<?= $r['status']==='present'?'green':($r['status']==='late'?'gold':'red') ?>"><?= $r['status'] ?></span></td><td style="color:var(--muted);font-size:.75rem"><?= date('d M Y H:i',strtotime($r['timestamp'])) ?></td></tr>
+              <tr><td><?= htmlspecialchars($r['full_name']) ?></td><td style="color:var(--gold);font-size:.78rem"><?= $r['index_no'] ?></td><td><?= $r['course_code'] ?></td><td><span class="pill pill-<?= $r['status']==='present'?'green':($r['status']==='late'?'gold':($r['status']==='pending'?'warn':'red')) ?>"><?= $r['status'] ?></span></td><td style="color:var(--muted);font-size:.75rem"><?= date('d M Y H:i',strtotime($r['timestamp'])) ?></td></tr>
             <?php endforeach; endif; ?>
           </tbody></table>
         </div></div>
       </div>
-	<!-- APPROVALS -->
-<div class="page-section" id="sec-approvals">
-  <div class="section-header">
-    <div class="section-title">Pending <span>Approvals</span></div>
-    <span class="pill pill-gold" id="pending-count-badge">0 pending</span>
-  </div>
-  <div id="approvals-container">
-    <div class="card">
-      <div class="card-body" style="padding:0;overflow-x:auto">
-        <table class="data-table" id="approvals-table">
-          <thead><tr><th>Student</th><th>Index</th><th>Selfie</th><th>Time</th><th>Action</th></tr></thead>
-          <tbody id="approvals-tbody">
-            <tr><td colspan="5" style="color:var(--muted)">No pending approvals.</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-</div>	
 
       <!-- ANNOUNCEMENTS -->
       <div class="page-section" id="sec-announce">
         <div class="section-header"><div class="section-title">Class <span>Announcements</span></div></div>
         <div class="card"><div class="card-head"><div class="card-head-title">Post Announcement</div></div>
-          <div class="card-body"><div class="announce-box"><textarea placeholder="Type a message to the class..."></textarea></div><button class="btn btn-rep">Post to Class</button></div>
+          <div class="card-body">
+            <div style="background:var(--surface2);border:1px solid var(--border);border-left:3px solid var(--rep);padding:1rem 1.2rem;border-radius:2px;margin-bottom:1rem">
+              <textarea placeholder="Type a message to the class..." style="width:100%;background:transparent;border:none;color:var(--text);font-family:'DM Sans',sans-serif;font-size:.88rem;resize:vertical;outline:none;min-height:80px"></textarea>
+            </div>
+            <button class="btn btn-rep">Post to Class</button>
+          </div>
         </div>
       </div>
 
@@ -468,6 +480,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   </div>
 </div>
 
+<!-- Add Modal -->
 <div class="modal-overlay" id="modal-add">
   <div class="modal"><div class="modal-head"><div class="modal-title">ADD STUDENT</div><button class="modal-close" onclick="closeModal('modal-add')">✕</button></div>
     <div class="modal-body"><form method="POST"><input type="hidden" name="action" value="add">
@@ -478,6 +491,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   </div>
 </div>
 
+<!-- Edit Modal -->
 <div class="modal-overlay" id="modal-edit">
   <div class="modal"><div class="modal-head"><div class="modal-title">EDIT STUDENT</div><button class="modal-close" onclick="closeModal('modal-edit')">✕</button></div>
     <div class="modal-body"><form method="POST"><input type="hidden" name="action" value="edit"><input type="hidden" name="id" id="e-id">
@@ -490,57 +504,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <form method="POST" id="del-form"><input type="hidden" name="action" value="delete"><input type="hidden" name="id" id="del-id"></form>
 
-// Poll pending approvals every 8 seconds when session is active
-<?php if ($activeSession): ?>
-function loadApprovals(){
-  fetch('../../api/pending_approvals.php?session_id=<?= $activeSession['id'] ?>')
-    .then(r=>r.json())
-    .then(data=>{
-      const tbody=document.getElementById('approvals-tbody');
-      const badge=document.getElementById('pending-badge');
-      const countBadge=document.getElementById('pending-count-badge');
-      if(countBadge) countBadge.textContent=data.total+' pending';
-      if(badge){
-        if(data.total>0){badge.textContent=data.total;badge.style.display='inline'}
-        else badge.style.display='none';
-      }
-      if(!tbody) return;
-      if(data.rows.length===0){
-        tbody.innerHTML='<tr><td colspan="5" style="color:var(--muted)">No pending approvals.</td></tr>';
-        return;
-      }
-      tbody.innerHTML=data.rows.map(r=>`
-        <tr id="row-${r.id}">
-          <td>${r.full_name}</td>
-          <td style="color:var(--gold);font-size:.78rem">${r.index_no}</td>
-          <td><img src="../../${r.selfie_url}" style="width:48px;height:48px;object-fit:cover;border-radius:50%;border:2px solid var(--border);cursor:pointer" onclick="viewSelfie('../../${r.selfie_url}','${r.full_name}')"></td>
-          <td style="color:var(--muted);font-size:.72rem">${r.time}</td>
-          <td style="display:flex;gap:.4rem">
-            <button class="btn btn-rep btn-sm" onclick="approveAtt(${r.id},'approve')">✓ Approve</button>
-            <button class="btn btn-danger btn-sm" onclick="approveAtt(${r.id},'reject')">✕ Reject</button>
-          </td>
-        </tr>
-      `).join('');
-    });
-}
-loadApprovals();
-setInterval(loadApprovals, 8000);
+<!-- Selfie viewer overlay -->
+<div id="selfie-overlay" style="display:none;position:fixed;inset:0;z-index:999;background:rgba(0,0,0,.92);align-items:center;justify-content:center;flex-direction:column;gap:1rem">
+  <img id="selfie-big" src="" style="max-width:90%;max-height:70vh;border-radius:4px;border:2px solid var(--border)">
+  <div id="selfie-name" style="color:var(--text);font-family:'Cinzel',serif;font-size:.9rem"></div>
+  <button onclick="closeSelfie()" style="color:var(--text);background:none;border:1px solid var(--border);padding:.5rem 1.5rem;cursor:pointer;border-radius:2px;font-family:'DM Sans',sans-serif">Close</button>
+</div>
 
-async function approveAtt(id, action){
-  const row=document.getElementById('row-'+id);
-  if(row) row.style.opacity='0.4';
-  const res=await fetch('../../api/approve_attendance.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({attendance_id:id,action})});
-  const data=await res.json();
-  if(data.success) loadApprovals();
-}
-
-function viewSelfie(url, name){
-  const overlay=document.createElement('div');
-  overlay.style.cssText='position:fixed;inset:0;z-index:999;background:rgba(0,0,0,.9);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:1rem';
-  overlay.innerHTML=`<img src="${url}" style="max-width:90%;max-height:70vh;border-radius:4px"><div style="color:#fff;font-family:Cinzel,serif">${name}</div><button onclick="this.parentElement.remove()" style="color:#fff;background:none;border:1px solid rgba(255,255,255,.3);padding:.5rem 1.5rem;cursor:pointer;border-radius:2px">Close</button>`;
-  document.body.appendChild(overlay);
-}
-<?php endif; ?>
 <script>
 function showSection(name,el){document.querySelectorAll('.page-section').forEach(s=>s.classList.remove('active'));document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));document.getElementById('sec-'+name).classList.add('active');document.getElementById('page-title').textContent=name.toUpperCase();if(el)el.classList.add('active');document.getElementById('sidebar').classList.remove('open')}
 function openModal(id){document.getElementById(id).classList.add('open')}
@@ -550,18 +520,66 @@ function openEdit(id,name,index,email){document.getElementById('e-id').value=id;
 function confirmDel(id){if(confirm('Remove this student?')){document.getElementById('del-id').value=id;document.getElementById('del-form').submit()}}
 function filterStudents(){const q=document.getElementById('s-search').value.toLowerCase();document.querySelectorAll('#s-table tbody tr').forEach(tr=>{tr.style.display=((tr.dataset.name||'').includes(q)||(tr.dataset.index||'').includes(q))?'':'none'})}
 function fillName(){const sel=document.getElementById('course-sel');const opt=sel?.options[sel.selectedIndex];const f=document.getElementById('course-name');if(opt&&f)f.value=opt.dataset.name||''}
+function viewSelfie(url,name){const ov=document.getElementById('selfie-overlay');document.getElementById('selfie-big').src=url;document.getElementById('selfie-name').textContent=name;ov.style.display='flex'}
+function closeSelfie(){document.getElementById('selfie-overlay').style.display='none'}
 if(window.innerWidth<=768)document.getElementById('menu-btn').style.display='block';
 window.addEventListener('resize',()=>{document.getElementById('menu-btn').style.display=window.innerWidth<=768?'block':'none'});
 
 <?php if($activeSession): ?>
+// ── COUNTDOWN RING ──
 let timeLeft=<?= $timeRemaining ?>;
 const ringFill=document.getElementById('ring-fill');
 const ringNum=document.getElementById('ring-num');
-function updateRing(){if(!ringFill)return;const offset=150.8*(1-timeLeft/120);ringFill.style.strokeDashoffset=offset;ringNum.textContent=timeLeft;ringFill.style.stroke=timeLeft<=10?'var(--danger)':timeLeft<=20?'var(--warning)':'var(--rep)'}
+function updateRing(){if(!ringFill)return;const offset=150.8*(1-timeLeft/120);ringFill.style.strokeDashoffset=offset;ringNum.textContent=timeLeft;ringFill.style.stroke=timeLeft<=20?'var(--danger)':timeLeft<=60?'var(--warning)':'var(--rep)'}
 updateRing();
 setInterval(()=>{timeLeft--;if(timeLeft<0)timeLeft=119;updateRing()},1000);
-setInterval(()=>{fetch('../../api/get_code.php?session_id=<?= $activeSession['id'] ?>').then(r=>r.json()).then(d=>{if(d.code){const el=document.getElementById('live-code');if(el)el.textContent=d.code.slice(0,3)+' '+d.code.slice(3)}})},30000);
-setInterval(()=>{fetch('../../api/live_attendance.php?session_id=<?= $activeSession['id'] ?>').then(r=>r.json()).then(data=>{if(!data.rows)return;const tbody=document.getElementById('live-tbody');const pill=document.getElementById('live-pill');const count=document.getElementById('live-count');if(count)count.textContent=data.total;if(pill)pill.textContent=data.total+' present';if(tbody&&data.rows.length>0){const empty=document.getElementById('empty-row');if(empty)empty.remove();tbody.innerHTML=data.rows.map(r=>`<tr><td>${r.full_name}</td><td style="color:var(--gold);font-size:.78rem">${r.index_no}</td><td><span class="pill pill-${r.status==='present'?'green':'gold'}">${r.status}</span></td><td style="color:var(--muted);font-size:.72rem">${r.time}</td></tr>`).join('')}})},10000);
+
+// Refresh code every 2 mins
+setInterval(()=>{fetch('../../api/get_code.php?session_id=<?= $activeSession['id'] ?>').then(r=>r.json()).then(d=>{if(d.code){const el=document.getElementById('live-code');if(el)el.textContent=d.code.slice(0,3)+' '+d.code.slice(3)}})},120000);
+
+// Poll live approved attendance
+setInterval(()=>{fetch('../../api/live_attendance.php?session_id=<?= $activeSession['id'] ?>').then(r=>r.json()).then(data=>{if(!data.rows)return;const tbody=document.getElementById('live-tbody');const pill=document.getElementById('live-pill');const count=document.getElementById('live-count');if(count)count.textContent=data.total;if(pill)pill.textContent=data.total+' present';if(tbody&&data.rows.length>0){const empty=document.getElementById('empty-row');if(empty)empty.remove();tbody.innerHTML=data.rows.map(r=>`<tr><td>${r.full_name}</td><td style="color:var(--gold);font-size:.78rem">${r.index_no}</td><td><span class="pill pill-green">${r.status}</span></td><td style="color:var(--muted);font-size:.72rem">${r.time}</td></tr>`).join('')}})},10000);
+
+// ── APPROVALS POLLING ──
+function loadApprovals(){
+  fetch('../../api/pending_approvals.php?session_id=<?= $activeSession['id'] ?>')
+    .then(r=>r.json())
+    .then(data=>{
+      const tbody=document.getElementById('approvals-tbody');
+      const badge=document.getElementById('pending-badge');
+      const countBadge=document.getElementById('approvals-count-badge');
+      const pendingCount=document.getElementById('pending-count');
+      if(countBadge) countBadge.textContent=data.total+' pending';
+      if(pendingCount) pendingCount.textContent=data.total;
+      if(badge){badge.textContent=data.total;badge.style.display=data.total>0?'inline':'none'}
+      if(!tbody) return;
+      if(data.rows.length===0){tbody.innerHTML='<tr><td colspan="5" style="color:var(--muted);padding:1.5rem">No pending approvals. ✓</td></tr>';return}
+      tbody.innerHTML=data.rows.map(r=>`
+        <tr id="arow-${r.id}">
+          <td style="font-weight:500">${r.full_name}</td>
+          <td style="color:var(--gold);font-size:.78rem">${r.index_no}</td>
+          <td><img src="../../${r.selfie_url}" class="selfie-thumb" onclick="viewSelfie('../../${r.selfie_url}','${r.full_name}')" title="Click to enlarge"></td>
+          <td style="color:var(--muted);font-size:.72rem">${r.time}</td>
+          <td style="display:flex;gap:.4rem;flex-wrap:wrap">
+            <button class="btn btn-rep btn-sm" onclick="approveAtt(${r.id},'approve')">✓ Approve</button>
+            <button class="btn btn-danger btn-sm" onclick="approveAtt(${r.id},'reject')">✕ Reject</button>
+          </td>
+        </tr>`).join('');
+    });
+}
+loadApprovals();
+setInterval(loadApprovals, 6000);
+
+async function approveAtt(id,action){
+  const row=document.getElementById('arow-'+id);
+  if(row){row.style.opacity='0.4';row.style.pointerEvents='none'}
+  try{
+    const res=await fetch('../../api/approve_attendance.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({attendance_id:id,action})});
+    const data=await res.json();
+    if(data.success) loadApprovals();
+    else if(row){row.style.opacity='1';row.style.pointerEvents='auto'}
+  }catch(e){if(row){row.style.opacity='1';row.style.pointerEvents='auto'}}
+}
 <?php endif; ?>
 </script>
 </body>

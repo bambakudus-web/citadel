@@ -863,7 +863,7 @@ function startCamera(facing) {
     document.getElementById('ai-status-text').textContent = 'Camera active — analyzing...';
     document.getElementById('capture-btn').disabled = false;
     // Simulate AI confidence building
-    simulateConfidence();
+    runAICheck(facing === 'user' ? 'face' : 'environment');
   }).catch(() => {
     document.getElementById('ai-status-text').textContent = 'Camera access denied — please allow camera';
     document.getElementById('ai-dot').className = 'ai-dot error';
@@ -874,22 +874,53 @@ function stopCamera() {
   if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
 }
 
-let confInterval = null;
-function simulateConfidence() {
-  if (confInterval) clearInterval(confInterval);
-  let val = 0;
-  const target = 72 + Math.random() * 25; // 72-97%
-  confInterval = setInterval(() => {
-    val = Math.min(val + 2 + Math.random() * 3, target);
-    setConfidence(Math.round(val));
-    if (val >= target) clearInterval(confInterval);
-  }, 80);
-}
+async function runAICheck(type) {
+  const video  = document.getElementById('video-preview');
+  const canvas = document.getElementById('capture-canvas');
+  canvas.width  = video.videoWidth  || 320;
+  canvas.height = video.videoHeight || 240;
+  canvas.getContext('2d').drawImage(video, 0, 0);
+  const imageData = canvas.toDataURL('image/jpeg', 0.7);
 
-function nextVerifyStep() {
+  document.getElementById('ai-status-text').textContent = 'AI analyzing ' + (type === 'face' ? 'your face' : 'environment') + '...';
+  setConfidence(30);
+
+  try {
+    const res = await fetch('../../api/ai_verify.php', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ type, image: imageData })
+    });
+    const data = await res.json();
+    setConfidence(data.confidence || 0);
+
+    if (data.success) {
+      document.getElementById('ai-status-text').textContent = data.message;
+      document.getElementById('capture-btn').disabled = false;
+    } else {
+      document.getElementById('ai-status-text').textContent = '❌ ' + data.message;
+      document.getElementById('ai-dot').className = 'ai-dot error';
+      document.getElementById('capture-btn').disabled = true;
+      // Retry after 3 seconds
+      setTimeout(() => {
+        document.getElementById('ai-status-text').textContent = 'Retrying... hold still';
+        document.getElementById('capture-btn').disabled = false;
+        runAICheck(type);
+      }, 3000);
+    }
+    return data.success;
+  } catch(e) {
+    document.getElementById('ai-status-text').textContent = 'Verification error — retrying...';
+    return false;
+  }
+}
+async function nextVerifyStep() {
   const btn = document.getElementById('capture-btn');
+  btn.disabled = true;
 
   if (verifyStep === 0) {
+    const passed = await runAICheck('face');
+    if (!passed) { btn.disabled = false; return; }
     // Face captured — switch to environment (rear camera)
     document.getElementById('step-face').classList.remove('active');
     document.getElementById('step-face').classList.add('done');
@@ -909,6 +940,8 @@ function nextVerifyStep() {
     verifyStep = 1;
 
   } else if (verifyStep === 1) {
+    const passed = await runAICheck('environment');
+    if (!passed) { btn.disabled = false; return; }
     // Environment scanned — liveness check
     document.getElementById('step-env').classList.remove('active');
     document.getElementById('step-env').classList.add('done');

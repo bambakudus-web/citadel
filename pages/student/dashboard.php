@@ -426,7 +426,7 @@ setInterval(()=>{
 },1000);
 <?php endif; ?>
 // Smart auto-refresh - checks session and approval status
-let lastStatus = "<?= $myRecord ? $myRecord[status] : none ?>";
+let lastStatus = "<?= $myRecord ? $myRecord['status'] : 'none' ?>";
 setInterval(()=>{
   fetch("../../api/session_status.php")
     .then(r=>r.json())

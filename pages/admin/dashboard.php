@@ -128,7 +128,7 @@ $sessions = $pdo->query("
       color: var(--muted);
     }
 
-    .sidebar-nav { flex: 1; padding: 1rem 0; overflow-y: auto; }
+    .sidebar-nav { flex: 1; padding: 1rem 0; overflow-y: auto; scrollbar-width: none; -ms-overflow-style: none; }
 
     .nav-section {
       font-size: 0.6rem;

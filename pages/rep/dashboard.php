@@ -58,8 +58,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $pdo->prepare("INSERT INTO sessions (course_code, course_name, lecturer_id, secret_key, start_time, active_status) VALUES (?,?,?,?,NOW(),1)")->execute([$courseCode, $courseName, $userId, $secretKey]);
         $newSessionId = $pdo->lastInsertId();
         $pdo->prepare("INSERT INTO attendance (session_id, student_id, status, timestamp) VALUES (?,?,'present',NOW())")->execute([$newSessionId, $userId]);
-        $newSessionId = $pdo->lastInsertId();
-        $pdo->prepare("INSERT INTO attendance (session_id, student_id, status, timestamp) VALUES (?,?,'present',NOW())")->execute([$newSessionId, $userId]);
         header('Location: dashboard.php'); exit;
     }
     if ($action === 'end_session') {

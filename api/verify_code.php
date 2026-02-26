@@ -40,7 +40,11 @@ for ($i = -1; $i <= 1; $i++) {
     }
 }
 
-echo json_encode(['valid' => $valid, 'session_id' => $sessionId]);
+if ($valid) {
+    echo json_encode(['success' => true, 'message' => 'Code verified']);
+} else {
+    echo json_encode(['success' => false, 'message' => 'Invalid code. Please try again.']);
+}
 
 function generateCode(string $secret, int $window): string {
     $hash = hash_hmac('sha256', (string)$window, $secret);

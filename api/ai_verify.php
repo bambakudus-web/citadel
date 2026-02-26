@@ -100,7 +100,13 @@ $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 curl_close($ch);
 
 if ($httpCode !== 200) {
-    echo json_encode(['success' => false, 'message' => 'AI service unavailable', 'confidence' => 0]);
+    $errorData = json_decode($response, true);
+    echo json_encode([
+        'success' => false, 
+        'message' => 'AI service error: ' . ($errorData['error']['message'] ?? 'HTTP ' . $httpCode),
+        'confidence' => 0,
+        'raw' => $response
+    ]);
     exit;
 }
 

@@ -4,6 +4,17 @@ require_once '../../includes/db.php';
 require_once '../../includes/auth.php';
 requireRole('admin');
 
+// Handle POST actions
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
+    $action = $_POST["action"] ?? "";
+    if ($action === "reset_system") {
+        $pdo->exec("DELETE FROM attendance");
+        $pdo->exec("DELETE FROM sessions");
+        $pdo->exec("DELETE FROM announcements");
+        header("Location: dashboard.php?reset=1");
+        exit;
+    }
+}
 $user = currentUser();
 
 // Stats
@@ -409,14 +420,31 @@ $sessions = $pdo->query("
     @media (max-width: 900px) {
       .two-col { grid-template-columns: 1fr; }
     }
+
+    @media (min-width: 769px) { #menu-btn { display: none; } }
+    @media (min-width: 769px) { #menu-btn { display: none; } }
     @media (max-width: 768px) {
       .sidebar { transform: translateX(-100%); }
       .sidebar.open { transform: translateX(0); }
       .main { margin-left: 0; }
-      .content { padding: 1.2rem; }
-      .topbar { padding: 0.9rem 1.2rem; }
+      .content { padding: 1rem; }
+      .topbar { padding: 0.8rem 1rem; }
       .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .two-col { grid-template-columns: 1fr; }
+      .data-table { font-size: .75rem; }
+      .data-table th, .data-table td { padding: .5rem; }
+      .form-row { grid-template-columns: 1fr; }
+      .stat-value { font-size: 1.5rem; }
+      .topbar-title { font-size: .78rem; }
+      #menu-btn { display: block; }
     }
+
+
+
+
+
+
+
   </style>
 </head>
 <body>
@@ -490,7 +518,7 @@ $sessions = $pdo->query("
     <!-- Topbar -->
     <div class="topbar">
       <div style="display:flex;align-items:center;gap:1rem;">
-        <button onclick="document.getElementById('sidebar').classList.toggle('open')" style="background:none;border:none;color:var(--muted);cursor:pointer;display:none" id="menu-btn">
+        <button onclick="document.getElementById('sidebar').classList.toggle('open')" style="background:none;border:none;color:var(--muted);cursor:pointer;" id="menu-btn">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
         </button>
         <div class="topbar-title" id="page-title">OVERVIEW</div>
@@ -742,6 +770,7 @@ $sessions = $pdo->query("
         </div>
         <div class="override-banner">
           <strong>⚠ Boss Override Zone.</strong> Changes made here are logged and irreversible without a second override. Use with caution.
+        <div class="card" style="margin-bottom:1.5rem;border-color:rgba(224,92,92,.3)"><div class="card-head" style="border-color:rgba(224,92,92,.2)"><div class="card-head-title" style="color:var(--danger)">🔴 SYSTEM RESET</div></div><div class="card-body"><p style="font-size:.83rem;color:var(--muted);margin-bottom:1.2rem">Clears ALL attendance records and sessions. Students and lecturers remain. Use before the semester starts fresh.</p><form method="POST" onsubmit="return confirm('RESET ALL ATTENDANCE DATA? This cannot be undone!')"><input type="hidden" name="action" value="reset_system"><button type="submit" class="btn" style="background:rgba(224,92,92,.15);color:var(--danger);border:1px solid rgba(224,92,92,.3);padding:.7rem 1.5rem">🗑 Reset All Attendance & Sessions</button></form></div></div>
         </div>
         <div class="card">
           <div class="card-head"><div class="card-head-title">Manual Attendance Adjustment</div></div>

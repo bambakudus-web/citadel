@@ -288,14 +288,31 @@ $totalStudents = $pdo->query("SELECT COUNT(*) FROM users WHERE role='student'")-
 
     /* ── Responsive ── */
     @media (max-width: 900px) { .two-col { grid-template-columns: 1fr; } }
+
+    @media (min-width: 769px) { #menu-btn { display: none; } }
+    @media (min-width: 769px) { #menu-btn { display: none; } }
     @media (max-width: 768px) {
       .sidebar { transform: translateX(-100%); }
       .sidebar.open { transform: translateX(0); }
       .main { margin-left: 0; }
-      .content { padding: 1.2rem; }
-      .topbar { padding: 0.9rem 1.2rem; }
-      .code-number { font-size: 2.8rem; }
+      .content { padding: 1rem; }
+      .topbar { padding: 0.8rem 1rem; }
+      .code-number { font-size: 2rem; }
+      .two-col { grid-template-columns: 1fr; }
+      .data-table { font-size: .75rem; }
+      .data-table th, .data-table td { padding: .5rem; }
+      .tt-item { flex-direction: column; gap: .3rem; }
+      .stat-value { font-size: 1.5rem; }
+      .topbar-title { font-size: .78rem; }
+      #menu-btn { display: block; }
     }
+
+
+
+
+
+
+
   </style>
 </head>
 <body>
@@ -343,7 +360,7 @@ $totalStudents = $pdo->query("SELECT COUNT(*) FROM users WHERE role='student'")-
   <div class="main">
     <div class="topbar">
       <div style="display:flex;align-items:center;gap:1rem">
-        <button id="menu-btn" onclick="document.getElementById('sidebar').classList.toggle('open')" style="background:none;border:none;color:var(--muted);cursor:pointer;display:none">
+        <button id="menu-btn" onclick="document.getElementById('sidebar').classList.toggle('open')" style="background:none;border:none;color:var(--muted);cursor:pointer;">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
         </button>
         <div class="topbar-title" id="page-title">LIVE SESSION</div>

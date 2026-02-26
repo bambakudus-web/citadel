@@ -33,6 +33,7 @@ if ($activeSession) {
 // Recent attendance
 $recentAtt = $pdo->prepare("SELECT a.*, s.course_code, s.course_name FROM attendance a JOIN sessions s ON a.session_id=s.id WHERE a.student_id=? ORDER BY a.timestamp DESC LIMIT 10");
 $recentAtt->execute([$userId]); $recentAtt = $recentAtt->fetchAll();
+$announcements = $pdo->query("SELECT a.message, a.created_at, u.full_name FROM announcements a JOIN users u ON a.rep_id=u.id ORDER BY a.created_at DESC LIMIT 5")->fetchAll();
 
 // Per-course stats
 $courseStats = $pdo->prepare("
@@ -161,7 +162,7 @@ $fullTT = $pdo->query("SELECT t.*, u.full_name as lecturer_name FROM timetable t
     .bar-fill{height:100%;border-radius:3px;transition:width .8s ease}
 
     @media(max-width:900px){.two-col{grid-template-columns:1fr}}
-    @media(min-width:769px){#menu-btn{display:none}}@media(max-width:768px){.sidebar{transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}.main{margin-left:0}.content{padding:1.2rem}.topbar{padding:.9rem 1.2rem}.stats-grid{grid-template-columns:repeat(2,1fr)}}
+    @media(min-width:769px){#menu-btn{display:none}}@media(max-width:768px){.sidebar{transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}.main{margin-left:0}.content{padding:1rem}.topbar{padding:.8rem 1rem}.stats-grid{grid-template-columns:repeat(2,1fr)}.data-table{font-size:.75rem}.data-table th,.data-table td{padding:.5rem .5rem}.topbar-title{font-size:.78rem}.stat-value{font-size:1.5rem}.code-inputs input{width:38px;height:48px;font-size:1.1rem}.code-inputs{gap:.4rem}.camera-wrap{max-width:100%}.attend-zone{padding:0}.tt-item{flex-direction:column;gap:.3rem}.tt-time{min-width:unset}.section-title{font-size:.95rem}}
   </style>
 </head>
 <body>
@@ -252,6 +253,7 @@ $fullTT = $pdo->query("SELECT t.*, u.full_name as lecturer_name FROM timetable t
           </div>
         </div>
       </div>
+      <div class="card" style="margin-top:1.5rem"><div class="card-head"><div class="card-head-title">📢 Class Announcements</div></div><div class="card-body" style="padding:0"><table class="data-table"><thead><tr><th>Message</th><th>From</th><th>Date</th></tr></thead><tbody><?php if(empty($announcements)):?><tr><td colspan="3" style="color:var(--muted)">No announcements yet.</td></tr><?php else:foreach($announcements as $ann):?><tr><td><?=htmlspecialchars($ann["message"])?></td><td style="color:var(--gold);font-size:.75rem"><?=htmlspecialchars($ann["full_name"])?></td><td style="color:var(--muted);font-size:.72rem"><?=date("d M H:i",strtotime($ann["created_at"]))?></td></tr><?php endforeach;endif;?></tbody></table></div></div>
 
       <!-- MARK ATTENDANCE -->
       <div class="page-section" id="sec-mark">

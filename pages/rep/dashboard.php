@@ -56,6 +56,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $secretKey  = bin2hex(random_bytes(16));
         $pdo->prepare("UPDATE sessions SET active_status=0, end_time=NOW() WHERE active_status=1")->execute();
         $pdo->prepare("INSERT INTO sessions (course_code, course_name, lecturer_id, secret_key, start_time, active_status) VALUES (?,?,?,?,NOW(),1)")->execute([$courseCode, $courseName, $userId, $secretKey]);
+        $newSessionId = $pdo->lastInsertId();
+        $pdo->prepare("INSERT INTO attendance (session_id, student_id, status, timestamp) VALUES (?,?,'present',NOW())")->execute([$newSessionId, $userId]);
+        $newSessionId = $pdo->lastInsertId();
+        $pdo->prepare("INSERT INTO attendance (session_id, student_id, status, timestamp) VALUES (?,?,'present',NOW())")->execute([$newSessionId, $userId]);
         header('Location: dashboard.php'); exit;
     }
     if ($action === 'end_session') {
@@ -226,7 +230,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     .pending-badge{background:var(--warning);color:#060910;font-size:.6rem;font-weight:700;padding:.15rem .45rem;border-radius:2px;margin-left:.4rem;display:none}
 
     @media(max-width:900px){.two-col{grid-template-columns:1fr}}
-    @media(max-width:768px){.sidebar{transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}.main{margin-left:0}.content{padding:1.2rem}.topbar{padding:.9rem 1.2rem}.stats-grid{grid-template-columns:repeat(2,1fr)}.code-number{font-size:2.5rem}}
+    @media(max-width:768px){.sidebar{transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}.main{margin-left:0}.content{padding:1rem}.topbar{padding:.8rem 1rem}.stats-grid{grid-template-columns:repeat(2,1fr)}.code-number{font-size:2rem}.data-table{font-size:.75rem}.data-table th,.data-table td{padding:.5rem .5rem}.tt-item{flex-direction:column;gap:.3rem}.tt-time{min-width:unset}.section-title{font-size:.95rem}.two-col{grid-template-columns:1fr}.form-row{grid-template-columns:1fr}.topbar-title{font-size:.78rem}.stat-value{font-size:1.5rem}#menu-btn{display:block}}
   </style>
 </head>
 <body>
@@ -573,7 +577,10 @@ function loadApprovals(){
         <tr id="arow-${r.id}">
           <td style="font-weight:500">${r.full_name}</td>
           <td style="color:var(--gold);font-size:.78rem">${r.index_no}</td>
-          <td><img src="../../${r.selfie_url}" class="selfie-thumb" onclick="viewSelfie('../../${r.selfie_url}','${r.full_name}')" title="Click to enlarge"></td>
+          <td style="display:flex;gap:.4rem">
+            <img src="../../${r.selfie_url}" class="selfie-thumb" onclick="viewSelfie('../../${r.selfie_url}','${r.full_name} — Face')" title="Face photo">
+            ${r.classroom_url ? `<img src="../../${r.classroom_url}" class="selfie-thumb" onclick="viewSelfie('../../${r.classroom_url}','${r.full_name} — Classroom')" title="Classroom photo" style="border-color:var(--steel)">` : '<span style="color:var(--muted);font-size:.7rem">No classroom</span>'}
+          </td>
           <td style="color:var(--muted);font-size:.72rem">${r.time}</td>
           <td style="display:flex;gap:.4rem;flex-wrap:wrap">
             <button class="btn btn-rep btn-sm" onclick="approveAtt(${r.id},'approve')">✓ Approve</button>

@@ -369,6 +369,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
               </div>
             </div>
           </div>
+	<a class="nav-item" id="approvals-nav" onclick="showSection('approvals',this)">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+  Approvals <span id="pending-badge" style="background:var(--warning);color:#060910;font-size:.6rem;padding:.1rem .4rem;border-radius:2px;margin-left:.3rem;display:none">0</span>
+</a>
+
         <?php else: ?>
           <div class="section-header"><div class="section-title">Start <span>Session</span></div></div>
           <?php if(!empty($todayClasses)): ?>
@@ -431,6 +436,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           </tbody></table>
         </div></div>
       </div>
+	<!-- APPROVALS -->
+<div class="page-section" id="sec-approvals">
+  <div class="section-header">
+    <div class="section-title">Pending <span>Approvals</span></div>
+    <span class="pill pill-gold" id="pending-count-badge">0 pending</span>
+  </div>
+  <div id="approvals-container">
+    <div class="card">
+      <div class="card-body" style="padding:0;overflow-x:auto">
+        <table class="data-table" id="approvals-table">
+          <thead><tr><th>Student</th><th>Index</th><th>Selfie</th><th>Time</th><th>Action</th></tr></thead>
+          <tbody id="approvals-tbody">
+            <tr><td colspan="5" style="color:var(--muted)">No pending approvals.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>	
 
       <!-- ANNOUNCEMENTS -->
       <div class="page-section" id="sec-announce">
@@ -466,6 +490,57 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <form method="POST" id="del-form"><input type="hidden" name="action" value="delete"><input type="hidden" name="id" id="del-id"></form>
 
+// Poll pending approvals every 8 seconds when session is active
+<?php if ($activeSession): ?>
+function loadApprovals(){
+  fetch('../../api/pending_approvals.php?session_id=<?= $activeSession['id'] ?>')
+    .then(r=>r.json())
+    .then(data=>{
+      const tbody=document.getElementById('approvals-tbody');
+      const badge=document.getElementById('pending-badge');
+      const countBadge=document.getElementById('pending-count-badge');
+      if(countBadge) countBadge.textContent=data.total+' pending';
+      if(badge){
+        if(data.total>0){badge.textContent=data.total;badge.style.display='inline'}
+        else badge.style.display='none';
+      }
+      if(!tbody) return;
+      if(data.rows.length===0){
+        tbody.innerHTML='<tr><td colspan="5" style="color:var(--muted)">No pending approvals.</td></tr>';
+        return;
+      }
+      tbody.innerHTML=data.rows.map(r=>`
+        <tr id="row-${r.id}">
+          <td>${r.full_name}</td>
+          <td style="color:var(--gold);font-size:.78rem">${r.index_no}</td>
+          <td><img src="../../${r.selfie_url}" style="width:48px;height:48px;object-fit:cover;border-radius:50%;border:2px solid var(--border);cursor:pointer" onclick="viewSelfie('../../${r.selfie_url}','${r.full_name}')"></td>
+          <td style="color:var(--muted);font-size:.72rem">${r.time}</td>
+          <td style="display:flex;gap:.4rem">
+            <button class="btn btn-rep btn-sm" onclick="approveAtt(${r.id},'approve')">✓ Approve</button>
+            <button class="btn btn-danger btn-sm" onclick="approveAtt(${r.id},'reject')">✕ Reject</button>
+          </td>
+        </tr>
+      `).join('');
+    });
+}
+loadApprovals();
+setInterval(loadApprovals, 8000);
+
+async function approveAtt(id, action){
+  const row=document.getElementById('row-'+id);
+  if(row) row.style.opacity='0.4';
+  const res=await fetch('../../api/approve_attendance.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({attendance_id:id,action})});
+  const data=await res.json();
+  if(data.success) loadApprovals();
+}
+
+function viewSelfie(url, name){
+  const overlay=document.createElement('div');
+  overlay.style.cssText='position:fixed;inset:0;z-index:999;background:rgba(0,0,0,.9);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:1rem';
+  overlay.innerHTML=`<img src="${url}" style="max-width:90%;max-height:70vh;border-radius:4px"><div style="color:#fff;font-family:Cinzel,serif">${name}</div><button onclick="this.parentElement.remove()" style="color:#fff;background:none;border:1px solid rgba(255,255,255,.3);padding:.5rem 1.5rem;cursor:pointer;border-radius:2px">Close</button>`;
+  document.body.appendChild(overlay);
+}
+<?php endif; ?>
 <script>
 function showSection(name,el){document.querySelectorAll('.page-section').forEach(s=>s.classList.remove('active'));document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));document.getElementById('sec-'+name).classList.add('active');document.getElementById('page-title').textContent=name.toUpperCase();if(el)el.classList.add('active');document.getElementById('sidebar').classList.remove('open')}
 function openModal(id){document.getElementById(id).classList.add('open')}

@@ -510,6 +510,8 @@ function captureSelfie(){
     document.getElementById('capture-btn').textContent = '📸 Capture Classroom';
     document.getElementById('step-label').textContent = 'Step 3: Show your classroom with the rear camera';
     document.getElementById('retake-btn').style.display = 'flex';
+    document.getElementById('selfie-preview').style.display = 'none';
+    document.getElementById('video-preview').style.display = 'block';
     // Switch to rear camera
     stopCamera();
     cameraStep = 'classroom';
@@ -524,6 +526,7 @@ function captureSelfie(){
     const preview = document.getElementById('selfie-preview');
     preview.src = capturedClassroom;
     document.getElementById('capture-btn').style.display = 'none';
+    document.getElementById('video-preview').style.display = 'none';
     document.getElementById('submit-btn').style.display = 'flex';
     document.getElementById('step-label').textContent = 'Step 3: Submit for Rep approval';
     stopCamera();

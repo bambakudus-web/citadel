@@ -93,6 +93,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $totalStudents = count($students);
         }
     }
+    if ($action === 'announce') {
+        $message = trim($_POST['message'] ?? '');
+        if ($message) {
+            $pdo->prepare("INSERT INTO announcements (rep_id, message) VALUES (?,?)")->execute([$userId, $message]);
+            $msg = 'Announcement posted.'; $msgType = 'success';
+        }
+    }
 }
 ?>
 <!DOCTYPE html>
@@ -468,10 +475,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="section-header"><div class="section-title">Class <span>Announcements</span></div></div>
         <div class="card"><div class="card-head"><div class="card-head-title">Post Announcement</div></div>
           <div class="card-body">
-            <div style="background:var(--surface2);border:1px solid var(--border);border-left:3px solid var(--rep);padding:1rem 1.2rem;border-radius:2px;margin-bottom:1rem">
-              <textarea placeholder="Type a message to the class..." style="width:100%;background:transparent;border:none;color:var(--text);font-family:'DM Sans',sans-serif;font-size:.88rem;resize:vertical;outline:none;min-height:80px"></textarea>
-            </div>
-            <button class="btn btn-rep">Post to Class</button>
+
+            <form method="POST">
+              <input type="hidden" name="action" value="announce">
+              <div style="background:var(--surface2);border:1px solid var(--border);border-left:3px solid var(--rep);padding:1rem 1.2rem;border-radius:2px;margin-bottom:1rem">
+                <textarea name="message" placeholder="Type a message to the class..." style="width:100%;background:transparent;border:none;color:var(--text);font-family:DM Sans,sans-serif;font-size:.88rem;resize:vertical;outline:none;min-height:80px" required></textarea>
+              </div>
+              <button type="submit" class="btn btn-rep">Post to Class</button>
+            </form>
+
+        <div class="card" style="margin-top:1.5rem"><div class="card-head"><div class="card-head-title">Recent Announcements</div></div><div class="card-body" style="padding:0"><table class="data-table"><thead><tr><th>Message</th><th>Date</th></tr></thead><tbody><?php $ann=$pdo->query("SELECT a.*,u.full_name FROM announcements a JOIN users u ON a.rep_id=u.id ORDER BY a.created_at DESC LIMIT 20")->fetchAll();if(empty($ann)):?><tr><td colspan="2" style="color:var(--muted)">No announcements yet.</td></tr><?php else:foreach($ann as $a):?><tr><td><?=htmlspecialchars($a["message"])?></td><td style="color:var(--muted);font-size:.72rem;white-space:nowrap"><?=date("d M Y H:i",strtotime($a["created_at"]))?></td></tr><?php endforeach;endif;?></tbody></table></div></div>
+
+
           </div>
         </div>
       </div>

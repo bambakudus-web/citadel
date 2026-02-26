@@ -161,7 +161,7 @@ $fullTT = $pdo->query("SELECT t.*, u.full_name as lecturer_name FROM timetable t
     .bar-fill{height:100%;border-radius:3px;transition:width .8s ease}
 
     @media(max-width:900px){.two-col{grid-template-columns:1fr}}
-    @media(max-width:768px){.sidebar{transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}.main{margin-left:0}.content{padding:1.2rem}.topbar{padding:.9rem 1.2rem}.stats-grid{grid-template-columns:repeat(2,1fr)}}
+    @media(min-width:769px){#menu-btn{display:none}}@media(max-width:768px){.sidebar{transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}.main{margin-left:0}.content{padding:1.2rem}.topbar{padding:.9rem 1.2rem}.stats-grid{grid-template-columns:repeat(2,1fr)}}
   </style>
 </head>
 <body>
@@ -201,7 +201,7 @@ $fullTT = $pdo->query("SELECT t.*, u.full_name as lecturer_name FROM timetable t
   <div class="main">
     <div class="topbar">
       <div style="display:flex;align-items:center;gap:1rem">
-        <button id="menu-btn" onclick="document.getElementById('sidebar').classList.toggle('open')" style="background:none;border:none;color:var(--muted);cursor:pointer;display:none">
+        <button id="menu-btn" onclick="document.getElementById('sidebar').classList.toggle('open')" style="background:none;border:none;color:var(--muted);cursor:pointer;">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
         </button>
         <div class="topbar-title" id="page-title">OVERVIEW</div>
@@ -405,8 +405,6 @@ $fullTT = $pdo->query("SELECT t.*, u.full_name as lecturer_name FROM timetable t
 
 <script>
 function showSection(name,el){document.querySelectorAll('.page-section').forEach(s=>s.classList.remove('active'));document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));document.getElementById('sec-'+name).classList.add('active');document.getElementById('page-title').textContent=name.toUpperCase();if(el)el.classList.add('active');document.getElementById('sidebar').classList.remove('open')}
-if(window.innerWidth<=768)document.getElementById('menu-btn').style.display='block';
-window.addEventListener('resize',()=>{document.getElementById('menu-btn').style.display=window.innerWidth<=768?'block':'none'});
 
 // ── CODE TIMER ──
 <?php if ($activeSession): ?>
@@ -482,9 +480,6 @@ async function verifyCode(){
 
 // ── CAMERA ──
 let stream=null;
-let capturedSelfie=null;
-let capturedClassroom=null;
-let cameraStep='selfie';
 function startCamera(){
   navigator.mediaDevices.getUserMedia({video:{facingMode:'user',width:{ideal:640},height:{ideal:480}}}).then(s=>{
     stream=s;

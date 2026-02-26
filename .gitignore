@@ -1,4 +1,3 @@
-includes/db.php
 uploads/selfies/
 *.log
 .env

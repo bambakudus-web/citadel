@@ -64,7 +64,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     if ($action === 'end_session') {
         $sid = (int)($_POST['session_id'] ?? 0);
-        $pdo->prepare("UPDATE sessions SET active_status=0, end_time=NOW() WHERE id=?")->execute([$sid]);
+        if ($sid) {
+            $pdo->prepare("UPDATE sessions SET active_status=0, end_time=NOW() WHERE id=?")->execute([$sid]);
+            $marked = $pdo->prepare("SELECT student_id FROM attendance WHERE session_id=? AND status IN ('present','late')");
+            $marked->execute([$sid]);
+            $markedIds = array_column($marked->fetchAll(), 'student_id');
+            $pdo->prepare("DELETE FROM attendance WHERE session_id=? AND status='pending'")->execute([$sid]);
+            $students = $pdo->query("SELECT id FROM users WHERE role IN ('student','rep')")->fetchAll();
+            foreach ($students as $s) {
+                if (!in_array($s['id'], $markedIds)) {
+                    try { $pdo->prepare("INSERT INTO attendance (session_id, student_id, status, timestamp) VALUES (?,?,'absent',NOW())")->execute([$sid, $s['id']]); } catch (Exception $e) {}
+                }
+            }
+        }
         header('Location: dashboard.php'); exit;
     }
     if ($action === 'add') {

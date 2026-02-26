@@ -425,35 +425,33 @@ setInterval(()=>{
   updateTimer();
 },1000);
 <?php endif; ?>
-// Lightweight session status check every 20 seconds
+// Smart auto-refresh - checks session and approval status
+let lastStatus = "<?= $myRecord ? $myRecord[status] : none ?>";
 setInterval(()=>{
   fetch("../../api/session_status.php")
     .then(r=>r.json())
     .then(data=>{
-      const markNav=document.getElementById("mark-nav");
-      if(data.active&&markNav&&!markNav.textContent.includes("🟢")){
-        markNav.innerHTML=markNav.innerHTML.replace("Mark Attendance","Mark Attendance 🟢");
-        location.reload();
-      } else if(!data.active&&markNav&&markNav.textContent.includes("🟢")){
-        location.reload();
+      const markNav = document.getElementById("mark-nav");
+      // Session went active or inactive - reload
+      const hasActive = <?= $activeSession ? true : false ?>;
+      if(data.active !== hasActive){ location.reload(); return; }
+      // Approval status changed - reload
+      if(data.my_status && data.my_status !== lastStatus){
+        lastStatus = data.my_status;
+        if(data.my_status === "present" || data.my_status === "late"){
+          // Show toast notification
+          const toast = document.createElement("div");
+          toast.style.cssText = "position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:var(--success);color:#060910;padding:.8rem 1.5rem;border-radius:2px;font-family:Cinzel,serif;font-size:.82rem;font-weight:700;z-index:999;animation:fadeIn .3s ease";
+          toast.textContent = "✓ Attendance Approved! You are marked " + data.my_status.toUpperCase();
+          document.body.appendChild(toast);
+          setTimeout(()=>location.reload(), 2500);
+        } else if(data.my_status === null){
+          // Rejected - reload to show fresh form
+          location.reload();
+        }
       }
     }).catch(()=>{});
-},20000);
-// Auto-check for new active sessions and approval status every 15 seconds
-setInterval(()=>{
-  fetch(window.location.href)
-    .then(r=>r.text())
-    .then(html=>{
-      const parser=new DOMParser();
-      const doc=parser.parseFromString(html,"text/html");
-      // Check if active session status changed
-      const newMark=doc.getElementById("sec-mark");
-      const curMark=document.getElementById("sec-mark");
-      if(newMark&&curMark&&newMark.innerHTML!==curMark.innerHTML){
-        curMark.innerHTML=newMark.innerHTML;
-      }
-    }).catch(()=>{});
-},15000);
+}, 12000);
 
 // ── CODE INPUT ──
 function codeInput(el,idx){

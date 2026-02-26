@@ -14,7 +14,7 @@ if (!$sessionId) {
 }
 
 $stmt = $pdo->prepare("
-    SELECT a.id, a.student_id, a.selfie_url, a.timestamp,
+    SELECT a.id, a.student_id, a.selfie_url, a.classroom_url, a.timestamp,
            u.full_name, u.index_no
     FROM attendance a
     JOIN users u ON a.student_id = u.id
@@ -29,7 +29,8 @@ $result = array_map(function($r) {
         'id'         => $r['id'],
         'full_name'  => $r['full_name'],
         'index_no'   => $r['index_no'],
-        'selfie_url' => $r['selfie_url'],
+        'selfie_url'    => $r['selfie_url'],
+        'classroom_url' => $r['classroom_url'],
         'time'       => date('H:i:s', strtotime($r['timestamp'])),
     ];
 }, $rows);

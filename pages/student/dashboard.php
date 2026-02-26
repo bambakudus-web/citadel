@@ -289,10 +289,12 @@ $fullTT = $pdo->query("SELECT t.*, u.full_name as lecturer_name FROM timetable t
             </div>
 
             <!-- Step indicator -->
-            <div class="step-indicator">
-              <div class="step-dot active" id="dot-code"></div><span id="step-label">Step 1: Enter the 6-digit code</span>
-              <div class="step-dot" id="dot-selfie" style="margin-left:.5rem"></div>
-            </div>
+        <div class="step-indicator">
+	  <div class="step-dot active" id="dot-code"></div>
+	  <div class="step-dot" id="dot-selfie" style="margin-left:.3rem"></div>
+	  <div class="step-dot" id="dot-class" style="margin-left:.3rem"></div>
+	  <span id="step-label" style="margin-left:.5rem">Step 1: Enter the 6-digit code</span>
+	</div>			
 
             <!-- Step 1: Code entry -->
             <div id="step-code-section">
@@ -480,7 +482,9 @@ async function verifyCode(){
 
 // ── CAMERA ──
 let stream=null;
-let capturedImage=null;
+let capturedSelfie=null;
+let capturedClassroom=null;
+let cameraStep='selfie';
 function startCamera(){
   navigator.mediaDevices.getUserMedia({video:{facingMode:'user',width:{ideal:640},height:{ideal:480}}}).then(s=>{
     stream=s;
@@ -493,25 +497,52 @@ function startCamera(){
 }
 function stopCamera(){if(stream){stream.getTracks().forEach(t=>t.stop());stream=null}}
 
+let capturedSelfie = null;
+let capturedClassroom = null;
+let cameraStep = 'selfie'; // 'selfie' or 'classroom'
+
 function captureSelfie(){
-  const video=document.getElementById('video-preview');
-  const canvas=document.getElementById('capture-canvas');
-  canvas.width=video.videoWidth||320; canvas.height=video.videoHeight||240;
+  const video  = document.getElementById('video-preview');
+  const canvas = document.getElementById('capture-canvas');
+  canvas.width = video.videoWidth||320; canvas.height = video.videoHeight||240;
   canvas.getContext('2d').drawImage(video,0,0);
-  capturedImage=canvas.toDataURL('image/jpeg',0.8);
-  const preview=document.getElementById('selfie-preview');
-  preview.src=capturedImage; preview.style.display='block';
-  document.getElementById('capture-btn').style.display='none';
-  document.getElementById('retake-btn').style.display='flex';
-  document.getElementById('submit-btn').style.display='flex';
-  stopCamera();
+
+  if(cameraStep === 'selfie'){
+    capturedSelfie = canvas.toDataURL('image/jpeg',0.8);
+    // Show selfie preview and switch to rear camera
+    document.getElementById('selfie-preview').src = capturedSelfie;
+    document.getElementById('selfie-preview').style.display = 'block';
+    document.getElementById('capture-btn').textContent = '📸 Capture Classroom';
+    document.getElementById('step-label').textContent = 'Step 3: Show your classroom with the rear camera';
+    document.getElementById('retake-btn').style.display = 'flex';
+    // Switch to rear camera
+    stopCamera();
+    cameraStep = 'classroom';
+    navigator.mediaDevices.getUserMedia({video:{facingMode:{exact:'environment'},width:{ideal:640},height:{ideal:480}}})
+      .then(s=>{stream=s;document.getElementById('video-preview').srcObject=s;})
+      .catch(()=>{
+        // Rear camera not available, use front
+        navigator.mediaDevices.getUserMedia({video:{facingMode:'user'}}).then(s=>{stream=s;document.getElementById('video-preview').srcObject=s;});
+      });
+  } else {
+    capturedClassroom = canvas.toDataURL('image/jpeg',0.8);
+    const preview = document.getElementById('selfie-preview');
+    preview.src = capturedClassroom;
+    document.getElementById('capture-btn').style.display = 'none';
+    document.getElementById('submit-btn').style.display = 'flex';
+    document.getElementById('step-label').textContent = 'Step 3: Submit for Rep approval';
+    stopCamera();
+  }
 }
+
 function retakeSelfie(){
-  capturedImage=null;
-  document.getElementById('selfie-preview').style.display='none';
-  document.getElementById('capture-btn').style.display='flex';
-  document.getElementById('retake-btn').style.display='none';
-  document.getElementById('submit-btn').style.display='none';
+  capturedSelfie = null; capturedClassroom = null; cameraStep = 'selfie';
+  document.getElementById('selfie-preview').style.display = 'none';
+  document.getElementById('capture-btn').style.display = 'flex';
+  document.getElementById('capture-btn').textContent = '📸 Capture Selfie';
+  document.getElementById('retake-btn').style.display = 'none';
+  document.getElementById('submit-btn').style.display = 'none';
+  document.getElementById('step-label').textContent = 'Step 2: Take your selfie';
   startCamera();
 }
 
@@ -519,10 +550,10 @@ function retakeSelfie(){
 async function submitAttendance(){
   const btn=document.getElementById('submit-btn');
   const errEl=document.getElementById('submit-error');
-  if(!capturedImage){errEl.textContent='Please take a selfie first.';errEl.style.display='block';return}
+  if(!capturedSelfie){errEl.textContent='Please take a selfie first.';errEl.style.display='block';return}
   btn.disabled=true; btn.textContent='Submitting...'; errEl.style.display='none';
   try{
-    const res=await fetch('../../api/mark_attendance.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({session_id:<?= $activeSession ? $activeSession['id'] : 'null' ?>,selfie:capturedImage})});
+    const res=await fetch('../../api/mark_attendance.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({session_id:<?= $activeSession ? $activeSession['id'] : 'null' ?>,selfie:capturedSelfie,classroom:capturedClassroom})});
     const data=await res.json();
     if(data.success){
       // Show pending confirmation

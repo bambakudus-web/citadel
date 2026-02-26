@@ -11,7 +11,8 @@ $userId = $user['id'];
 
 $input     = json_decode(file_get_contents('php://input'), true);
 $sessionId = (int)($input['session_id'] ?? 0);
-$selfieB64 = $input['selfie'] ?? '';
+$selfieB64   = $input['selfie']   ?? '';
+$classroomB64 = $input['classroom'] ?? '';
 
 if (!$sessionId) {
     echo json_encode(['success' => false, 'message' => 'No active session']);
@@ -52,10 +53,19 @@ if (!empty($selfieB64)) {
     file_put_contents($selfieFile, $selfieData);
     $selfieUrl = 'uploads/selfies/' . basename($selfieFile);
 }
+// Save classroom image
+$classroomUrl = '';
+if (!empty($classroomB64)) {
+    $classroomB64  = preg_replace('/^data:image\/\w+;base64,/', '', $classroomB64);
+    $classroomData = base64_decode($classroomB64);
+    $classroomFile = '../uploads/selfies/' . $userId . '_' . $sessionId . '_class_' . time() . '.jpg';
+    file_put_contents($classroomFile, $classroomData);
+    $classroomUrl = 'uploads/selfies/' . basename($classroomFile);
+}
 
 // Insert as PENDING — Rep must approve
-$stmt = $pdo->prepare("INSERT INTO attendance (session_id, student_id, status, selfie_url, timestamp) VALUES (?,?,'pending',?,NOW())");
-$stmt->execute([$sessionId, $userId, $selfieUrl]);
+$stmt = $pdo->prepare("INSERT INTO attendance (session_id, student_id, status, selfie_url, classroom_url, timestamp) VALUES (?,?,'pending',?,?,NOW())");
+$stmt->execute([$sessionId, $userId, $selfieUrl, $classroomUrl]);
 
 echo json_encode([
     'success'    => true,

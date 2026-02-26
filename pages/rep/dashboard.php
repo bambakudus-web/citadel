@@ -34,7 +34,7 @@ function generateCode(string $secret, int $window): string {
 }
 
 $currentCode   = '';
-$timeRemaining = 30 - (time() % 30);
+$timeRemaining = 120 - (time() % 120);
 if ($activeSession) {
     $currentCode = generateCode($activeSession['secret_key'], (int)floor(time() / 30));
 }
@@ -557,9 +557,9 @@ window.addEventListener('resize',()=>{document.getElementById('menu-btn').style.
 let timeLeft=<?= $timeRemaining ?>;
 const ringFill=document.getElementById('ring-fill');
 const ringNum=document.getElementById('ring-num');
-function updateRing(){if(!ringFill)return;const offset=150.8*(1-timeLeft/30);ringFill.style.strokeDashoffset=offset;ringNum.textContent=timeLeft;ringFill.style.stroke=timeLeft<=10?'var(--danger)':timeLeft<=20?'var(--warning)':'var(--rep)'}
+function updateRing(){if(!ringFill)return;const offset=150.8*(1-timeLeft/120);ringFill.style.strokeDashoffset=offset;ringNum.textContent=timeLeft;ringFill.style.stroke=timeLeft<=10?'var(--danger)':timeLeft<=20?'var(--warning)':'var(--rep)'}
 updateRing();
-setInterval(()=>{timeLeft--;if(timeLeft<0)timeLeft=29;updateRing()},1000);
+setInterval(()=>{timeLeft--;if(timeLeft<0)timeLeft=119;updateRing()},1000);
 setInterval(()=>{fetch('../../api/get_code.php?session_id=<?= $activeSession['id'] ?>').then(r=>r.json()).then(d=>{if(d.code){const el=document.getElementById('live-code');if(el)el.textContent=d.code.slice(0,3)+' '+d.code.slice(3)}})},30000);
 setInterval(()=>{fetch('../../api/live_attendance.php?session_id=<?= $activeSession['id'] ?>').then(r=>r.json()).then(data=>{if(!data.rows)return;const tbody=document.getElementById('live-tbody');const pill=document.getElementById('live-pill');const count=document.getElementById('live-count');if(count)count.textContent=data.total;if(pill)pill.textContent=data.total+' present';if(tbody&&data.rows.length>0){const empty=document.getElementById('empty-row');if(empty)empty.remove();tbody.innerHTML=data.rows.map(r=>`<tr><td>${r.full_name}</td><td style="color:var(--gold);font-size:.78rem">${r.index_no}</td><td><span class="pill pill-${r.status==='present'?'green':'gold'}">${r.status}</span></td><td style="color:var(--muted);font-size:.72rem">${r.time}</td></tr>`).join('')}})},10000);
 <?php endif; ?>

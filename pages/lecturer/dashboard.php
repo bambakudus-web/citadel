@@ -72,7 +72,7 @@ function generateCode(string $secret, int $window): string {
 }
 
 $currentCode   = '';
-$timeRemaining = 30 - (time() % 30);
+$timeRemaining = 120 - (time() % 120);
 if ($activeSession) {
     $window      = (int)floor(time() / 30);
     $currentCode = generateCode($activeSession['secret_key'], $window);
@@ -595,7 +595,7 @@ const secretKey = '<?= $activeSession['secret_key'] ?>';
 
 function updateRing() {
   if (!ringFill) return;
-  const offset = circumference * (1 - timeLeft / 30);
+  const offset = circumference * (1 - timeLeft / 120);
   ringFill.style.strokeDashoffset = offset;
   ringNum.textContent = timeLeft;
   if (timeLeft <= 10) ringFill.style.stroke = 'var(--danger)';
@@ -607,7 +607,7 @@ updateRing();
 
 setInterval(() => {
   timeLeft--;
-  if (timeLeft < 0) timeLeft = 29;
+  if (timeLeft < 0) timeLeft = 119;
   updateRing();
 }, 1000);
 

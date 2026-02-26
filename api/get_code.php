@@ -16,7 +16,7 @@ if (!$session) {
     exit;
 }
 
-$window = (int)floor(time() / 30);
+$window = (int)floor(time() / 120);
 $hash   = hash_hmac('sha256', (string)$window, $session['secret_key']);
 $offset = hexdec(substr($hash, -1)) & 0xf;
 $code   = (hexdec(substr($hash, $offset * 2, 8)) & 0x7fffffff) % 1000000;
@@ -24,5 +24,5 @@ $code   = str_pad((string)$code, 6, '0', STR_PAD_LEFT);
 
 echo json_encode([
     'code'      => $code,
-    'remaining' => 30 - (time() % 30)
+    'remaining' => 120 - (time() % 120)
 ]);

@@ -27,7 +27,7 @@ if (!$session) {
 
 // Generate expected TOTP-style code
 // Code is derived from: secret_key + floor(time/30)
-$window    = (int)floor(time() / 30);
+$window    = (int)floor(time() / 120);
 $secretKey = $session['secret_key'];
 
 // Allow ±1 window for network latency

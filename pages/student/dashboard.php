@@ -408,18 +408,18 @@ window.addEventListener('resize',()=>{document.getElementById('menu-btn').style.
 
 // ── CODE TIMER ──
 <?php if ($activeSession): ?>
-let timeLeft = <?= 30 - (time() % 30) ?>;
+let timeLeft = <?= 120 - (time() % 120) ?>;
 function updateTimer(){
   const fill = document.getElementById('timer-fill');
   const num  = document.getElementById('timer-num');
   if(!fill) return;
-  fill.style.width = (timeLeft/30*100)+'%';
+  fill.style.width = (timeLeft/120*100)+'%';
   fill.style.background = timeLeft<=10?'var(--danger)':timeLeft<=20?'var(--warning)':'var(--gold)';
   if(num) num.textContent = timeLeft;
 }
 updateTimer();
 setInterval(()=>{
-  timeLeft--; if(timeLeft<0){timeLeft=29; clearCodeInputs();}
+  timeLeft--; if(timeLeft<0){timeLeft=119; clearCodeInputs();}
   updateTimer();
 },1000);
 <?php endif; ?>

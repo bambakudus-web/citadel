@@ -13,36 +13,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $identifier  = trim($_POST['identifier'] ?? '');
     $password    = $_POST['password'] ?? '';
     $fingerprint = $_POST['device_fingerprint'] ?? '';
-
     if (empty($identifier) || empty($password)) {
         $error = 'Please enter your ID and password.';
     } else {
         $stmt = $pdo->prepare("SELECT * FROM users WHERE index_no=? OR email=? LIMIT 1");
         $stmt->execute([$identifier, $identifier]);
         $user = $stmt->fetch();
-
         if ($user && password_verify($password, $user['password_hash'])) {
-            // Device fingerprint check
             if ($user['device_fingerprint'] && $fingerprint && $user['device_fingerprint'] !== $fingerprint) {
-                $error = 'Access denied. This account is registered to another device. Contact your administrator.';
+                $error = 'Access denied. This account is registered to another device. Contact admin.';
             } else {
-                // Register device on first login
                 if ($fingerprint && !$user['device_fingerprint']) {
                     $pdo->prepare("UPDATE users SET device_fingerprint=? WHERE id=?")->execute([$fingerprint, $user['id']]);
                 }
-                $_SESSION['user']    = [
-                    'id'        => $user['id'],
-                    'full_name' => $user['full_name'],
-                    'index_no'  => $user['index_no'],
-                    'email'     => $user['email'],
-                    'role'      => $user['role'],
-                ];
+                $_SESSION['user_id'] = $user['id'];
+                $_SESSION['role']    = $user['role'];
+                $_SESSION['user']    = ['id'=>$user['id'],'full_name'=>$user['full_name'],'index_no'=>$user['index_no'],'email'=>$user['email'],'role'=>$user['role']];
                 header('Location: ' . roleRedirect($user['role']));
                 exit;
             }
         } else {
             $error = 'Invalid credentials. Please try again.';
         }
+    }
+}
 
 function roleRedirect(string $role): string {
     return match($role) {

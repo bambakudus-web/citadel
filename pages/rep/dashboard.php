@@ -46,6 +46,18 @@ if ($activeSession) {
 
 $students  = $pdo->query("SELECT * FROM users WHERE role IN ('student','rep') ORDER BY full_name")->fetchAll();
 $recentAtt = $pdo->query("SELECT a.*, u.full_name, u.index_no, s.course_code FROM attendance a JOIN users u ON a.student_id=u.id JOIN sessions s ON a.session_id=s.id ORDER BY a.timestamp DESC LIMIT 15")->fetchAll();
+$sessionHistory = $pdo->query("
+    SELECT s.*, 
+    COUNT(DISTINCT CASE WHEN a.status IN ('present','late') THEN a.student_id END) as present_count,
+    COUNT(DISTINCT CASE WHEN a.status='absent' THEN a.student_id END) as absent_count,
+    COUNT(DISTINCT CASE WHEN a.status='late' THEN a.student_id END) as late_count
+    FROM sessions s
+    LEFT JOIN attendance a ON s.id=a.session_id
+    WHERE s.active_status=0
+    GROUP BY s.id
+    ORDER BY s.start_time DESC
+    LIMIT 30
+")->fetchAll();
 
 $msg = ''; $msgType = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -277,6 +289,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       <a class="nav-item" id="approvals-nav" onclick="showSection('approvals',this)">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
         Approvals<span class="pending-badge" id="pending-badge"><?= $pendingCount ?></span>
+      <a class="nav-item" onclick="showSection('history',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/><polyline points="12 7 12 12 16 14"/></svg>
+        Session History
+      </a>
       </a>
       <div class="nav-section">Class Management</div>
       <a class="nav-item" onclick="showSection('students',this)">
@@ -456,6 +472,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       </div>
 
       <!-- STUDENTS -->
+      <!-- SESSION HISTORY -->
+      <div class="page-section" id="sec-history">
+        <div class="section-header"><div class="section-title">Session <span>History</span></div><a href="../../api/export_attendance.php" class="btn btn-rep btn-sm">⬇ Export All CSV</a></div>
+        <div class="card"><div class="card-body" style="padding:0;overflow-x:auto">
+          <table class="data-table"><thead><tr><th>Course</th><th>Date</th><th>Start</th><th>End</th><th>Present</th><th>Late</th><th>Absent</th><th>Export</th></tr></thead>
+          <tbody>
+            <?php if(empty($sessionHistory)): ?><tr><td colspan="8" style="color:var(--muted)">No past sessions yet.</td></tr>
+            <?php else: foreach($sessionHistory as $sh): ?>
+              <tr>
+                <td><strong><?= htmlspecialchars($sh['course_code']) ?></strong><br><small style="color:var(--muted)"><?= htmlspecialchars($sh['course_name']) ?></small></td>
+                <td style="color:var(--muted);font-size:.78rem"><?= date('d M Y',strtotime($sh['start_time'])) ?></td>
+                <td style="font-size:.78rem"><?= date('H:i',strtotime($sh['start_time'])) ?></td>
+                <td style="font-size:.78rem;color:var(--muted)"><?= $sh['end_time'] ? date('H:i',strtotime($sh['end_time'])) : '-' ?></td>
+                <td><span class="pill pill-green"><?= $sh['present_count'] ?></span></td>
+                <td><span class="pill pill-gold"><?= $sh['late_count'] ?></span></td>
+                <td><span class="pill pill-red"><?= $sh['absent_count'] ?></span></td>
+                <td><a href="../../api/export_attendance.php?session_id=<?= $sh['id'] ?>" class="btn btn-ghost btn-sm">⬇ CSV</a></td>
+              </tr>
+            <?php endforeach; endif; ?>
+          </tbody></table>
+        </div></div>
+      </div>
       <div class="page-section" id="sec-students">
         <div class="section-header"><div class="section-title">Class <span>Registry</span></div><button class="btn btn-rep" onclick="openModal('modal-add')">+ Add Student</button></div>
         <div class="filter-bar"><input type="text" id="s-search" placeholder="Search name or index number..." oninput="filterStudents()"></div>

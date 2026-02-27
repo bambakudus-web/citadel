@@ -14,6 +14,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         header("Location: dashboard.php?reset=1");
         exit;
     }
+    if ($action === "reset_device") {
+        $uid = (int)($_POST["user_id"] ?? 0);
+        if ($uid) {
+            $pdo->prepare("UPDATE users SET device_fingerprint=NULL WHERE id=?")->execute([$uid]);
+        }
+        header("Location: dashboard.php?tab=devices");
+        exit;
+    }
 }
 $user = currentUser();
 
@@ -866,8 +874,8 @@ $sessions = $pdo->query("
                   <td><?= htmlspecialchars($d['full_name']) ?></td>
                   <td style="color:var(--gold);font-size:0.78rem"><?= $d['index_no'] ?></td>
                   <td style="color:var(--muted);font-size:0.72rem;max-width:160px;overflow:hidden;text-overflow:ellipsis"><?= $d['device_fingerprint'] ?: '— not registered —' ?></td>
-                  <td><span class="pill pill-green">Active</span></td>
-                  <td><button class="btn btn-danger btn-sm">Ban</button></td>
+                  <td><?= $d['device_fingerprint'] ? '<span class="pill pill-green">Registered</span>' : '<span class="pill pill-red">Not Registered</span>' ?></td>
+                  <td><form method="POST" style="display:inline"><input type="hidden" name="action" value="reset_device"><input type="hidden" name="user_id" value="<?= $d['id'] ?>"><button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Reset device for <?= htmlspecialchars($d['full_name']) ?>?')">Reset Device</button></form></td>
                 </tr>
                 <?php endforeach; ?>
               </tbody>

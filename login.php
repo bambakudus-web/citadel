@@ -22,25 +22,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $user = $stmt->fetch();
 
         if ($user && password_verify($password, $user['password_hash'])) {
-            if ($fingerprint) {
-                $pdo->prepare("UPDATE users SET device_fingerprint=? WHERE id=?")->execute([$fingerprint, $user['id']]);
+            // Device fingerprint check
+            if ($user['device_fingerprint'] && $fingerprint && $user['device_fingerprint'] !== $fingerprint) {
+                $error = 'Access denied. This account is registered to another device. Contact your administrator.';
+            } else {
+                // Register device on first login
+                if ($fingerprint && !$user['device_fingerprint']) {
+                    $pdo->prepare("UPDATE users SET device_fingerprint=? WHERE id=?")->execute([$fingerprint, $user['id']]);
+                }
+                $_SESSION['user']    = [
+                    'id'        => $user['id'],
+                    'full_name' => $user['full_name'],
+                    'index_no'  => $user['index_no'],
+                    'email'     => $user['email'],
+                    'role'      => $user['role'],
+                ];
+                header('Location: ' . roleRedirect($user['role']));
+                exit;
             }
-            $_SESSION['user_id'] = $user['id'];
-            $_SESSION['role']    = $user['role'];
-            $_SESSION['user']    = [
-                'id'        => $user['id'],
-                'full_name' => $user['full_name'],
-                'index_no'  => $user['index_no'],
-                'email'     => $user['email'],
-                'role'      => $user['role'],
-            ];
-            header('Location: ' . roleRedirect($user['role']));
-            exit;
         } else {
             $error = 'Invalid credentials. Please try again.';
         }
-    }
-}
 
 function roleRedirect(string $role): string {
     return match($role) {

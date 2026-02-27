@@ -20,8 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->execute([$identifier, $identifier]);
         $user = $stmt->fetch();
         if ($user && password_verify($password, $user['password_hash'])) {
-            if ($user['device_fingerprint'] && $fingerprint && $user['device_fingerprint'] !== $fingerprint) {
-                $error = 'Access denied. This account is registered to another device. Contact admin.';
+            if ($user['device_fingerprint'] && $fingerprint && $user['device_fingerprint'] !== $fingerprint && !in_array($user['role'], ['admin','rep'])) {
             } else {
                 if ($fingerprint && !$user['device_fingerprint']) {
                     $pdo->prepare("UPDATE users SET device_fingerprint=? WHERE id=?")->execute([$fingerprint, $user['id']]);

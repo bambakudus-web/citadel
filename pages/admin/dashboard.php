@@ -39,7 +39,18 @@ $recentActivity = $pdo->query("
 ")->fetchAll();
 
 // All students
-$students = $pdo->query("SELECT * FROM users WHERE role='student' ORDER BY full_name")->fetchAll();
+$students = $pdo->query("
+    SELECT u.*,
+    COUNT(DISTINCT s.id) as total_sessions,
+    SUM(CASE WHEN a.status IN ('present','late') THEN 1 ELSE 0 END) as attended,
+    ROUND(SUM(CASE WHEN a.status IN ('present','late') THEN 1 ELSE 0 END) / NULLIF(COUNT(DISTINCT s.id),0) * 100) as attendance_pct
+    FROM users u
+    LEFT JOIN attendance a ON u.id=a.student_id
+    LEFT JOIN sessions s ON a.session_id=s.id
+    WHERE u.role='student'
+    GROUP BY u.id
+    ORDER BY attendance_pct ASC, u.full_name
+")->fetchAll();
 
 // All sessions
 $sessions = $pdo->query("
@@ -655,7 +666,7 @@ $sessions = $pdo->query("
         <div class="card">
           <div class="card-body" style="padding:0;overflow-x:auto">
             <table class="data-table" id="student-table">
-              <thead><tr><th>#</th><th>Index No.</th><th>Full Name</th><th>Email</th><th>Role</th><th>Actions</th></tr></thead>
+              <thead><tr><th>#</th><th>Index No.</th><th>Full Name</th><th>Email</th><th>Role</th><th>Attendance</th><th>Actions</th></tr></thead>
               <tbody>
                 <?php foreach ($students as $i => $s): ?>
                   <tr data-name="<?= strtolower($s['full_name']) ?>" data-index="<?= $s['index_no'] ?>">
@@ -664,6 +675,8 @@ $sessions = $pdo->query("
                     <td><?= htmlspecialchars($s['full_name']) ?></td>
                     <td style="color:var(--muted);font-size:0.78rem"><?= $s['email'] ?></td>
                     <td><span class="pill pill-<?= $s['role']==='rep'?'gold':'steel' ?>"><?= $s['role'] ?></span></td>
+                    <?php $pct=$s['attendance_pct']??0; $color=$pct>=75?'var(--success)':($pct>=50?'var(--warning)':'var(--danger)'); ?>
+                    <td><div style="display:flex;align-items:center;gap:.5rem"><div style="width:60px;height:5px;background:var(--border);border-radius:3px"><div style="width:<?= min($pct,100) ?>%;height:100%;background:<?= $color ?>;border-radius:3px"></div></div><span style="font-size:.75rem;color:<?= $color ?>;font-weight:600"><?= $pct??0 ?>%</span><?php if($pct<75&&$s['total_sessions']>3): ?><span title="Below 75%" style="color:var(--danger);font-size:.8rem">⚠</span><?php endif; ?></div></td>
                     <td>
                       <button class="btn btn-ghost btn-sm" onclick="editStudent(<?= $s['id'] ?>, '<?= htmlspecialchars(addslashes($s['full_name'])) ?>', '<?= $s['index_no'] ?>', '<?= $s['email'] ?>', '<?= $s['role'] ?>')">Edit</button>
                       <button class="btn btn-danger btn-sm" onclick="confirmDelete(<?= $s['id'] ?>, 'student')">Remove</button>

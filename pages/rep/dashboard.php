@@ -68,7 +68,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $marked->execute([$sid]);
             $markedIds = array_column($marked->fetchAll(), 'student_id');
             $pdo->prepare("DELETE FROM attendance WHERE session_id=? AND status='pending'")->execute([$sid]);
-            $students = $pdo->query("SELECT id FROM users WHERE role IN ('student','rep')")->fetchAll();
+            $students = $pdo->query("
+    SELECT u.*,
+    COUNT(DISTINCT s.id) as total_sessions,
+    SUM(CASE WHEN a.status IN ('present','late') THEN 1 ELSE 0 END) as attended,
+    ROUND(SUM(CASE WHEN a.status IN ('present','late') THEN 1 ELSE 0 END) / NULLIF(COUNT(DISTINCT s.id),0) * 100) as attendance_pct
+    FROM users u
+    LEFT JOIN attendance a ON u.id=a.student_id
+    LEFT JOIN sessions s ON a.session_id=s.id
+    WHERE u.role IN ('student','rep')
+    GROUP BY u.id
+    ORDER BY attendance_pct ASC, u.full_name
+")->fetchAll();
             foreach ($students as $s) {
                 if (!in_array($s['id'], $markedIds)) {
                     try { $pdo->prepare("INSERT INTO attendance (session_id, student_id, status, timestamp) VALUES (?,?,'absent',NOW())")->execute([$sid, $s['id']]); } catch (Exception $e) {}
@@ -450,7 +461,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="filter-bar"><input type="text" id="s-search" placeholder="Search name or index number..." oninput="filterStudents()"></div>
         <div class="card"><div class="card-body" style="padding:0;overflow-x:auto">
           <table class="data-table" id="s-table">
-            <thead><tr><th>#</th><th>Index No.</th><th>Full Name</th><th>Role</th><th>Actions</th></tr></thead>
+            <thead><tr><th>#</th><th>Index No.</th><th>Full Name</th><th>Role</th><th>Attendance</th><th>Actions</th></tr></thead>
             <tbody>
               <?php foreach($students as $i=>$s): ?>
                 <tr data-name="<?= strtolower($s['full_name']) ?>" data-index="<?= $s['index_no'] ?>">
@@ -458,6 +469,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                   <td style="color:var(--gold);font-size:.78rem"><?= htmlspecialchars($s['index_no']) ?></td>
                   <td><?= htmlspecialchars($s['full_name']) ?></td>
                   <td><span class="pill pill-<?= $s['role']==='rep'?'rep':'steel' ?>"><?= $s['role'] ?></span></td>
+                  <?php $pct=$s['attendance_pct']??0; $color=$pct>=75?'var(--success)':($pct>=50?'var(--warning)':'var(--danger)'); ?>
+                  <td><div style="display:flex;align-items:center;gap:.5rem"><div style="width:60px;height:5px;background:var(--border);border-radius:3px"><div style="width:<?= min($pct,100) ?>%;height:100%;background:<?= $color ?>;border-radius:3px"></div></div><span style="font-size:.75rem;color:<?= $color ?>;font-weight:600"><?= $pct??0 ?>%</span><?php if($pct<75&&$s['total_sessions']>3): ?><span title="Below 75%" style="color:var(--danger)">⚠</span><?php endif; ?></div></td>
                   <td>
                     <button class="btn btn-ghost btn-sm" onclick="openEdit(<?= $s['id'] ?>,'<?= htmlspecialchars(addslashes($s['full_name'])) ?>','<?= $s['index_no'] ?>','<?= $s['email'] ?>')">Edit</button>
                     <?php if($s['role']!=='rep'): ?><button class="btn btn-danger btn-sm" onclick="confirmDel(<?= $s['id'] ?>)">Remove</button><?php endif; ?>

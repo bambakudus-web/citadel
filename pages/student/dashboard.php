@@ -253,7 +253,7 @@ $fullTT = $pdo->query("SELECT t.*, u.full_name as lecturer_name FROM timetable t
           </div>
         </div>
       </div>
-      <div class="card" style="margin-top:1.5rem"><div class="card-head"><div class="card-head-title">📢 Class Announcements</div></div><div class="card-body" style="padding:0"><table class="data-table"><thead><tr><th>Message</th><th>From</th><th>Date</th></tr></thead><tbody><?php if(empty($announcements)):?><tr><td colspan="3" style="color:var(--muted)">No announcements yet.</td></tr><?php else:foreach($announcements as $ann):?><tr><td><?=htmlspecialchars($ann["message"])?></td><td style="color:var(--gold);font-size:.75rem"><?=htmlspecialchars($ann["full_name"])?></td><td style="color:var(--muted);font-size:.72rem"><?=date("d M H:i",strtotime($ann["created_at"]))?></td></tr><?php endforeach;endif;?></tbody></table></div></div>
+      <div class="card" style="margin-top:1.5rem"><div class="card-head"><div class="card-head-title">📢 Class Announcements</div></div><div class="card-body" style="padding:0"><table class="data-table"><thead><tr><th>Message</th><th>From</th><th>Date</th></tr></thead><tbody id="ann-list"><?php if(empty($announcements)):?><tr><td colspan="3" style="color:var(--muted)">No announcements yet.</td></tr><?php else:foreach($announcements as $ann):?><tr><td><?=htmlspecialchars($ann["message"])?></td><td style="color:var(--gold);font-size:.75rem"><?=htmlspecialchars($ann["full_name"])?></td><td style="color:var(--muted);font-size:.72rem"><?=date("d M H:i",strtotime($ann["created_at"]))?></td></tr><?php endforeach;endif;?></tbody></table></div></div>
 
       <!-- MARK ATTENDANCE -->
       <div class="page-section" id="sec-mark">
@@ -425,34 +425,33 @@ setInterval(()=>{
   updateTimer();
 },1000);
 <?php endif; ?>
-// Smart auto-refresh - checks session and approval status
+// Smart auto-refresh
 let lastStatus = "<?= $myRecord ? $myRecord['status'] : 'none' ?>";
 setInterval(()=>{
   fetch("../../api/session_status.php")
     .then(r=>r.json())
     .then(data=>{
-      const markNav = document.getElementById("mark-nav");
-      // Session went active or inactive - reload
-      const hasActive = <?= $activeSession ? true : false ?>;
+      const hasActive = <?= $activeSession ? "true" : "false" ?>;
       if(data.active && !hasActive){ location.reload(); return; }
-      // Approval status changed - reload
-      if(data.my_status && data.my_status !== lastStatus){
-        lastStatus = data.my_status;
-        if(data.my_status === "present" || data.my_status === "late"){
-          // Show toast notification
-          const toast = document.createElement("div");
-          toast.style.cssText = "position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:var(--success);color:#060910;padding:.8rem 1.5rem;border-radius:2px;font-family:Cinzel,serif;font-size:.82rem;font-weight:700;z-index:999;animation:fadeIn .3s ease";
-          toast.textContent = "✓ Attendance Approved! You are marked " + data.my_status.toUpperCase();
+      const newStatus = data.my_status || "none";
+      if(newStatus !== lastStatus){
+        if(newStatus === "present" || newStatus === "late"){
+          const toast=document.createElement("div");
+          toast.style.cssText="position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:var(--success);color:#060910;padding:.8rem 1.5rem;border-radius:2px;font-family:Cinzel,serif;font-size:.82rem;font-weight:700;z-index:999";
+          toast.textContent="✓ Approved! Marked "+newStatus.toUpperCase();
           document.body.appendChild(toast);
-          setTimeout(()=>location.reload(), 2500);
-        } else if(data.my_status === null){
-          // Rejected - reload to show fresh form
-          location.reload();
+          setTimeout(()=>location.reload(),2000);
+        } else if(lastStatus==="pending" && newStatus==="none"){
+          const toast=document.createElement("div");
+          toast.style.cssText="position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:var(--danger);color:#fff;padding:.8rem 1.5rem;border-radius:2px;font-family:Cinzel,serif;font-size:.82rem;font-weight:700;z-index:999";
+          toast.textContent="✗ Attendance Rejected. Please try again.";
+          document.body.appendChild(toast);
+          setTimeout(()=>location.reload(),2500);
         }
+        lastStatus=newStatus;
       }
     }).catch(()=>{});
-}, 12000);
-
+},10000);
 // ── CODE INPUT ──
 function codeInput(el,idx){
   el.value=el.value.replace(/\D/,'');
@@ -597,6 +596,26 @@ async function submitAttendance(){
     }
   }catch(e){errEl.textContent='Connection error. Try again.';errEl.style.display='block';btn.disabled=false;btn.textContent='Submit →'}
 }
+// Poll announcements every 30 seconds
+let lastAnnouncement = document.querySelector("#ann-list tr:first-child td")?.textContent || "";
+setInterval(()=>{
+  fetch("../../api/announcements.php")
+    .then(r=>r.json())
+    .then(data=>{
+      if(!data.rows||!data.rows.length) return;
+      const latest = data.rows[0].message;
+      if(latest !== lastAnnouncement){
+        lastAnnouncement = latest;
+        const tbody = document.getElementById("ann-list");
+        if(tbody) tbody.innerHTML = data.rows.map(r=>`<tr><td>${r.message}</td><td style="color:var(--gold);font-size:.75rem">${r.full_name}</td><td style="color:var(--muted);font-size:.72rem">${r.time}</td></tr>`).join("");
+        const toast=document.createElement("div");
+        toast.style.cssText="position:fixed;top:1rem;right:1rem;background:var(--steel);color:#fff;padding:.8rem 1.2rem;border-radius:2px;font-size:.82rem;z-index:999;max-width:280px";
+        toast.textContent="📢 New announcement from Rep";
+        document.body.appendChild(toast);
+        setTimeout(()=>toast.remove(),4000);
+      }
+    }).catch(()=>{});
+},30000);
 </script>
 </body>
 </html>

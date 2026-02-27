@@ -148,6 +148,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     :root{--bg:#060910;--surface:#0c1018;--surface2:#111722;--border:#1a2535;--gold:#c9a84c;--gold-dim:#7a5f28;--steel:#4a6fa5;--steel-dim:#2a4060;--rep:#5a9f7a;--rep-dim:#2a5040;--text:#e8eaf0;--muted:#6b7a8d;--success:#4caf82;--danger:#e05c5c;--warning:#e0a050;--sidebar-w:240px}
+    body.light{--bg:#f0f2f5;--surface:#ffffff;--surface2:#f5f7fa;--border:#dde1e9;--text:#1a2035;--muted:#5a6a7d;--gold:#8a6520;--gold-dim:#c9a84c;--steel:#2a4f8a}
     html,body{height:100%;background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;overflow-x:hidden}
     body::before{content:'';position:fixed;inset:0;z-index:0;background:radial-gradient(ellipse 60% 40% at 20% 0%,rgba(90,159,122,.1) 0%,transparent 60%);pointer-events:none}
     .layout{display:flex;min-height:100vh;position:relative;z-index:1}
@@ -324,6 +325,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       <div style="display:flex;align-items:center;gap:1rem">
         <span style="font-size:.75rem;color:var(--muted)"><?= date('l, d M Y') ?></span>
         <span class="badge-rep">Rep</span>
+        <button id="theme-btn" onclick="toggleTheme()" style="background:none;border:1px solid var(--border);color:var(--muted);cursor:pointer;padding:.25rem .6rem;border-radius:2px;font-size:.75rem">🌙</button>
       </div>
     </div>
 
@@ -664,6 +666,9 @@ async function approveAtt(id,action){
   }catch(e){if(row){row.style.opacity='1';row.style.pointerEvents='auto'}}
 }
 <?php endif; ?>
+// Theme toggle
+function toggleTheme(){const body=document.body;const btn=document.getElementById("theme-btn");if(body.classList.contains("light")){body.classList.remove("light");localStorage.setItem("theme","dark");if(btn)btn.textContent="🌙";}else{body.classList.add("light");localStorage.setItem("theme","light");if(btn)btn.textContent="☀️";}}
+(function(){if(localStorage.getItem("theme")==="light"){document.body.classList.add("light");const btn=document.getElementById("theme-btn");if(btn)btn.textContent="☀️";}})();
 </script>
 </body>
 </html>

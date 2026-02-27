@@ -368,6 +368,7 @@ $totalStudents = $pdo->query("SELECT COUNT(*) FROM users WHERE role='student'")-
       <div style="display:flex;align-items:center;gap:1rem">
         <span style="font-size:0.75rem;color:var(--muted)"><?= date('l, d M Y') ?></span>
         <span class="badge-lec">Lecturer</span>
+        <button id="theme-btn" onclick="toggleTheme()" style="background:none;border:1px solid var(--border);color:var(--muted);cursor:pointer;padding:.25rem .6rem;border-radius:2px;font-size:.75rem">🌙</button>
       </div>
     </div>
 
@@ -666,6 +667,9 @@ setInterval(() => {
 }, 10000);
 
 <?php endif; ?>
+// Theme toggle
+function toggleTheme(){const body=document.body;const btn=document.getElementById("theme-btn");if(body.classList.contains("light")){body.classList.remove("light");localStorage.setItem("theme","dark");if(btn)btn.textContent="🌙";}else{body.classList.add("light");localStorage.setItem("theme","light");if(btn)btn.textContent="☀️";}}
+(function(){if(localStorage.getItem("theme")==="light"){document.body.classList.add("light");const btn=document.getElementById("theme-btn");if(btn)btn.textContent="☀️";}})();
 </script>
 </body>
 </html>

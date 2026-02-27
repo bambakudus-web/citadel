@@ -126,6 +126,7 @@ function roleRedirect(string $role): string {
       </div>
       <button type="submit" class="btn-primary">Enter Citadel</button>
     </form>
+    <a href="reset_password.php" style="display:block;text-align:center;margin-top:1rem;color:var(--muted);text-decoration:none;font-size:.8rem">Forgot password?</a>
 
     <div class="card-footer">New student? <a href="register.php">Register here</a></div>
   </div>

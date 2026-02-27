@@ -471,7 +471,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
       <!-- ATTENDANCE -->
       <div class="page-section" id="sec-attendance">
-        <div class="section-header"><div class="section-title">Attendance <span>Records</span></div></div>
+        <div class="section-header"><div class="section-title">Attendance <span>Records</span></div><div style="display:flex;gap:.6rem;flex-wrap:wrap"><a href="../../api/export_attendance.php" class="btn btn-rep btn-sm">⬇ Export All CSV</a><a href="../../api/export_attendance.php?from=<?= date('Y-m-d') ?>&to=<?= date('Y-m-d') ?>" class="btn btn-ghost btn-sm">⬇ Today Only</a></div></div>
         <div class="card"><div class="card-body" style="padding:0;overflow-x:auto">
           <table class="data-table"><thead><tr><th>Student</th><th>Index No.</th><th>Course</th><th>Status</th><th>Time</th></tr></thead>
           <tbody>

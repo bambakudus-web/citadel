@@ -717,7 +717,7 @@ $sessions = $pdo->query("
       <div class="page-section" id="sec-attendance">
         <div class="section-header">
           <div class="section-title">Attendance <span>Records</span></div>
-          <button class="btn btn-ghost" onclick="exportCSV()">Export CSV</button>
+          <div style="display:flex;gap:.6rem;flex-wrap:wrap"><a href="../../api/export_attendance.php" class="btn btn-ghost btn-sm">⬇ Export All</a><a href="../../api/export_attendance.php?from=<?= date('Y-m-d') ?>&amp;to=<?= date('Y-m-d') ?>" class="btn btn-ghost btn-sm">⬇ Today</a></div>
         </div>
         <div class="filter-bar">
           <input type="text" placeholder="Search student...">
@@ -993,7 +993,7 @@ function closeSession(id) {
 }
 
 // ── Export CSV (placeholder) ──
-function exportCSV() { alert('Export feature coming soon.'); }
+function exportCSV() { window.location.href='../../api/export_attendance.php'; }
 
 // ── Mobile menu ──
 const menuBtn = document.getElementById('menu-btn');

@@ -69,6 +69,34 @@ $sessions = $pdo->query("
     LEFT JOIN attendance a ON s.id = a.session_id
     GROUP BY s.id ORDER BY s.created_at DESC LIMIT 20
 ")->fetchAll();
+$activeSession = $pdo->query("SELECT * FROM sessions WHERE active_status=1 ORDER BY start_time DESC LIMIT 1")->fetch();
+$pendingCount = 0;
+if ($activeSession) {
+    $pc = $pdo->prepare("SELECT COUNT(*) FROM attendance WHERE session_id=? AND status='pending'");
+    $pc->execute([$activeSession['id']]); $pendingCount = $pc->fetchColumn();
+}
+$sessionHistory = $pdo->query("
+    SELECT s.*, 
+    COUNT(DISTINCT CASE WHEN a.status IN ('present','late') THEN a.student_id END) as present_count,
+    COUNT(DISTINCT CASE WHEN a.status='absent' THEN a.student_id END) as absent_count,
+    COUNT(DISTINCT CASE WHEN a.status='late' THEN a.student_id END) as late_count
+    FROM sessions s LEFT JOIN attendance a ON s.id=a.session_id
+    WHERE s.active_status=0 GROUP BY s.id ORDER BY s.start_time DESC LIMIT 30
+")->fetchAll();
+$announcements = $pdo->query("SELECT a.message, a.created_at, u.full_name FROM announcements a JOIN users u ON a.rep_id=u.id ORDER BY a.created_at DESC LIMIT 20")->fetchAll();
+$liveAttendance = [];
+if ($activeSession) {
+    $la = $pdo->prepare("SELECT u.full_name, u.index_no, a.status, a.minutes_late, a.timestamp FROM attendance a JOIN users u ON a.student_id=u.id WHERE a.session_id=? AND a.status IN ('present','late') ORDER BY a.timestamp DESC");
+    $la->execute([$activeSession['id']]); $liveAttendance = $la->fetchAll();
+}
+function generateCode(string $secret, int $window): string {
+    $hash = hash_hmac('sha256', (string)$window, $secret);
+    $offset = hexdec(substr($hash, -1)) & 0xf;
+    $code = (hexdec(substr($hash, $offset * 2, 8)) & 0x7fffffff) % 1000000;
+    return str_pad((string)$code, 6, '0', STR_PAD_LEFT);
+}
+$currentCode = $activeSession ? generateCode($activeSession['secret_key'], (int)floor(time() / 120)) : '';
+$timeRemaining = 120 - (time() % 120);
 ?>
 <!DOCTYPE html>
 <html lang="en">

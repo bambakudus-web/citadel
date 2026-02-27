@@ -434,7 +434,7 @@ setInterval(()=>{
       const markNav = document.getElementById("mark-nav");
       // Session went active or inactive - reload
       const hasActive = <?= $activeSession ? true : false ?>;
-      if(data.active !== hasActive){ location.reload(); return; }
+      if(data.active && !hasActive){ location.reload(); return; }
       // Approval status changed - reload
       if(data.my_status && data.my_status !== lastStatus){
         lastStatus = data.my_status;

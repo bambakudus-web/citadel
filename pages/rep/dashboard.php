@@ -106,7 +106,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $hash  = password_hash($index, PASSWORD_DEFAULT);
         if ($name && $index) {
             try {
-                $pdo->prepare("INSERT INTO users (full_name, index_no, email, password_hash, role) VALUES (?,?,?,?,'student')")->execute([$name, $index, $email, $hash]);
+                $pdo->prepare("INSERT INTO users (full_name, index_no, email, phone, password_hash, role) VALUES (?,?,?,?,?,'student')")->execute([$name, $index, $email, $phone, $hash]);
                 $msg = "Student $name added."; $msgType = 'success';
                 $students = $pdo->query("SELECT * FROM users WHERE role IN ('student','rep') ORDER BY full_name")->fetchAll();
                 $totalStudents = count($students);
@@ -138,6 +138,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 }
+// WhatsApp broadcast to all students
+            $phones = $pdo->query("SELECT phone, full_name FROM users WHERE role IN ('student','rep') AND phone IS NOT NULL AND phone != ''")->fetchAll();
+            if (!empty($phones)) {
+                require_once '../../vendor/autoload.php';
+                $sid   = getenv('TWILIO_SID');
+                $token = getenv('TWILIO_TOKEN');
+                $from  = getenv('TWILIO_FROM') ?: 'whatsapp:+14155238886';
+                if ($sid && $token) {
+                    try {
+                        $tw = new \Twilio\Rest\Client($sid, $token);
+                        foreach ($phones as $p) {
+                            $tw->messages->create('whatsapp:'.$p['phone'], [
+                                'from' => $from,
+                                'body' => "📢 *CITADEL Announcement*\n\nHello {$p['full_name']},\n\n{$message}\n\n_From: Course Rep_"
+                            ]);
+                        }
+                    } catch (Exception $e) { error_log($e->getMessage()); }
+                }
+            }
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -567,7 +586,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <div class="modal"><div class="modal-head"><div class="modal-title">ADD STUDENT</div><button class="modal-close" onclick="closeModal('modal-add')">✕</button></div>
     <div class="modal-body"><form method="POST"><input type="hidden" name="action" value="add">
       <div class="form-row"><div class="form-field"><label>Full Name</label><input type="text" name="full_name" required placeholder="Surname, Firstname"></div><div class="form-field"><label>Index Number</label><input type="text" name="index_no" required placeholder="52430540000"></div></div>
-      <div class="form-field"><label>Email (optional)</label><input type="email" name="email" placeholder="auto-generated if blank"></div>
+      <div class="form-row"><div class="form-field"><label>Email (optional)</label><input type="email" name="email" placeholder="auto-generated if blank"></div><div class="form-field"><label>WhatsApp Number</label><input type="text" name="phone" placeholder="+233XXXXXXXXX"></div></div>
       <button type="submit" class="btn btn-rep" style="width:100%">Add Student</button>
     </form></div>
   </div>

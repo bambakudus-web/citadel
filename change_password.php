@@ -9,6 +9,12 @@ $user   = currentUser();
 $userId = $user['id'];
 $msg    = ''; $msgType = '';
 
+// Handle phone update
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['phone'])) {
+    $phone = trim($_POST['phone'] ?? '');
+    $pdo->prepare("UPDATE users SET phone=? WHERE id=?")->execute([$phone, $userId]);
+    $msg = 'Phone number updated!'; $msgType = 'success';
+}
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $current  = $_POST['current_password']  ?? '';
     $new      = $_POST['new_password']      ?? '';
@@ -142,6 +148,17 @@ $backLink = match($user['role'] ?? '') {
 
       <button type="submit" class="btn-primary">Update Password</button>
     </form>
+    <div style="margin-top:1.5rem;padding-top:1.5rem;border-top:1px solid var(--border)">
+      <div style="font-family:Cinzel,serif;font-size:.8rem;color:var(--gold);letter-spacing:.12em;margin-bottom:1rem">WHATSAPP NUMBER</div>
+      <form method="POST">
+        <input type="hidden" name="phone" value="">
+        <div class="field">
+          <label>Phone Number</label>
+          <input type="text" name="phone" placeholder="+233XXXXXXXXX" value="<?= htmlspecialchars(currentUser()['phone'] ?? '') ?>">
+        </div>
+        <button type="submit" class="btn-primary" style="margin-top:.5rem">Update Phone</button>
+      </form>
+    </div>
 
     <a href="<?= $backLink ?>" class="back-link">← Back to <span>Dashboard</span></a>
   </div>

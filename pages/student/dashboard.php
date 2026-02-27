@@ -385,7 +385,7 @@ $fullTT = $pdo->query("SELECT t.*, u.full_name as lecturer_name FROM timetable t
 
       <!-- STATS -->
       <div class="page-section" id="sec-stats">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.8rem"><div class="section-title" style="margin-bottom:0">My <span>Stats</span></div><a href="../../api/attendance_certificate.php" class="btn btn-gold btn-sm" style="text-decoration:none">⬇ Download Certificate</a></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.8rem;margin-bottom:1.8rem"><div class="section-title" style="margin-bottom:0">My <span>Stats</span></div><a href="../../api/attendance_certificate.php" class="btn btn-gold btn-sm" style="text-decoration:none">⬇ Download Certificate</a></div>
         <?php if (empty($courseStats)): ?>
           <p style="color:var(--muted);font-size:.83rem">No attendance data yet.</p>
         <?php else: foreach ($courseStats as $cs):

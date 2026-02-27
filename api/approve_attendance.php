@@ -29,9 +29,10 @@ if ($action === 'approve') {
     // Determine present or late based on 15-min window
     $sessionStart = strtotime($att['start_time']);
     $submitTime   = strtotime($att['timestamp']);
-    $status       = ($submitTime - $sessionStart) <= 900 ? 'present' : 'late';
-
-    $pdo->prepare("UPDATE attendance SET status=? WHERE id=?")->execute([$status, $attendanceId]);
+    $diff         = $submitTime - $sessionStart;
+$status       = $diff <= 900 ? 'present' : 'late';
+$minutesLate  = $diff > 0 ? (int)floor($diff / 60) : 0;
+$pdo->prepare("UPDATE attendance SET status=?, minutes_late=?, selfie_url=NULL, classroom_url=NULL WHERE id=?")->execute([$status, $minutesLate, $attendanceId]);
     echo json_encode(['success' => true, 'status' => $status, 'message' => 'Marked as ' . $status]);
 
 } else {

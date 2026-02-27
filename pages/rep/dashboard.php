@@ -44,7 +44,18 @@ if ($activeSession) {
     $currentCode = generateCode($activeSession['secret_key'], (int)floor(time() / 120));
 }
 
-$students  = $pdo->query("SELECT * FROM users WHERE role IN ('student','rep') ORDER BY full_name")->fetchAll();
+$students = $pdo->query("
+    SELECT u.*,
+    COUNT(DISTINCT s.id) as total_sessions,
+    SUM(CASE WHEN a.status IN ('present','late') THEN 1 ELSE 0 END) as attended,
+    ROUND(SUM(CASE WHEN a.status IN ('present','late') THEN 1 ELSE 0 END) / NULLIF(COUNT(DISTINCT s.id),0) * 100) as attendance_pct
+    FROM users u
+    LEFT JOIN attendance a ON u.id=a.student_id
+    LEFT JOIN sessions s ON a.session_id=s.id
+    WHERE u.role IN ('student','rep')
+    GROUP BY u.id
+    ORDER BY attendance_pct ASC, u.full_name
+")->fetchAll();
 $recentAtt = $pdo->query("SELECT a.*, u.full_name, u.index_no, s.course_code FROM attendance a JOIN users u ON a.student_id=u.id JOIN sessions s ON a.session_id=s.id ORDER BY a.timestamp DESC LIMIT 15")->fetchAll();
 $sessionHistory = $pdo->query("
     SELECT s.*, 
@@ -283,7 +294,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     .pending-badge{background:var(--warning);color:#060910;font-size:.6rem;font-weight:700;padding:.15rem .45rem;border-radius:2px;margin-left:.4rem;display:none}
 
     @media(max-width:900px){.two-col{grid-template-columns:1fr}}
-    @media(max-width:768px){.sidebar{transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}.main{margin-left:0}.content{padding:1rem}.topbar{padding:.8rem 1rem}.stats-grid{grid-template-columns:repeat(2,1fr)}.code-number{font-size:2rem}.data-table{font-size:.75rem}.data-table th,.data-table td{padding:.5rem .5rem}.tt-item{flex-direction:column;gap:.3rem}.tt-time{min-width:unset}.section-title{font-size:.95rem}.two-col{grid-template-columns:1fr}.form-row{grid-template-columns:1fr}.topbar-title{font-size:.78rem}.stat-value{font-size:1.5rem}#menu-btn{display:block}}
+    @media(max-width:768px){.sidebar{transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}.main{margin-left:0}.content{padding:1rem;overflow-x:hidden}.topbar{padding:.8rem 1rem}.stats-grid{grid-template-columns:repeat(2,1fr)}.code-number{font-size:2rem}.data-table{font-size:.72rem;display:block;overflow-x:auto;white-space:nowrap}.data-table th,.data-table td{padding:.4rem .5rem}.tt-item{flex-direction:column;gap:.3rem}.tt-time{min-width:unset}.section-title{font-size:.95rem}.two-col{grid-template-columns:1fr}.form-row{grid-template-columns:1fr}.topbar-title{font-size:.78rem}.stat-value{font-size:1.5rem}#menu-btn{display:block}}
   </style>
 </head>
 <body>

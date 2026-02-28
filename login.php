@@ -16,45 +16,53 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $password    = $_POST['password'] ?? '';
     $fingerprint = $_POST['device_fingerprint'] ?? '';
 
-    $rlKey      = 'login_' . ($_SERVER['REMOTE_ADDR'] ?? 'unknown');
-    $rlAttempts = getCurrentAttempts($rlKey);
-
-    if ($rlAttempts >= 3) {
-        $remaining = getRateLimitRemaining($rlKey);
-        $error = '🔒 Account locked. Try again in ' . ceil($remaining/60) . ' minute(s) or contact admin.';
-    } elseif (empty($identifier) || empty($password)) {
+    if (empty($identifier) || empty($password)) {
         $error = 'Please enter your ID and password.';
     } else {
         $stmt = $pdo->prepare("SELECT * FROM users WHERE index_no=? OR email=? LIMIT 1");
         $stmt->execute([$identifier, $identifier]);
         $user = $stmt->fetch();
-        if ($user && password_verify($password, $user['password_hash'])) {
-            resetRateLimit($rlKey);
-            if ($user['device_fingerprint'] && $fingerprint && $user['device_fingerprint'] !== $fingerprint && !in_array($user['role'], ['admin','rep'])) {
-                $error = 'Access denied. This account is registered to another device. Contact admin.';
-            } else {
-                if ($fingerprint && !$user['device_fingerprint']) {
-                    $pdo->prepare("UPDATE users SET device_fingerprint=? WHERE id=?")->execute([$fingerprint, $user['id']]);
+
+        if ($user) {
+            // Check if account is locked
+            if ($user['is_locked']) {
+                $error = '🔒 Your account has been locked. Please contact the administrator.';
+            } elseif ($user && password_verify($password, $user['password_hash'])) {
+                // Correct password - reset attempts
+                $pdo->prepare("UPDATE users SET login_attempts=0 WHERE id=?")->execute([$user['id']]);
+
+                if ($user['device_fingerprint'] && $fingerprint && $user['device_fingerprint'] !== $fingerprint && !in_array($user['role'], ['admin','rep'])) {
+                    $error = 'Access denied. This account is registered to another device. Contact admin.';
+                } else {
+                    if ($fingerprint && !$user['device_fingerprint']) {
+                        $pdo->prepare("UPDATE users SET device_fingerprint=? WHERE id=?")->execute([$fingerprint, $user['id']]);
+                    }
+                    $_SESSION['user_id'] = $user['id'];
+                    $_SESSION['role']    = $user['role'];
+                    $_SESSION['user']    = ['id'=>$user['id'],'full_name'=>$user['full_name'],'index_no'=>$user['index_no'],'email'=>$user['email'],'role'=>$user['role']];
+                    header('Location: ' . roleRedirect($user['role']));
+                    exit;
                 }
-                $_SESSION['user_id'] = $user['id'];
-                $_SESSION['role']    = $user['role'];
-                $_SESSION['user']    = ['id'=>$user['id'],'full_name'=>$user['full_name'],'index_no'=>$user['index_no'],'email'=>$user['email'],'role'=>$user['role']];
-                header('Location: ' . roleRedirect($user['role']));
-                exit;
+            } else {
+                // Wrong password - increment attempts
+                $attempts = $user['login_attempts'] + 1;
+                if ($attempts >= 3) {
+                    $pdo->prepare("UPDATE users SET login_attempts=?, is_locked=1 WHERE id=?")->execute([$attempts, $user['id']]);
+                    $error = '🔒 Your account has been locked due to too many failed attempts. Contact the administrator.';
+                } elseif ($attempts == 2) {
+                    $pdo->prepare("UPDATE users SET login_attempts=? WHERE id=?")->execute([$attempts, $user['id']]);
+                    $error = '⚠ Invalid credentials. Warning: 1 more failed attempt will lock your account.';
+                } else {
+                    $pdo->prepare("UPDATE users SET login_attempts=? WHERE id=?")->execute([$attempts, $user['id']]);
+                    $error = 'Invalid credentials. Please try again.';
+                }
             }
         } else {
-            checkRateLimit($rlKey, 3, 300); // increment attempt
-            $rlAttempts++;
-            if ($rlAttempts == 2) {
-                $error = '⚠ Invalid credentials. Warning: 1 attempt remaining before lockout.';
-            } elseif ($rlAttempts >= 3) {
-                $error = '🔒 Account locked for 5 minutes. Contact admin to unlock.';
-            } else {
-                $error = 'Invalid credentials. Please try again.';
-            }
+            $error = 'Invalid credentials. Please try again.';
         }
     }
 }
+
 function roleRedirect(string $role): string {
     return match($role) {
         'admin'    => 'pages/admin/dashboard.php',

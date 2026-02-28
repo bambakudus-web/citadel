@@ -24,6 +24,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         header("Location: dashboard.php?tab=devices");
         exit;
     }
+    if ($action === "unlock_account") {
+        $uid = (int)($_POST["user_id"] ?? 0);
+        if ($uid) {
+            $pdo->prepare("UPDATE users SET is_locked=0, login_attempts=0 WHERE id=?")->execute([$uid]);
+        }
+        header("Location: dashboard.php");
+        exit;
+    }
 }
 $user = currentUser();
 
@@ -914,17 +922,22 @@ $timeRemaining = 120 - (time() % 120);
         <div class="card">
           <div class="card-body" style="padding:0;overflow-x:auto">
             <table class="data-table">
-              <thead><tr><th>Student</th><th>Index No.</th><th>Fingerprint</th><th>Status</th><th>Actions</th></tr></thead>
+              <thead><tr><th>Name</th><th>Index No.</th><th>Device</th><th>Login Status</th><th>Actions</th></tr></thead>
               <tbody>
                 <?php
-                $devs = $pdo->query("SELECT id, full_name, index_no, device_fingerprint FROM users WHERE role='student' ORDER BY full_name")->fetchAll();
+                $devs = $pdo->query("SELECT id, full_name, index_no, device_fingerprint, is_locked, login_attempts FROM users WHERE role IN ('student','rep','lecturer') ORDER BY is_locked DESC, full_name")->fetchAll();
                 foreach ($devs as $d): ?>
                 <tr>
                   <td><?= htmlspecialchars($d['full_name']) ?></td>
                   <td style="color:var(--gold);font-size:0.78rem"><?= $d['index_no'] ?></td>
                   <td style="color:var(--muted);font-size:0.72rem;max-width:160px;overflow:hidden;text-overflow:ellipsis"><?= $d['device_fingerprint'] ?: '— not registered —' ?></td>
-                  <td><?= $d['device_fingerprint'] ? '<span class="pill pill-green">Registered</span>' : '<span class="pill pill-red">Not Registered</span>' ?></td>
-                  <td><form method="POST" style="display:inline"><input type="hidden" name="action" value="reset_device"><input type="hidden" name="user_id" value="<?= $d['id'] ?>"><button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Reset device for <?= htmlspecialchars($d['full_name']) ?>?')">Reset Device</button></form></td>
+                  <td><?= $d['is_locked'] ? '<span class="pill pill-red">🔒 Locked ('.$d["login_attempts"].' attempts)</span>' : '<span class="pill pill-green">Active</span>' ?></td>
+                  <td style="display:flex;gap:.4rem;flex-wrap:wrap">
+                  <form method="POST" style="display:inline"><input type="hidden" name="action" value="reset_device"><input type="hidden" name="user_id" value="<?= $d['id'] ?>"><button type="submit" class="btn btn-ghost btn-sm" onclick="return confirm('Reset device?')">Reset Device</button></form>
+                  <?php if($d['is_locked']): ?>
+                  <form method="POST" style="display:inline"><input type="hidden" name="action" value="unlock_account"><input type="hidden" name="user_id" value="<?= $d['id'] ?>"><button type="submit" class="btn btn-sm" style="background:rgba(76,175,130,.15);color:var(--success);border:1px solid rgba(76,175,130,.3)" onclick="return confirm('Unlock account for <?= htmlspecialchars($d['full_name']) ?>?')">🔓 Unlock</button></form>
+                  <?php endif; ?>
+                  </td>
                 </tr>
                 <?php endforeach; ?>
               </tbody>

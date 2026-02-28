@@ -82,3 +82,17 @@ function getRateLimitRemaining(string $key, int $windowSeconds = 300): int {
 function clean(string $input): string {
     return htmlspecialchars(strip_tags(trim($input)), ENT_QUOTES, 'UTF-8');
 }
+
+
+function getCurrentAttempts(string $key): int {
+    global $pdo;
+    if (!isset($pdo)) return 0;
+    try {
+        $stmt = $pdo->prepare("SELECT attempts, window_start FROM rate_limits WHERE rl_key=?");
+        $stmt->execute([$key]);
+        $row = $stmt->fetch();
+        if (!$row) return 0;
+        if (time() - $row['window_start'] > 300) return 0;
+        return (int)$row['attempts'];
+    } catch (Exception $e) { return 0; }
+}

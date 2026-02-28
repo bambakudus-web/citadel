@@ -16,10 +16,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $password    = $_POST['password'] ?? '';
     $fingerprint = $_POST['device_fingerprint'] ?? '';
 
-    $rlKey = 'login_' . ($_SERVER['REMOTE_ADDR'] ?? 'unknown');
-    if (!checkRateLimit($rlKey, 5, 300)) {
+    $rlKey      = 'login_' . ($_SERVER['REMOTE_ADDR'] ?? 'unknown');
+    $rlAttempts = getCurrentAttempts($rlKey);
+
+    if ($rlAttempts >= 3) {
         $remaining = getRateLimitRemaining($rlKey);
-        $error = 'Too many failed attempts. Try again in ' . ceil($remaining/60) . ' minute(s).';
+        $error = '🔒 Account locked. Try again in ' . ceil($remaining/60) . ' minute(s) or contact admin.';
     } elseif (empty($identifier) || empty($password)) {
         $error = 'Please enter your ID and password.';
     } else {
@@ -41,11 +43,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 exit;
             }
         } else {
-            $error = 'Invalid credentials. Please try again.';
+            checkRateLimit($rlKey, 3, 300); // increment attempt
+            $rlAttempts++;
+            if ($rlAttempts == 2) {
+                $error = '⚠ Invalid credentials. Warning: 1 attempt remaining before lockout.';
+            } elseif ($rlAttempts >= 3) {
+                $error = '🔒 Account locked for 5 minutes. Contact admin to unlock.';
+            } else {
+                $error = 'Invalid credentials. Please try again.';
+            }
         }
     }
 }
-
 function roleRedirect(string $role): string {
     return match($role) {
         'admin'    => 'pages/admin/dashboard.php',

@@ -121,7 +121,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             try {
                 $pdo->prepare("INSERT INTO users (full_name, index_no, email, phone, password_hash, role) VALUES (?,?,?,?,?,'student')")->execute([$name, $index, $email, $phone, $hash]);
                 $msg = "Student $name added."; $msgType = 'success';
-                $students = $pdo->query("SELECT * FROM users WHERE role IN ('student','rep') ORDER BY full_name")->fetchAll();
+                $students = $pdo->query("
+    SELECT u.*,
+    COUNT(DISTINCT s.id) as total_sessions,
+    SUM(CASE WHEN a.status IN ('present','late') THEN 1 ELSE 0 END) as attended,
+    ROUND(SUM(CASE WHEN a.status IN ('present','late') THEN 1 ELSE 0 END) / NULLIF(COUNT(DISTINCT s.id),0) * 100) as attendance_pct
+    FROM users u
+    LEFT JOIN attendance a ON u.id=a.student_id
+    LEFT JOIN sessions s ON a.session_id=s.id
+    WHERE u.role IN ('student','rep')
+    GROUP BY u.id
+    ORDER BY attendance_pct ASC, u.full_name
+")->fetchAll();
                 $totalStudents = count($students);
             } catch (Exception $e) { $msg = "Error: Index or email already exists."; $msgType = 'error'; }
         } else { $msg = "Name and Index Number are required."; $msgType = 'error'; }
@@ -131,7 +142,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($id && $name && $index) {
             $pdo->prepare("UPDATE users SET full_name=?, index_no=?, email=? WHERE id=? AND role IN ('student','rep')")->execute([$name, $index, $email, $id]);
             $msg = "Student updated."; $msgType = 'success';
-            $students = $pdo->query("SELECT * FROM users WHERE role IN ('student','rep') ORDER BY full_name")->fetchAll();
+            $students = $pdo->query("
+    SELECT u.*,
+    COUNT(DISTINCT s.id) as total_sessions,
+    SUM(CASE WHEN a.status IN ('present','late') THEN 1 ELSE 0 END) as attended,
+    ROUND(SUM(CASE WHEN a.status IN ('present','late') THEN 1 ELSE 0 END) / NULLIF(COUNT(DISTINCT s.id),0) * 100) as attendance_pct
+    FROM users u
+    LEFT JOIN attendance a ON u.id=a.student_id
+    LEFT JOIN sessions s ON a.session_id=s.id
+    WHERE u.role IN ('student','rep')
+    GROUP BY u.id
+    ORDER BY attendance_pct ASC, u.full_name
+")->fetchAll();
         }
     }
     if ($action === 'delete') {
@@ -139,7 +161,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($id) {
             $pdo->prepare("DELETE FROM users WHERE id=? AND role='student'")->execute([$id]);
             $msg = "Student removed."; $msgType = 'success';
-            $students = $pdo->query("SELECT * FROM users WHERE role IN ('student','rep') ORDER BY full_name")->fetchAll();
+            $students = $pdo->query("
+    SELECT u.*,
+    COUNT(DISTINCT s.id) as total_sessions,
+    SUM(CASE WHEN a.status IN ('present','late') THEN 1 ELSE 0 END) as attended,
+    ROUND(SUM(CASE WHEN a.status IN ('present','late') THEN 1 ELSE 0 END) / NULLIF(COUNT(DISTINCT s.id),0) * 100) as attendance_pct
+    FROM users u
+    LEFT JOIN attendance a ON u.id=a.student_id
+    LEFT JOIN sessions s ON a.session_id=s.id
+    WHERE u.role IN ('student','rep')
+    GROUP BY u.id
+    ORDER BY attendance_pct ASC, u.full_name
+")->fetchAll();
             $totalStudents = count($students);
         }
     }

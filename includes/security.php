@@ -28,43 +28,54 @@ function csrfField(): string {
 
 function verifyCsrf(): void {
     $token = $_POST['csrf_token'] ?? $_SERVER['HTTP_X_CSRF_TOKEN'] ?? '';
-    if (!hash_equals($_SESSION['csrf_token'] ?? '', $token)) {
+    if (empty($_SESSION['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $token)) {
         http_response_code(403);
-        die(json_encode(['success' => false, 'message' => 'Invalid request token.']));
+        if (!empty($_SERVER['HTTP_ACCEPT']) && strpos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false) {
+            die(json_encode(['success' => false, 'message' => 'Invalid request token.']));
+        }
+        die('Invalid request token.');
     }
 }
 
-// ── RATE LIMITING (login brute force) ──
+// ── RATE LIMITING via DB ──
 function checkRateLimit(string $key, int $maxAttempts = 5, int $windowSeconds = 300): bool {
-    $file = sys_get_temp_dir() . '/citadel_rl_' . md5($key) . '.json';
-    $data = file_exists($file) ? json_decode(file_get_contents($file), true) : ['attempts' => 0, 'window_start' => time()];
-    
-    // Reset window if expired
-    if (time() - $data['window_start'] > $windowSeconds) {
-        $data = ['attempts' => 0, 'window_start' => time()];
-    }
-    
-    if ($data['attempts'] >= $maxAttempts) {
-        $remaining = $windowSeconds - (time() - $data['window_start']);
-        return false; // Blocked
-    }
-    
-    $data['attempts']++;
-    file_put_contents($file, json_encode($data));
-    return true; // Allowed
+    global $pdo;
+    if (!isset($pdo)) return true;
+    try {
+        $stmt = $pdo->prepare("SELECT attempts, window_start FROM rate_limits WHERE rl_key=?");
+        $stmt->execute([$key]);
+        $row = $stmt->fetch();
+        $now = time();
+        if ($row) {
+            if ($now - $row['window_start'] > $windowSeconds) {
+                $pdo->prepare("UPDATE rate_limits SET attempts=1, window_start=? WHERE rl_key=?")->execute([$now, $key]);
+                return true;
+            }
+            if ($row['attempts'] >= $maxAttempts) return false;
+            $pdo->prepare("UPDATE rate_limits SET attempts=attempts+1 WHERE rl_key=?")->execute([$key]);
+        } else {
+            $pdo->prepare("INSERT INTO rate_limits (rl_key, attempts, window_start) VALUES (?,1,?)")->execute([$key, $now]);
+        }
+        return true;
+    } catch (Exception $e) { return true; }
 }
 
 function resetRateLimit(string $key): void {
-    $file = sys_get_temp_dir() . '/citadel_rl_' . md5($key) . '.json';
-    if (file_exists($file)) unlink($file);
+    global $pdo;
+    if (!isset($pdo)) return;
+    try { $pdo->prepare("DELETE FROM rate_limits WHERE rl_key=?")->execute([$key]); } catch (Exception $e) {}
 }
 
 function getRateLimitRemaining(string $key, int $windowSeconds = 300): int {
-    $file = sys_get_temp_dir() . '/citadel_rl_' . md5($key) . '.json';
-    if (!file_exists($file)) return 0;
-    $data = json_decode(file_get_contents($file), true);
-    if (time() - $data['window_start'] > $windowSeconds) return 0;
-    return $windowSeconds - (time() - $data['window_start']);
+    global $pdo;
+    if (!isset($pdo)) return 0;
+    try {
+        $stmt = $pdo->prepare("SELECT window_start FROM rate_limits WHERE rl_key=?");
+        $stmt->execute([$key]);
+        $row = $stmt->fetch();
+        if (!$row) return 0;
+        return max(0, $windowSeconds - (time() - $row['window_start']));
+    } catch (Exception $e) { return 0; }
 }
 
 // ── XSS PROTECTION ──

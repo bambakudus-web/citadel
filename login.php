@@ -1,6 +1,8 @@
 <?php
 session_start();
 require_once 'includes/db.php';
+require_once 'includes/auth.php';
+require_once 'includes/security.php';
 
 if (!empty($_SESSION['user_id'])) {
     header('Location: ' . roleRedirect($_SESSION['role']));
@@ -13,14 +15,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $identifier  = trim($_POST['identifier'] ?? '');
     $password    = $_POST['password'] ?? '';
     $fingerprint = $_POST['device_fingerprint'] ?? '';
-    if (empty($identifier) || empty($password)) {
+
+    $rlKey = 'login_' . ($_SERVER['REMOTE_ADDR'] ?? 'unknown');
+    if (!checkRateLimit($rlKey, 5, 300)) {
+        $remaining = getRateLimitRemaining($rlKey);
+        $error = 'Too many failed attempts. Try again in ' . ceil($remaining/60) . ' minute(s).';
+    } elseif (empty($identifier) || empty($password)) {
         $error = 'Please enter your ID and password.';
     } else {
         $stmt = $pdo->prepare("SELECT * FROM users WHERE index_no=? OR email=? LIMIT 1");
         $stmt->execute([$identifier, $identifier]);
         $user = $stmt->fetch();
         if ($user && password_verify($password, $user['password_hash'])) {
+            resetRateLimit($rlKey);
             if ($user['device_fingerprint'] && $fingerprint && $user['device_fingerprint'] !== $fingerprint && !in_array($user['role'], ['admin','rep'])) {
+                $error = 'Access denied. This account is registered to another device. Contact admin.';
             } else {
                 if ($fingerprint && !$user['device_fingerprint']) {
                     $pdo->prepare("UPDATE users SET device_fingerprint=? WHERE id=?")->execute([$fingerprint, $user['id']]);
@@ -108,6 +117,9 @@ function roleRedirect(string $role): string {
     <div class="divider"><span></span><em>Secure Sign In</em><span></span></div>
 
     <div class="error-msg"><?= htmlspecialchars($error) ?></div>
+    <?php if(isset($_GET["timeout"])): ?>
+    <div class="error-msg" style="display:block;border-color:rgba(201,168,76,.3);background:rgba(201,168,76,.08);color:var(--gold)">⏱ Session expired. Please sign in again.</div>
+    <?php endif; ?>
 
     <form method="POST">
       <input type="hidden" name="device_fingerprint" id="fp">

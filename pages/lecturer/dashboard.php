@@ -1,4 +1,5 @@
 <?php
+require_once '../../includes/security.php';
 // pages/lecturer/dashboard.php
 require_once '../../includes/db.php';
 require_once '../../includes/auth.php';
@@ -670,6 +671,26 @@ setInterval(() => {
 // Theme toggle
 function toggleTheme(){const body=document.body;const btn=document.getElementById("theme-btn");if(body.classList.contains("light")){body.classList.remove("light");localStorage.setItem("theme","dark");if(btn)btn.textContent="🌙";}else{body.classList.add("light");localStorage.setItem("theme","light");if(btn)btn.textContent="☀️";}}
 (function(){if(localStorage.getItem("theme")==="light"){document.body.classList.add("light");const btn=document.getElementById("theme-btn");if(btn)btn.textContent="☀️";}})();
+</script>
+<script>
+// Auto-inject CSRF token into all forms
+const csrfToken = "<?= csrfToken() ?>";
+document.querySelectorAll('form').forEach(form => {
+    if (!form.querySelector('[name="csrf_token"]')) {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'csrf_token';
+        input.value = csrfToken;
+        form.appendChild(input);
+    }
+});
+// Add CSRF to all fetch requests
+const originalFetch = window.fetch;
+window.fetch = function(url, options = {}) {
+    options.headers = options.headers || {};
+    options.headers['X-CSRF-Token'] = csrfToken;
+    return originalFetch(url, options);
+};
 </script>
 </body>
 </html>

@@ -1,4 +1,5 @@
 <?php
+require_once '../../includes/security.php';
 // pages/admin/dashboard.php
 require_once '../../includes/db.php';
 require_once '../../includes/auth.php';
@@ -6,6 +7,7 @@ requireRole('admin');
 
 // Handle POST actions
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
+    verifyCsrf();
     $action = $_POST["action"] ?? "";
     if ($action === "reset_system") {
         $pdo->exec("DELETE FROM attendance");
@@ -1186,6 +1188,26 @@ function viewImg(src,title){
 }
 loadApprovalsAdmin();
 setInterval(loadApprovalsAdmin, 15000);
+</script>
+<script>
+// Auto-inject CSRF token into all forms
+const csrfToken = "<?= csrfToken() ?>";
+document.querySelectorAll('form').forEach(form => {
+    if (!form.querySelector('[name="csrf_token"]')) {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'csrf_token';
+        input.value = csrfToken;
+        form.appendChild(input);
+    }
+});
+// Add CSRF to all fetch requests
+const originalFetch = window.fetch;
+window.fetch = function(url, options = {}) {
+    options.headers = options.headers || {};
+    options.headers['X-CSRF-Token'] = csrfToken;
+    return originalFetch(url, options);
+};
 </script>
 </body>
 </html>

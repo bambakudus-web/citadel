@@ -121,6 +121,7 @@ $totalStudents = $pdo->query("SELECT COUNT(*) FROM users WHERE role='student'")-
       --sidebar-w:240px;
     }
     body.light{--bg:#f0f2f5;--surface:#ffffff;--surface2:#f5f7fa;--border:#dde1e9;--text:#1a2035;--muted:#5a6a7d;--gold:#8a6520;--gold-dim:#c9a84c;--steel:#2a4f8a;}
+    body.light::before{display:none;}
     html, body { height: 100%; background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; overflow-x: hidden; }
     body::before { content: ''; position: fixed; inset: 0; z-index: 0; background: radial-gradient(ellipse 60% 40% at 50% 0%, rgba(138,111,212,0.1) 0%, transparent 60%); pointer-events: none; }
     .layout { display: flex; min-height: 100vh; position: relative; z-index: 1; }

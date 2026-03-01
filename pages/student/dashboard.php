@@ -164,7 +164,7 @@ $fullTT = $pdo->query("SELECT t.*, u.full_name as lecturer_name FROM timetable t
     .bar-fill{height:100%;border-radius:3px;transition:width .8s ease}
 
     @media(max-width:900px){.two-col{grid-template-columns:1fr}}
-    @media(min-width:769px){#menu-btn{display:none}}@media(max-width:768px){.sidebar{transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}.main{margin-left:0}.content{padding:1rem;overflow-x:hidden}.topbar{padding:.8rem 1rem}.stats-grid{grid-template-columns:repeat(2,1fr)}.data-table{font-size:.72rem;display:block;overflow-x:auto;white-space:nowrap}.data-table th,.data-table td{padding:.4rem .5rem}.topbar-title{font-size:.78rem}.stat-value{font-size:1.5rem}.code-inputs input{width:38px;height:48px;font-size:1.1rem}.code-inputs{gap:.4rem}.camera-wrap{max-width:100%}.attend-zone{padding:0}.tt-item{flex-direction:column;gap:.3rem}.tt-time{min-width:unset}.section-title{font-size:.95rem}}
+    @media(min-width:769px){#menu-btn{display:none}}@media(max-width:768px){.sidebar{transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}.main{margin-left:0}.content{padding:1rem;overflow-x:hidden}.topbar{padding:.8rem 1rem}.stats-grid{grid-template-columns:repeat(2,1fr)}.data-table{font-size:.72rem;display:block;overflow-x:auto}.data-table th,.data-table td{padding:.4rem .5rem}.topbar-title{font-size:.78rem}.stat-value{font-size:1.5rem}.code-inputs input{width:38px;height:48px;font-size:1.1rem}.code-inputs{gap:.4rem}.camera-wrap{max-width:100%}.attend-zone{padding:0}.tt-item{flex-direction:column;gap:.3rem}.tt-time{min-width:unset}.section-title{font-size:.95rem}}
   </style>
 </head>
 <body>
@@ -378,7 +378,11 @@ $fullTT = $pdo->query("SELECT t.*, u.full_name as lecturer_name FROM timetable t
             $hist->execute([$userId]); $hist = $hist->fetchAll();
             if (empty($hist)): ?><tr><td colspan="3" style="color:var(--muted)">No records yet.</td></tr>
             <?php else: foreach ($hist as $r): ?>
-              <tr><td><?= htmlspecialchars($r['course_code']) ?> <span style="color:var(--muted);font-size:.75rem">· <?= htmlspecialchars($r['course_name']) ?></span></td><td><span class="pill pill-<?= $r['status']==='present'?'green':($r['status']==='late'?'gold':($r['status']==='pending'?'pending':'red')) ?>"><?= $r['status'] ?></span></td><td style="color:var(--muted);font-size:.75rem"><?= date('d M Y H:i',strtotime($r['timestamp'])) ?></td></tr>
+              <tr>
+  <td><strong><?= htmlspecialchars($r['course_code']) ?></strong><br><span style="color:var(--muted);font-size:.72rem"><?= htmlspecialchars($r['course_name']) ?></span></td>
+  <td><span class="pill pill-<?= $r['status']==='present'?'green':($r['status']==='late'?'gold':($r['status']==='pending'?'pending':'red')) ?>"><?= $r['status'] ?></span></td>
+  <td style="color:var(--muted);font-size:.72rem;white-space:nowrap"><?= date('d M Y',strtotime($r['timestamp'])) ?><br><?= date('H:i',strtotime($r['timestamp'])) ?></td>
+</tr>
             <?php endforeach; endif; ?>
           </tbody></table>
         </div></div>

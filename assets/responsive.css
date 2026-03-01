@@ -1,0 +1,69 @@
+/* ═══════════════════════════════════════
+   CITADEL — Global Responsive Styles
+   ═══════════════════════════════════════ */
+
+@media (max-width: 768px) {
+
+  /* Layout */
+  .sidebar { transform: translateX(-100%); }
+  .sidebar.open { transform: translateX(0); }
+  .main { margin-left: 0 !important; }
+  .content { padding: 1rem !important; overflow-x: hidden !important; }
+  .topbar { padding: .8rem 1rem !important; }
+  .topbar-title { font-size: .78rem !important; }
+  #menu-btn { display: block !important; }
+
+  /* Typography */
+  .section-title { font-size: .95rem !important; }
+  .stat-value { font-size: 1.5rem !important; }
+
+  /* Grids */
+  .stats-grid { grid-template-columns: repeat(2,1fr) !important; }
+  .two-col { grid-template-columns: 1fr !important; }
+  .form-row { grid-template-columns: 1fr !important; }
+
+  /* Tables - horizontal scroll */
+  .card-body { overflow-x: auto !important; }
+  .data-table { font-size: .72rem !important; min-width: 500px; }
+  .data-table th, .data-table td { padding: .4rem .5rem !important; white-space: nowrap; }
+
+  /* Hide less important columns on mobile */
+  .data-table .hide-mobile { display: none !important; }
+
+  /* Pills */
+  .pill { font-size: .65rem !important; padding: .15rem .4rem !important; }
+
+  /* Buttons */
+  .btn-sm { font-size: .7rem !important; padding: .3rem .6rem !important; }
+
+  /* Cards */
+  .card { margin-bottom: 1rem !important; }
+
+  /* Code display */
+  .code-number { font-size: 2rem !important; }
+  .code-inputs input { width: 38px !important; height: 48px !important; font-size: 1.1rem !important; }
+  .code-inputs { gap: .4rem !important; }
+
+  /* Camera */
+  .camera-wrap { max-width: 100% !important; }
+  .attend-zone { padding: 0 !important; }
+
+  /* Timetable */
+  .tt-item { flex-direction: column !important; gap: .3rem !important; }
+  .tt-time { min-width: unset !important; }
+
+  /* Actions column - stack buttons */
+  .action-btns { display: flex !important; flex-direction: column !important; gap: .3rem !important; }
+
+  /* Section headers */
+  .section-header { flex-direction: column !important; align-items: flex-start !important; gap: .5rem !important; }
+
+  /* Modal */
+  .modal { width: 95vw !important; max-height: 90vh !important; overflow-y: auto !important; }
+}
+
+@media (max-width: 480px) {
+  .stats-grid { grid-template-columns: 1fr !important; }
+  .topbar-date { display: none !important; }
+  .data-table { font-size: .68rem !important; }
+}

@@ -519,6 +519,7 @@ $timeRemaining = 120 - (time() % 120);
 
 
   </style>
+  <link rel="stylesheet" href="/assets/responsive.css">
 </head>
 <body>
 <div class="layout">

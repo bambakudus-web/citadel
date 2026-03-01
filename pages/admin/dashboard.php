@@ -863,7 +863,7 @@ $timeRemaining = 120 - (time() % 120);
         </div>
         <div class="override-banner">
           <strong>⚠ Boss Override Zone.</strong> Changes made here are logged and irreversible without a second override. Use with caution.
-        <div class="card" style="margin-bottom:1.5rem;border-color:rgba(224,92,92,.3)"><div class="card-head" style="border-color:rgba(224,92,92,.2)"><div class="card-head-title" style="color:var(--danger)">🔴 SYSTEM RESET</div></div><div class="card-body"><p style="font-size:.83rem;color:var(--muted);margin-bottom:1.2rem">Clears ALL attendance records and sessions. Students and lecturers remain. Use before the semester starts fresh.</p><form method="POST" onsubmit="return confirm('RESET ALL ATTENDANCE DATA? This cannot be undone!')"><input type="hidden" name="action" value="reset_system"><button type="submit" class="btn" style="background:rgba(224,92,92,.15);color:var(--danger);border:1px solid rgba(224,92,92,.3);padding:.7rem 1.5rem">🗑 Reset All Attendance & Sessions</button></form></div></div>
+        <div class="card" style="margin-bottom:1.5rem;border-color:rgba(224,92,92,.3)"><div class="card-head" style="border-color:rgba(224,92,92,.2)"><div class="card-head-title" style="color:var(--danger)">🔴 SYSTEM RESET</div></div><div class="card-body"><p style="font-size:.83rem;color:var(--muted);margin-bottom:1.2rem">Clears ALL attendance records and sessions. Students and lecturers remain. Use before the semester starts fresh.</p><form method="POST" onsubmit="return confirm('RESET ALL ATTENDANCE DATA? This cannot be undone!')"><input type="hidden" name="csrf_token" value="<?= csrfToken() ?>"><input type="hidden" name="action" value="reset_system"><button type="submit" class="btn" style="background:rgba(224,92,92,.15);color:var(--danger);border:1px solid rgba(224,92,92,.3);padding:.7rem 1.5rem">🗑 Reset All Attendance & Sessions</button></form></div></div>
         </div>
         <div class="card">
           <div class="card-head"><div class="card-head-title">Manual Attendance Adjustment</div></div>
@@ -903,6 +903,7 @@ $timeRemaining = 120 - (time() % 120);
           <div class="card-head"><div class="card-head-title">Device Fingerprint Ban</div></div>
           <div class="card-body">
             <form method="POST">
+            <input type="hidden" name="csrf_token" value="<?= csrfToken() ?>">
             <div class="form-row">
               <div class="form-field">
                 <label>Student Index No.</label>
@@ -950,9 +951,9 @@ $timeRemaining = 120 - (time() % 120);
                   <td style="color:var(--muted);font-size:0.72rem;max-width:160px;overflow:hidden;text-overflow:ellipsis"><?= $d['device_fingerprint'] ?: '— not registered —' ?></td>
                   <td><?= $d['is_locked'] ? '<span class="pill pill-red">🔒 Locked ('.$d["login_attempts"].' attempts)</span>' : '<span class="pill pill-green">Active</span>' ?></td>
                   <td style="display:flex;gap:.4rem;flex-wrap:wrap">
-                  <form method="POST" style="display:inline"><input type="hidden" name="action" value="reset_device"><input type="hidden" name="user_id" value="<?= $d['id'] ?>"><button type="submit" class="btn btn-ghost btn-sm" onclick="return confirm('Reset device?')">Reset Device</button></form>
+                  <form method="POST" style="display:inline"><input type="hidden" name="csrf_token" value="<?= csrfToken() ?>"><input type="hidden" name="action" value="reset_device"><input type="hidden" name="user_id" value="<?= $d['id'] ?>"><button type="submit" class="btn btn-ghost btn-sm" onclick="return confirm('Reset device?')">Reset Device</button></form>
                   <?php if($d['is_locked']): ?>
-                  <form method="POST" style="display:inline"><input type="hidden" name="action" value="unlock_account"><input type="hidden" name="user_id" value="<?= $d['id'] ?>"><button type="submit" class="btn btn-sm" style="background:rgba(76,175,130,.15);color:var(--success);border:1px solid rgba(76,175,130,.3)" onclick="return confirm('Unlock account for <?= htmlspecialchars($d['full_name']) ?>?')">🔓 Unlock</button></form>
+                  <form method="POST" style="display:inline"><input type="hidden" name="csrf_token" value="<?= csrfToken() ?>"><input type="hidden" name="action" value="unlock_account"><input type="hidden" name="user_id" value="<?= $d['id'] ?>"><button type="submit" class="btn btn-sm" style="background:rgba(76,175,130,.15);color:var(--success);border:1px solid rgba(76,175,130,.3)" onclick="return confirm('Unlock account for <?= htmlspecialchars($d['full_name']) ?>?')">🔓 Unlock</button></form>
                   <?php endif; ?>
                   </td>
                 </tr>
@@ -970,7 +971,7 @@ $timeRemaining = 120 - (time() % 120);
           <div style="font-size:.75rem;color:var(--muted);letter-spacing:.15em;margin-bottom:.5rem">CURRENT CODE</div>
           <div style="font-family:Cinzel,serif;font-size:3rem;color:var(--gold);letter-spacing:.3em"><?= $currentCode ?></div>
           <div style="font-size:.78rem;color:var(--muted);margin-top:.5rem"><?= $activeSession["course_code"] ?> · <?= $timeRemaining ?>s remaining</div>
-          <form method="POST" style="margin-top:1.5rem"><input type="hidden" name="action" value="end_session"><input type="hidden" name="session_id" value="<?= $activeSession["id"] ?>"><button type="submit" class="btn btn-danger" onclick="return confirm('End this session?')">End Session</button></form>
+          <form method="POST" style="margin-top:1.5rem"><input type="hidden" name="csrf_token" value="<?= csrfToken() ?>"><input type="hidden" name="action" value="end_session"><input type="hidden" name="session_id" value="<?= $activeSession["id"] ?>"><button type="submit" class="btn btn-danger" onclick="return confirm('End this session?')">End Session</button></form>
         </div></div>
         <div class="card"><div class="card-head"><div class="card-head-title">Live Attendance (<?= count($liveAttendance) ?>)</div></div><div class="card-body" style="padding:0;overflow-x:auto">
           <table class="data-table"><thead><tr><th>Student</th><th>Index</th><th>Status</th><th>Time</th></tr></thead><tbody>
@@ -1017,7 +1018,7 @@ $timeRemaining = 120 - (time() % 120);
       <div class="page-section" id="sec-announce">
         <div class="section-header"><div class="section-title">Class <span>Announcements</span></div></div>
         <div class="card" style="margin-bottom:1.5rem"><div class="card-head"><div class="card-head-title">Post Announcement</div></div><div class="card-body">
-          <form method="POST">
+          <form method="POST"><input type="hidden" name="csrf_token" value="<?= csrfToken() ?>">
             <input type="hidden" name="action" value="announce">
             <div class="form-field"><label>Message</label><textarea name="message" required style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:.75rem;border-radius:2px;font-family:DM Sans,sans-serif;min-height:80px;resize:vertical"></textarea></div>
             <button type="submit" class="btn btn-gold">📢 Post to Class</button>
@@ -1044,7 +1045,7 @@ $timeRemaining = 120 - (time() % 120);
       <button class="modal-close" onclick="closeModal('modal-add-student')">✕</button>
     </div>
     <div class="modal-body">
-      <form method="POST" action="../../api/add_student.php">
+      <form method="POST" action="../../api/add_student.php"><input type="hidden" name="csrf_token" value="<?= csrfToken() ?>">
         <div class="form-row">
           <div class="form-field">
             <label>Full Name</label>
@@ -1080,7 +1081,7 @@ $timeRemaining = 120 - (time() % 120);
       <button class="modal-close" onclick="closeModal('modal-edit-student')">✕</button>
     </div>
     <div class="modal-body">
-      <form method="POST" action="../../api/edit_student.php">
+      <form method="POST" action="../../api/edit_student.php"><input type="hidden" name="csrf_token" value="<?= csrfToken() ?>">
         <input type="hidden" name="id" id="edit-id">
         <div class="form-row">
           <div class="form-field">

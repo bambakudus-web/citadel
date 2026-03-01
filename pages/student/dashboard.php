@@ -255,8 +255,8 @@ $fullTT = $pdo->query("SELECT t.*, u.full_name as lecturer_name FROM timetable t
             </div>
           </div>
         </div>
-      </div>
       <div class="card" style="margin-top:1.5rem"><div class="card-head"><div class="card-head-title">📢 Class Announcements</div></div><div class="card-body" style="padding:0"><table class="data-table"><thead><tr><th>Message</th><th>From</th><th>Date</th></tr></thead><tbody id="ann-list"><?php if(empty($announcements)):?><tr><td colspan="3" style="color:var(--muted)">No announcements yet.</td></tr><?php else:foreach($announcements as $ann):?><tr><td><?=htmlspecialchars($ann["message"])?></td><td style="color:var(--gold);font-size:.75rem"><?=htmlspecialchars($ann["full_name"])?></td><td style="color:var(--muted);font-size:.72rem"><?=date("d M H:i",strtotime($ann["created_at"]))?></td></tr><?php endforeach;endif;?></tbody></table></div></div>
+      </div>
 
       <!-- MARK ATTENDANCE -->
       <div class="page-section" id="sec-mark">

@@ -20,6 +20,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $uid = (int)($_POST["user_id"] ?? 0);
         if ($uid) {
             $pdo->prepare("UPDATE users SET device_fingerprint=NULL WHERE id=?")->execute([$uid]);
+        }
+        header("Location: dashboard.php"); exit;
+    }
     if ($action === "ban_device" || $action === "unban_device") {
         $index = trim($_POST["index_no"] ?? "");
         if ($index) {
@@ -34,10 +37,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             }
         }
         header("Location: dashboard.php"); exit;
-    }
-        }
-        header("Location: dashboard.php?tab=devices");
-        exit;
     }
     if ($action === "unlock_account") {
         $uid = (int)($_POST["user_id"] ?? 0);

@@ -317,7 +317,6 @@ $totalStudents = $pdo->query("SELECT COUNT(*) FROM users WHERE role='student'")-
 
 
   </style>
-  <link rel="stylesheet" href="/assets/responsive.css">
 </head>
 <body>
 <div class="layout">

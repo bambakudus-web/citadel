@@ -329,9 +329,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     .pending-badge{background:var(--warning);color:#060910;font-size:.6rem;font-weight:700;padding:.15rem .45rem;border-radius:2px;margin-left:.4rem;display:none}
 
     @media(max-width:900px){.two-col{grid-template-columns:1fr}}
-    .sidebar.open{transform:translateX(0)}.main{margin-left:0}.content{padding:1rem;overflow-x:hidden}.topbar{padding:.8rem 1rem}.stats-grid{grid-template-columns:repeat(2,1fr)}.code-number{font-size:2rem}.data-table{font-size:.72rem;display:block;overflow-x:auto;white-space:nowrap}.data-table th,.data-table td{padding:.4rem .5rem}.tt-item{flex-direction:column;gap:.3rem}.tt-time{min-width:unset}.section-title{font-size:.95rem}.two-col{grid-template-columns:1fr}.form-row{grid-template-columns:1fr}.topbar-title{font-size:.78rem}.stat-value{font-size:1.5rem}#menu-btn{display:block}}
+    @media(max-width:768px){.sidebar{transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}.main{margin-left:0}.content{padding:1rem;overflow-x:hidden}.topbar{padding:.8rem 1rem}.stats-grid{grid-template-columns:repeat(2,1fr)}.code-number{font-size:2rem}.data-table{font-size:.72rem;display:block;overflow-x:auto;white-space:nowrap}.data-table th,.data-table td{padding:.4rem .5rem}.tt-item{flex-direction:column;gap:.3rem}.tt-time{min-width:unset}.section-title{font-size:.95rem}.two-col{grid-template-columns:1fr}.form-row{grid-template-columns:1fr}.topbar-title{font-size:.78rem}.stat-value{font-size:1.5rem}#menu-btn{display:block}}
   </style>
-  <link rel="stylesheet" href="/assets/responsive.css">
 </head>
 <body>
 <div class="layout">

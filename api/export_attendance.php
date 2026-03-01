@@ -1,5 +1,6 @@
 <?php
 // api/export_attendance.php
+require_once '../includes/cors.php';
 session_start();
 require_once '../includes/db.php';
 require_once '../includes/auth.php';

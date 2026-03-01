@@ -1,5 +1,6 @@
 <?php
 require_once '../includes/db.php';
+require_once '../includes/cors.php';
 require_once '../includes/auth.php';
 requireRole('rep', 'admin', 'lecturer');
 header('Content-Type: application/json');

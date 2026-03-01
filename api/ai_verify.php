@@ -1,5 +1,6 @@
 <?php
 // api/ai_verify.php
+require_once '../includes/cors.php';
 // Real AI verification using Anthropic Claude vision API
 header('Content-Type: application/json');
 session_start();

@@ -1,5 +1,6 @@
 <?php
 // api/add_student.php
+require_once '../includes/cors.php';
 require_once '../includes/db.php';
 require_once '../includes/auth.php';
 requireLogin();

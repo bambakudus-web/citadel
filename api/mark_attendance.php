@@ -1,5 +1,6 @@
 <?php
 // api/mark_attendance.php
+require_once '../includes/cors.php';
 header('Content-Type: application/json');
 session_start();
 require_once '../includes/db.php';

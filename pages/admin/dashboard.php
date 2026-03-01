@@ -20,6 +20,21 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $uid = (int)($_POST["user_id"] ?? 0);
         if ($uid) {
             $pdo->prepare("UPDATE users SET device_fingerprint=NULL WHERE id=?")->execute([$uid]);
+    if ($action === "ban_device" || $action === "unban_device") {
+        $index = trim($_POST["index_no"] ?? "");
+        if ($index) {
+            $u = $pdo->prepare("SELECT id FROM users WHERE index_no=?");
+            $u->execute([$index]); $u = $u->fetch();
+            if ($u) {
+                if ($action === "ban_device") {
+                    $pdo->prepare("UPDATE users SET device_fingerprint='BANNED' WHERE id=?")->execute([$u["id"]]);
+                } else {
+                    $pdo->prepare("UPDATE users SET device_fingerprint=NULL WHERE id=?")->execute([$u["id"]]);
+                }
+            }
+        }
+        header("Location: dashboard.php"); exit;
+    }
         }
         header("Location: dashboard.php?tab=devices");
         exit;
@@ -888,16 +903,18 @@ $timeRemaining = 120 - (time() % 120);
         <div class="card" style="margin-top:1.5rem">
           <div class="card-head"><div class="card-head-title">Device Fingerprint Ban</div></div>
           <div class="card-body">
+            <form method="POST">
             <div class="form-row">
               <div class="form-field">
                 <label>Student Index No.</label>
-                <input type="text" placeholder="e.g. 52430540001">
+                <input type="text" name="index_no" placeholder="e.g. 52430540001" required>
               </div>
               <div class="form-field" style="display:flex;align-items:flex-end;gap:0.6rem">
-                <button class="btn btn-danger" style="width:100%">Ban Device</button>
-                <button class="btn btn-ghost" style="width:100%">Unban</button>
+                <button type="submit" name="action" value="ban_device" class="btn btn-danger" style="width:100%">Ban Device</button>
+                <button type="submit" name="action" value="unban_device" class="btn btn-ghost" style="width:100%">Unban</button>
               </div>
             </div>
+            </form>
           </div>
         </div>
       </div>

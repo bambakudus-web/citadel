@@ -518,7 +518,39 @@ $timeRemaining = 120 - (time() % 120);
 
 
 
-  </style>
+  
+    @media(max-width:768px){
+      .sidebar{transform:translateX(-100%)}
+      .sidebar.open{transform:translateX(0)}
+      .main{margin-left:0}
+      .content{padding:1rem;overflow-x:hidden}
+      .topbar{padding:.8rem 1rem}
+      .topbar-title{font-size:.78rem}
+      #menu-btn{display:block}
+      .stats-grid{grid-template-columns:repeat(2,1fr)}
+      .two-col{grid-template-columns:1fr}
+      .form-row{grid-template-columns:1fr}
+      .section-title{font-size:.95rem}
+      .stat-value{font-size:1.5rem}
+      .card-body{overflow-x:auto}
+      .data-table{font-size:.72rem}
+      .data-table th,.data-table td{padding:.4rem .5rem;white-space:nowrap}
+      .pill{font-size:.65rem;padding:.15rem .4rem}
+      .tt-item{flex-direction:column;gap:.3rem}
+      .tt-time{min-width:unset}
+      .code-number{font-size:2rem}
+      .code-inputs input{width:38px;height:48px;font-size:1.1rem}
+      .code-inputs{gap:.4rem}
+      .camera-wrap{max-width:100%}
+      .attend-zone{padding:0}
+      .modal{width:95vw;max-height:90vh;overflow-y:auto}
+      .section-header{flex-wrap:wrap;gap:.5rem}
+    }
+    @media(max-width:480px){
+      .stats-grid{grid-template-columns:1fr}
+    }
+
+    </style>
 </head>
 <body>
 <div class="layout">
@@ -679,7 +711,7 @@ $timeRemaining = 120 - (time() % 120);
             <div class="card-head">
               <div class="card-head-title">Recent Activity</div>
             </div>
-            <div class="card-body" style="padding:0">
+            <div class="card-body" style="padding:0;overflow-x:auto">
               <table class="data-table">
                 <thead><tr><th>Student</th><th>Course</th><th>Status</th><th>Time</th></tr></thead>
                 <tbody>

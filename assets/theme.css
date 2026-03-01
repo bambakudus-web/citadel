@@ -1,0 +1,19 @@
+/* Light mode override */
+body.light {
+  --bg: #f0f2f5;
+  --surface: #ffffff;
+  --surface2: #f5f7fa;
+  --border: #dde1e9;
+  --text: #1a2035;
+  --muted: #6b7a8d;
+  --gold: #8a6520;
+  --gold-dim: #c9a84c;
+  --steel: #2a4f8a;
+  --steel-dim: #4a6fa5;
+}
+body.light .nav-item:hover { background: rgba(0,0,0,.04); }
+body.light .sidebar { box-shadow: 2px 0 12px rgba(0,0,0,.08); }
+body.light .topbar { box-shadow: 0 1px 8px rgba(0,0,0,.06); }
+body.light .code-inputs input { background: #f5f7fa; }
+body.light .camera-wrap { border: 1px solid var(--border); }
+

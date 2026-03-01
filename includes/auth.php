@@ -1,6 +1,8 @@
 <?php
 function requireLogin() {
     if (session_status() === PHP_SESSION_NONE) session_start();
+    require_once __DIR__ . '/security.php';
+    	xcheckSessionTimeout(30);
     if (empty($_SESSION['user_id'])) {
         header('Location: /login.php');
         exit;

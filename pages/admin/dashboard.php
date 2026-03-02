@@ -550,7 +550,15 @@ $timeRemaining = 120 - (time() % 120);
       .stats-grid{grid-template-columns:1fr}
     }
 
-    </style>
+    
+    @media(max-width:768px){
+      /* Hide non-essential table columns */
+      .hide-mobile{ display:none !important; }
+      .data-table{ font-size:.72rem; }
+      .data-table th, .data-table td{ padding:.35rem .4rem; white-space:nowrap; }
+    }
+
+  </style>
 </head>
 <body>
 <div class="layout">
@@ -777,7 +785,7 @@ $timeRemaining = 120 - (time() % 120);
         <div class="card">
           <div class="card-body" style="padding:0;overflow-x:auto">
             <table class="data-table" id="student-table">
-              <thead><tr><th>#</th><th>Index No.</th><th>Full Name</th><th>Email</th><th>Role</th><th>Attendance</th><th>Actions</th></tr></thead>
+              <thead><tr><th>#</th><th>Index No.</th><th>Full Name</th><th class="hide-mobile">Email</th><th>Role</th><th>Attendance</th><th>Actions</th></tr></thead>
               <tbody>
                 <?php foreach ($students as $i => $s): ?>
                   <tr data-name="<?= strtolower($s['full_name']) ?>" data-index="<?= $s['index_no'] ?>">
@@ -809,7 +817,7 @@ $timeRemaining = 120 - (time() % 120);
         <div class="card">
           <div class="card-body" style="padding:0;overflow-x:auto">
             <table class="data-table">
-              <thead><tr><th>Course</th><th>Lecturer</th><th>Started</th><th>Status</th><th>Attendance</th><th>Actions</th></tr></thead>
+              <thead><tr><th>Course</th><th class="hide-mobile">Lecturer</th><th>Started</th><th>Status</th><th class="hide-mobile">Attendance</th><th>Actions</th></tr></thead>
               <tbody>
                 <?php if (empty($sessions)): ?>
                   <tr><td colspan="6" style="color:var(--muted)">No sessions yet.</td></tr>
@@ -819,10 +827,10 @@ $timeRemaining = 120 - (time() % 120);
                       <td>
                         <span style="color:var(--gold);font-size:0.78rem"><?= htmlspecialchars($s['course_code']) ?></span>
                       </td>
-                      <td><?= htmlspecialchars($s['lecturer_name']) ?></td>
+                      <td class="hide-mobile"><?= htmlspecialchars($s['lecturer_name']) ?></td>
                       <td style="color:var(--muted);font-size:0.78rem"><?= date('d M, H:i', strtotime($s['start_time'])) ?></td>
                       <td><span class="pill pill-<?= $s['active_status']?'green':'red' ?>"><?= $s['active_status']?'Active':'Closed' ?></span></td>
-                      <td><?= $s['attendance_count'] ?> students</td>
+                      <td class="hide-mobile"><?= $s['attendance_count'] ?> students</td>
                       <td>
                         <?php if ($s['active_status']): ?>
                           <button class="btn btn-danger btn-sm" onclick="closeSession(<?= $s['id'] ?>)">Close</button>
@@ -972,7 +980,7 @@ $timeRemaining = 120 - (time() % 120);
         <div class="card">
           <div class="card-body" style="padding:0;overflow-x:auto">
             <table class="data-table">
-              <thead><tr><th>Name</th><th>Index No.</th><th>Device</th><th>Login Status</th><th>Actions</th></tr></thead>
+              <thead><tr><th>Name</th><th>Index No.</th><th class="hide-mobile">Device</th><th>Login Status</th><th>Actions</th></tr></thead>
               <tbody>
                 <?php
                 $devs = $pdo->query("SELECT id, full_name, index_no, device_fingerprint, is_locked, login_attempts FROM users WHERE role IN ('student','rep','lecturer') ORDER BY is_locked DESC, full_name")->fetchAll();
@@ -980,7 +988,7 @@ $timeRemaining = 120 - (time() % 120);
                 <tr>
                   <td><?= htmlspecialchars($d['full_name']) ?></td>
                   <td style="color:var(--gold);font-size:0.78rem"><?= $d['index_no'] ?></td>
-                  <td style="color:var(--muted);font-size:0.72rem;max-width:160px;overflow:hidden;text-overflow:ellipsis"><?= $d['device_fingerprint'] ?: '— not registered —' ?></td>
+                  <td class="hide-mobile" style="color:var(--muted);font-size:0.72rem;max-width:160px;overflow:hidden;text-overflow:ellipsis"><?= $d['device_fingerprint'] ?: '— not registered —' ?></td>
                   <td><?= $d['is_locked'] ? '<span class="pill pill-red">🔒 Locked ('.$d["login_attempts"].' attempts)</span>' : '<span class="pill pill-green">Active</span>' ?></td>
                   <td style="display:flex;gap:.4rem;flex-wrap:wrap">
                   <form method="POST" style="display:inline"><input type="hidden" name="csrf_token" value="<?= csrfToken() ?>"><input type="hidden" name="action" value="reset_device"><input type="hidden" name="user_id" value="<?= $d['id'] ?>"><button type="submit" class="btn btn-ghost btn-sm" onclick="return confirm('Reset device?')">Reset Device</button></form>

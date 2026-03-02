@@ -330,7 +330,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     @media(max-width:900px){.two-col{grid-template-columns:1fr}}
     @media(max-width:768px){.sidebar{transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}.main{margin-left:0}.content{padding:1rem;overflow-x:hidden}.topbar{padding:.8rem 1rem}.stats-grid{grid-template-columns:repeat(2,1fr)}.code-number{font-size:2rem}.data-table{font-size:.72rem;display:block;overflow-x:auto;white-space:nowrap}.data-table th,.data-table td{padding:.4rem .5rem}.tt-item{flex-direction:column;gap:.3rem}.tt-time{min-width:unset}.section-title{font-size:.95rem}.two-col{grid-template-columns:1fr}.form-row{grid-template-columns:1fr}.topbar-title{font-size:.78rem}.stat-value{font-size:1.5rem}#menu-btn{display:block}}
-      @media(max-width:768px){.hide-mobile{display:none!important}.card-body{overflow-x:auto!important}.data-table{font-size:.72rem}.data-table th,.data-table td{padding:.35rem .4rem;white-space:nowrap}.btn-sm{font-size:.65rem!important;padding:.2rem .35rem!important}}
+      .data-table{font-size:.72rem}.data-table th,.data-table td{padding:.35rem .4rem;white-space:nowrap}.btn-sm{font-size:.65rem!important;padding:.2rem .35rem!important}}
     </style>
 </head>
 <body>
@@ -430,7 +430,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
               <tbody>
                 <?php if (empty($recentAtt)): ?><tr><td colspan="4" style="color:var(--muted)">No records yet.</td></tr>
                 <?php else: foreach ($recentAtt as $r): ?>
-                  <tr><td><?= htmlspecialchars($r['full_name']) ?><br><small style="color:var(--muted)"><?= $r['index_no'] ?></small></td><td class="hide-mobile" style="color:var(--gold);font-size:.78rem"><?= $r['course_code'] ?></td><td><span class="pill pill-<?= $r['status']==='present'?'green':($r['status']==='late'?'gold':($r['status']==='pending'?'warn':'red')) ?>"><?= $r['status'] ?></span></td><td class="hide-mobile" style="color:var(--muted);font-size:.72rem"><?= date('H:i',strtotime($r['timestamp'])) ?></td></tr>
+                  <tr>
+  <td><?= htmlspecialchars($r['full_name']) ?><br><small style="color:var(--muted)"><?= $r['index_no'] ?></small></td>
+  <td style="color:var(--gold);font-size:.78rem"><?= $r['course_code'] ?></td>
+  <td><span class="pill pill-<?= $r['status']==='present'?'green':($r['status']==='late'?'gold':($r['status']==='pending'?'warn':'red')) ?>"><?= $r['status'] ?></span></td>
+  <td style="color:var(--muted);font-size:.72rem;white-space:nowrap"><?= date('H:i',strtotime($r['timestamp'])) ?></td>
+</tr>
                 <?php endforeach; endif; ?>
               </tbody></table>
             </div>

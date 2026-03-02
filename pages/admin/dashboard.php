@@ -607,32 +607,6 @@ $timeRemaining = 120 - (time() % 120);
       .mobile-cards tbody td:empty{ display:none; }
     }
 
-  
-    @media(max-width:768px){
-      .hide-mobile{ display:none !important; }
-      .table-scroll{ overflow-x:auto; -webkit-overflow-scrolling:touch; }
-      .table-scroll::-webkit-scrollbar{ height:3px; }
-      .table-scroll::-webkit-scrollbar-thumb{ background:var(--border); border-radius:2px; }
-      .data-table{ font-size:.73rem; white-space:nowrap; min-width:100%; }
-      .data-table th,.data-table td{ padding:.35rem .5rem; }
-      .btn-sm{ font-size:.65rem !important; padding:.2rem .35rem !important; }
-      .pill{ font-size:.62rem !important; padding:.1rem .3rem !important; }
-      .section-header{ flex-wrap:wrap; gap:.5rem; }
-    }
-
-  
-    @media(max-width:768px){
-      .hide-mobile{ display:none !important; }
-      .table-scroll{ overflow-x:auto; -webkit-overflow-scrolling:touch; }
-      .table-scroll::-webkit-scrollbar{ height:3px; }
-      .table-scroll::-webkit-scrollbar-thumb{ background:var(--border); border-radius:2px; }
-      .data-table{ font-size:.73rem; white-space:nowrap; min-width:100%; }
-      .data-table th,.data-table td{ padding:.35rem .5rem; }
-      .btn-sm{ font-size:.65rem !important; padding:.2rem .35rem !important; }
-      .pill{ font-size:.62rem !important; padding:.1rem .3rem !important; }
-      .section-header{ flex-wrap:wrap; gap:.5rem; }
-    }
-
   </style>
 </head>
 <body>
@@ -794,7 +768,7 @@ $timeRemaining = 120 - (time() % 120);
             <div class="card-head">
               <div class="card-head-title">Recent Activity</div>
             </div>
-            <div class="card-body" style="padding:0"><div class="table-scroll">
+            <div class="card-body" style="padding:0;overflow-x:auto">
               <table class="data-table mobile-cards">
                 <thead><tr><th>Student</th><th>Course</th><th>Status</th><th>Time</th></tr></thead>
                 <tbody>
@@ -858,7 +832,7 @@ $timeRemaining = 120 - (time() % 120);
           <input type="text" id="student-search" placeholder="Search name or index number..." oninput="filterStudents()">
         </div>
         <div class="card">
-          <div class="card-body" style="padding:0"><div class="table-scroll">
+          <div class="card-body" style="padding:0;overflow-x:auto">
             <table class="data-table mobile-cards" id="student-table">
               <thead><tr><th>#</th><th>Index No.</th><th>Full Name</th><th class="hide-mobile">Email</th><th class="hide-mobile">Role</th><th class="hide-mobile">Attendance</th><th>Actions</th></tr></thead>
               <tbody>
@@ -890,7 +864,7 @@ $timeRemaining = 120 - (time() % 120);
           <div class="section-title">Attendance <span>Sessions</span></div>
         </div>
         <div class="card">
-          <div class="card-body" style="padding:0"><div class="table-scroll">
+          <div class="card-body" style="padding:0;overflow-x:auto">
             <table class="data-table mobile-cards">
               <thead><tr><th>Course</th><th class="hide-mobile">Lecturer</th><th class="hide-mobile">Started</th><th>Status</th><th class="hide-mobile">Attendance</th><th>Actions</th></tr></thead>
               <tbody>
@@ -940,7 +914,7 @@ $timeRemaining = 120 - (time() % 120);
           </select>
         </div>
         <div class="card">
-          <div class="card-body" style="padding:0"><div class="table-scroll">
+          <div class="card-body" style="padding:0;overflow-x:auto">
             <table class="data-table mobile-cards">
               <thead><tr><th>Student</th><th class="hide-mobile">Index No.</th><th class="hide-mobile">Course</th><th>Status</th><th class="hide-mobile">Timestamp</th><th>Selfie</th></tr></thead>
               <tbody>
@@ -1053,7 +1027,7 @@ $timeRemaining = 120 - (time() % 120);
           <div class="section-title">Device <span>Control</span></div>
         </div>
         <div class="card">
-          <div class="card-body" style="padding:0"><div class="table-scroll">
+          <div class="card-body" style="padding:0;overflow-x:auto">
             <table class="data-table mobile-cards">
               <thead><tr><th>Name</th><th>Index No.</th><th class="hide-mobile">Device</th><th>Login Status</th><th>Actions</th></tr></thead>
               <tbody>
@@ -1088,7 +1062,7 @@ $timeRemaining = 120 - (time() % 120);
           <div style="font-size:.78rem;color:var(--muted);margin-top:.5rem"><?= $activeSession["course_code"] ?> · <?= $timeRemaining ?>s remaining</div>
           <form method="POST" style="margin-top:1.5rem"><input type="hidden" name="csrf_token" value="<?= csrfToken() ?>"><input type="hidden" name="action" value="end_session"><input type="hidden" name="session_id" value="<?= $activeSession["id"] ?>"><button type="submit" class="btn btn-danger" onclick="return confirm('End this session?')">End Session</button></form>
         </div></div>
-        <div class="card"><div class="card-head"><div class="card-head-title">Live Attendance (<?= count($liveAttendance) ?>)</div></div><div class="card-body" style="padding:0"><div class="table-scroll">
+        <div class="card"><div class="card-head"><div class="card-head-title">Live Attendance (<?= count($liveAttendance) ?>)</div></div><div class="card-body" style="padding:0;overflow-x:auto">
           <table class="data-table mobile-cards"><thead><tr><th>Student</th><th>Index</th><th>Status</th><th>Time</th></tr></thead><tbody>
           <?php foreach($liveAttendance as $la): ?>
           <tr><td><?= htmlspecialchars($la["full_name"]) ?></td><td style="color:var(--gold);font-size:.78rem"><?= $la["index_no"] ?></td>
@@ -1104,16 +1078,16 @@ $timeRemaining = 120 - (time() % 120);
       <!-- APPROVALS -->
       <div class="page-section" id="sec-approvals">
         <div class="section-header"><div class="section-title">Pending <span>Approvals</span></div><span id="pending-count-badge" style="background:var(--warning);color:#060910;padding:.2rem .7rem;border-radius:2px;font-size:.75rem;font-weight:700"><?= $pendingCount ?> PENDING</span></div>
-        <div class="card"><div class="card-body" style="padding:0"><div class="table-scroll">
+        <div class="card"><div class="card-body" style="padding:0;overflow-x:auto">
           <table class="data-table mobile-cards" id="approvals-table"><thead><tr><th>Student</th><th>Index</th><th>Photos</th><th>Submitted</th><th>Actions</th></tr></thead>
-          <tbody id="approvals-tbody"><tr><td colspan="5" style="color:var(--muted);text-align:center">Loading...</td></tr></tbody></table></div>
+          <tbody id="approvals-tbody"><tr><td colspan="5" style="color:var(--muted);text-align:center">Loading...</td></tr></tbody></table>
         </div></div>
       </div>
 
       <!-- SESSION HISTORY -->
       <div class="page-section" id="sec-history">
         <div class="section-header"><div class="section-title">Session <span>History</span></div><a href="../../api/export_attendance.php" class="btn btn-ghost btn-sm">⬇ Export All CSV</a></div>
-        <div class="card"><div class="card-body" style="padding:0"><div class="table-scroll">
+        <div class="card"><div class="card-body" style="padding:0;overflow-x:auto">
           <table class="data-table mobile-cards"><thead><tr><th>Course</th><th class="hide-mobile">Date</th><th class="hide-mobile">Start</th><th class="hide-mobile">End</th><th>Present</th><th class="hide-mobile">Late</th><th>Absent</th><th>Export</th></tr></thead><tbody>
           <?php if(empty($sessionHistory)): ?><tr><td colspan="8" style="color:var(--muted)">No past sessions yet.</td></tr>
           <?php else: foreach($sessionHistory as $sh): ?>
@@ -1139,7 +1113,7 @@ $timeRemaining = 120 - (time() % 120);
             <button type="submit" class="btn btn-gold">📢 Post to Class</button>
           </form>
         </div></div>
-        <div class="card"><div class="card-head"><div class="card-head-title">Recent Announcements</div></div><div class="card-body" style="padding:0"><div class="table-scroll">
+        <div class="card"><div class="card-head"><div class="card-head-title">Recent Announcements</div></div><div class="card-body" style="padding:0;overflow-x:auto">
           <table class="data-table mobile-cards"><thead><tr><th>Message</th><th>From</th><th>Date</th></tr></thead><tbody>
           <?php if(empty($announcements)): ?><tr><td colspan="3" style="color:var(--muted)">No announcements yet.</td></tr>
           <?php else: foreach($announcements as $ann): ?>

@@ -430,7 +430,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
               <tbody>
                 <?php if (empty($recentAtt)): ?><tr><td colspan="4" style="color:var(--muted)">No records yet.</td></tr>
                 <?php else: foreach ($recentAtt as $r): ?>
-                  <tr><td><?= htmlspecialchars($r['full_name']) ?><br><small style="color:var(--muted)"><?= $r['index_no'] ?></small></td><td style="color:var(--gold);font-size:.78rem"><?= $r['course_code'] ?></td><td><span class="pill pill-<?= $r['status']==='present'?'green':($r['status']==='late'?'gold':($r['status']==='pending'?'warn':'red')) ?>"><?= $r['status'] ?></span></td><td style="color:var(--muted);font-size:.72rem"><?= date('H:i',strtotime($r['timestamp'])) ?></td></tr>
+                  <tr><td><?= htmlspecialchars($r['full_name']) ?><br><small style="color:var(--muted)"><?= $r['index_no'] ?></small></td><td class="hide-mobile" style="color:var(--gold);font-size:.78rem"><?= $r['course_code'] ?></td><td><span class="pill pill-<?= $r['status']==='present'?'green':($r['status']==='late'?'gold':($r['status']==='pending'?'warn':'red')) ?>"><?= $r['status'] ?></span></td><td class="hide-mobile" style="color:var(--muted);font-size:.72rem"><?= date('H:i',strtotime($r['timestamp'])) ?></td></tr>
                 <?php endforeach; endif; ?>
               </tbody></table>
             </div>

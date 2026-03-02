@@ -877,7 +877,7 @@ $timeRemaining = 120 - (time() % 120);
         <div class="card">
           <div class="card-body" style="padding:0;overflow-x:auto">
             <table class="data-table">
-              <thead><tr><th>Student</th><th class="hide-mobile">Index No.</th><th class="hide-mobile">Course</th><th>Status</th><th class="hide-mobile">Timestamp</th><th>Selfie</th></tr></thead>
+              <thead><tr><th>Student</th><th class="hide-mobile">Index No.</th><th class="hide-mobile">Course</th><th>Status</th><th class="hide-mobile">Timestamp</th><th class="hide-mobile">Selfie</th></tr></thead>
               <tbody>
                 <?php
                 $records = $pdo->query("
@@ -893,11 +893,11 @@ $timeRemaining = 120 - (time() % 120);
                 <?php else: foreach ($records as $r): ?>
                   <tr>
                     <td><?= htmlspecialchars($r['full_name']) ?></td>
-                    <td style="color:var(--gold);font-size:0.78rem"><?= $r['index_no'] ?></td>
-                    <td><?= $r['course_code'] ?></td>
+                    <td class="hide-mobile" style="color:var(--gold);font-size:0.78rem"><?= $r['index_no'] ?></td>
+                    <td class="hide-mobile"><?= $r['course_code'] ?></td>
                     <td><span class="pill pill-<?= $r['status']==='present'?'green':($r['status']==='late'?'gold':'red') ?>"><?= $r['status'] ?></span></td>
-                    <td style="color:var(--muted);font-size:0.75rem"><?= date('d M Y H:i', strtotime($r['timestamp'])) ?></td>
-                    <td><?= $r['selfie_url'] ? '<span class="pill pill-green">✓</span>' : '<span class="pill pill-red">—</span>' ?></td>
+                    <td class="hide-mobile" style="color:var(--muted);font-size:0.75rem"><?= date('d M Y H:i', strtotime($r['timestamp'])) ?></td>
+                    <td class="hide-mobile"><?= $r['selfie_url'] ? '<span class="pill pill-green">✓</span>' : '<span class="pill pill-red">—</span>' ?></td>
                   </tr>
                 <?php endforeach; endif; ?>
               </tbody>
@@ -990,14 +990,14 @@ $timeRemaining = 120 - (time() % 120);
         <div class="card">
           <div class="card-body" style="padding:0;overflow-x:auto">
             <table class="data-table">
-              <thead><tr><th>Name</th><th>Index No.</th><th class="hide-mobile">Device</th><th>Login Status</th><th>Actions</th></tr></thead>
+              <thead><tr><th>Name</th><th class="hide-mobile">Index No.</th><th class="hide-mobile">Device</th><th>Login Status</th><th>Actions</th></tr></thead>
               <tbody>
                 <?php
                 $devs = $pdo->query("SELECT id, full_name, index_no, device_fingerprint, is_locked, login_attempts FROM users WHERE role IN ('student','rep','lecturer') ORDER BY is_locked DESC, full_name")->fetchAll();
                 foreach ($devs as $d): ?>
                 <tr>
                   <td><?= htmlspecialchars($d['full_name']) ?></td>
-                  <td style="color:var(--gold);font-size:0.78rem"><?= $d['index_no'] ?></td>
+                  <td class="hide-mobile" style="color:var(--gold);font-size:0.78rem"><?= $d['index_no'] ?></td>
                   <td class="hide-mobile" style="color:var(--muted);font-size:0.72rem;max-width:160px;overflow:hidden;text-overflow:ellipsis"><?= $d['device_fingerprint'] ?: '— not registered —' ?></td>
                   <td><?= $d['is_locked'] ? '<span class="pill pill-red">🔒 Locked ('.$d["login_attempts"].' attempts)</span>' : '<span class="pill pill-green">Active</span>' ?></td>
                   <td>

@@ -785,17 +785,17 @@ $timeRemaining = 120 - (time() % 120);
         <div class="card">
           <div class="card-body" style="padding:0;overflow-x:auto">
             <table class="data-table" id="student-table">
-              <thead><tr><th>#</th><th>Index No.</th><th>Full Name</th><th class="hide-mobile">Email</th><th>Role</th><th>Attendance</th><th>Actions</th></tr></thead>
+              <thead><tr><th>#</th><th>Index No.</th><th>Full Name</th><th class="hide-mobile">Email</th><th class="hide-mobile">Role</th><th class="hide-mobile">Attendance</th><th>Actions</th></tr></thead>
               <tbody>
                 <?php foreach ($students as $i => $s): ?>
                   <tr data-name="<?= strtolower($s['full_name']) ?>" data-index="<?= $s['index_no'] ?>">
                     <td style="color:var(--muted)"><?= $i+1 ?></td>
                     <td style="color:var(--gold);font-size:0.8rem"><?= $s['index_no'] ?></td>
                     <td><?= htmlspecialchars($s['full_name']) ?></td>
-                    <td style="color:var(--muted);font-size:0.78rem"><?= $s['email'] ?></td>
-                    <td><span class="pill pill-<?= $s['role']==='rep'?'gold':'steel' ?>"><?= $s['role'] ?></span></td>
+                    <td class="hide-mobile" style="color:var(--muted);font-size:0.78rem"><?= $s['email'] ?></td>
+                    <td class="hide-mobile"><span class="pill pill-<?= $s['role']==='rep'?'gold':'steel' ?>"><?= $s['role'] ?></span></td>
                     <?php $pct=$s['attendance_pct']??0; $color=$pct>=75?'var(--success)':($pct>=50?'var(--warning)':'var(--danger)'); ?>
-                    <td><div style="display:flex;align-items:center;gap:.5rem"><div style="width:60px;height:5px;background:var(--border);border-radius:3px"><div style="width:<?= min($pct,100) ?>%;height:100%;background:<?= $color ?>;border-radius:3px"></div></div><span style="font-size:.75rem;color:<?= $color ?>;font-weight:600"><?= $pct??0 ?>%</span><?php if($pct<75&&$s['total_sessions']>3): ?><span title="Below 75%" style="color:var(--danger);font-size:.8rem">⚠</span><?php endif; ?></div></td>
+                    <td class="hide-mobile"><div style="display:flex;align-items:center;gap:.5rem"><div style="width:60px;height:5px;background:var(--border);border-radius:3px"><div style="width:<?= min($pct,100) ?>%;height:100%;background:<?= $color ?>;border-radius:3px"></div></div><span style="font-size:.75rem;color:<?= $color ?>;font-weight:600"><?= $pct??0 ?>%</span><?php if($pct<75&&$s['total_sessions']>3): ?><span title="Below 75%" style="color:var(--danger);font-size:.8rem">⚠</span><?php endif; ?></div></td>
                     <td>
                       <a href="../../api/attendance_certificate.php?student_id=<?= $s['id'] ?>" class="btn btn-ghost btn-sm" style="text-decoration:none">⬇ Cert</a>
                       <button class="btn btn-ghost btn-sm" onclick="editStudent(<?= $s['id'] ?>, '<?= htmlspecialchars(addslashes($s['full_name'])) ?>', '<?= $s['index_no'] ?>', '<?= $s['email'] ?>', '<?= $s['role'] ?>')">Edit</button>
@@ -817,7 +817,7 @@ $timeRemaining = 120 - (time() % 120);
         <div class="card">
           <div class="card-body" style="padding:0;overflow-x:auto">
             <table class="data-table">
-              <thead><tr><th>Course</th><th class="hide-mobile">Lecturer</th><th>Started</th><th>Status</th><th class="hide-mobile">Attendance</th><th>Actions</th></tr></thead>
+              <thead><tr><th>Course</th><th class="hide-mobile">Lecturer</th><th class="hide-mobile">Started</th><th>Status</th><th class="hide-mobile">Attendance</th><th>Actions</th></tr></thead>
               <tbody>
                 <?php if (empty($sessions)): ?>
                   <tr><td colspan="6" style="color:var(--muted)">No sessions yet.</td></tr>
@@ -828,7 +828,7 @@ $timeRemaining = 120 - (time() % 120);
                         <span style="color:var(--gold);font-size:0.78rem"><?= htmlspecialchars($s['course_code']) ?></span>
                       </td>
                       <td class="hide-mobile"><?= htmlspecialchars($s['lecturer_name']) ?></td>
-                      <td style="color:var(--muted);font-size:0.78rem"><?= date('d M, H:i', strtotime($s['start_time'])) ?></td>
+                      <td class="hide-mobile" style="color:var(--muted);font-size:0.78rem"><?= date('d M, H:i', strtotime($s['start_time'])) ?></td>
                       <td><span class="pill pill-<?= $s['active_status']?'green':'red' ?>"><?= $s['active_status']?'Active':'Closed' ?></span></td>
                       <td class="hide-mobile"><?= $s['attendance_count'] ?> students</td>
                       <td>
@@ -867,7 +867,7 @@ $timeRemaining = 120 - (time() % 120);
         <div class="card">
           <div class="card-body" style="padding:0;overflow-x:auto">
             <table class="data-table">
-              <thead><tr><th>Student</th><th>Index No.</th><th>Course</th><th>Status</th><th>Timestamp</th><th>Selfie</th></tr></thead>
+              <thead><tr><th>Student</th><th class="hide-mobile">Index No.</th><th class="hide-mobile">Course</th><th>Status</th><th class="hide-mobile">Timestamp</th><th>Selfie</th></tr></thead>
               <tbody>
                 <?php
                 $records = $pdo->query("
@@ -1039,7 +1039,7 @@ $timeRemaining = 120 - (time() % 120);
       <div class="page-section" id="sec-history">
         <div class="section-header"><div class="section-title">Session <span>History</span></div><a href="../../api/export_attendance.php" class="btn btn-ghost btn-sm">⬇ Export All CSV</a></div>
         <div class="card"><div class="card-body" style="padding:0;overflow-x:auto">
-          <table class="data-table"><thead><tr><th>Course</th><th>Date</th><th>Start</th><th>End</th><th>Present</th><th>Late</th><th>Absent</th><th>Export</th></tr></thead><tbody>
+          <table class="data-table"><thead><tr><th>Course</th><th class="hide-mobile">Date</th><th class="hide-mobile">Start</th><th class="hide-mobile">End</th><th>Present</th><th class="hide-mobile">Late</th><th>Absent</th><th>Export</th></tr></thead><tbody>
           <?php if(empty($sessionHistory)): ?><tr><td colspan="8" style="color:var(--muted)">No past sessions yet.</td></tr>
           <?php else: foreach($sessionHistory as $sh): ?>
           <tr><td><strong><?= htmlspecialchars($sh["course_code"]) ?></strong><br><small style="color:var(--muted)"><?= htmlspecialchars($sh["course_name"]) ?></small></td>

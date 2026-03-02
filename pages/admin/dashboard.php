@@ -569,6 +569,44 @@ $timeRemaining = 120 - (time() % 120);
       .section-header{ flex-wrap:wrap; gap:.5rem; }
     }
 
+  
+    @media(max-width:768px){
+      .hide-mobile{ display:none !important; }
+      .section-header{ flex-wrap:wrap; gap:.5rem; }
+      .btn-sm{ font-size:.65rem !important; padding:.2rem .4rem !important; }
+      
+      /* Convert tables to cards on mobile */
+      .mobile-cards thead{ display:none; }
+      .mobile-cards tbody tr{
+        display:block;
+        background:var(--surface2);
+        border:1px solid var(--border);
+        border-radius:4px;
+        margin-bottom:.8rem;
+        padding:.7rem;
+      }
+      .mobile-cards tbody td{
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        padding:.25rem 0;
+        border:none;
+        font-size:.78rem;
+        border-bottom:1px solid var(--border);
+      }
+      .mobile-cards tbody td:last-child{ border-bottom:none; padding-top:.4rem; }
+      .mobile-cards tbody td::before{
+        content:attr(data-label);
+        font-size:.68rem;
+        color:var(--muted);
+        letter-spacing:.08em;
+        text-transform:uppercase;
+        margin-right:.5rem;
+        flex-shrink:0;
+      }
+      .mobile-cards tbody td:empty{ display:none; }
+    }
+
   </style>
 </head>
 <body>
@@ -731,7 +769,7 @@ $timeRemaining = 120 - (time() % 120);
               <div class="card-head-title">Recent Activity</div>
             </div>
             <div class="card-body" style="padding:0;overflow-x:auto">
-              <table class="data-table">
+              <table class="data-table mobile-cards">
                 <thead><tr><th>Student</th><th>Course</th><th>Status</th><th>Time</th></tr></thead>
                 <tbody>
                   <?php if (empty($recentActivity)): ?>
@@ -795,15 +833,15 @@ $timeRemaining = 120 - (time() % 120);
         </div>
         <div class="card">
           <div class="card-body" style="padding:0;overflow-x:auto">
-            <table class="data-table" id="student-table">
+            <table class="data-table mobile-cards" id="student-table">
               <thead><tr><th>#</th><th>Index No.</th><th>Full Name</th><th class="hide-mobile">Email</th><th class="hide-mobile">Role</th><th class="hide-mobile">Attendance</th><th>Actions</th></tr></thead>
               <tbody>
                 <?php foreach ($students as $i => $s): ?>
                   <tr data-name="<?= strtolower($s['full_name']) ?>" data-index="<?= $s['index_no'] ?>">
                     <td style="color:var(--muted)"><?= $i+1 ?></td>
-                    <td style="color:var(--gold);font-size:0.8rem"><?= $s['index_no'] ?></td>
+                    <td data-label="Index" style="color:var(--gold);font-size:0.8rem"><?= $s['index_no'] ?></td>
                     <td><?= htmlspecialchars($s['full_name']) ?></td>
-                    <td class="hide-mobile" style="color:var(--muted);font-size:0.78rem"><?= $s['email'] ?></td>
+                    <td data-label="Email" class="hide-mobile" style="color:var(--muted);font-size:0.78rem"><?= $s['email'] ?></td>
                     <td class="hide-mobile"><span class="pill pill-<?= $s['role']==='rep'?'gold':'steel' ?>"><?= $s['role'] ?></span></td>
                     <?php $pct=$s['attendance_pct']??0; $color=$pct>=75?'var(--success)':($pct>=50?'var(--warning)':'var(--danger)'); ?>
                     <td class="hide-mobile"><div style="display:flex;align-items:center;gap:.5rem"><div style="width:60px;height:5px;background:var(--border);border-radius:3px"><div style="width:<?= min($pct,100) ?>%;height:100%;background:<?= $color ?>;border-radius:3px"></div></div><span style="font-size:.75rem;color:<?= $color ?>;font-weight:600"><?= $pct??0 ?>%</span><?php if($pct<75&&$s['total_sessions']>3): ?><span title="Below 75%" style="color:var(--danger);font-size:.8rem">⚠</span><?php endif; ?></div></td>
@@ -827,7 +865,7 @@ $timeRemaining = 120 - (time() % 120);
         </div>
         <div class="card">
           <div class="card-body" style="padding:0;overflow-x:auto">
-            <table class="data-table">
+            <table class="data-table mobile-cards">
               <thead><tr><th>Course</th><th class="hide-mobile">Lecturer</th><th class="hide-mobile">Started</th><th>Status</th><th class="hide-mobile">Attendance</th><th>Actions</th></tr></thead>
               <tbody>
                 <?php if (empty($sessions)): ?>
@@ -836,7 +874,7 @@ $timeRemaining = 120 - (time() % 120);
                   <?php foreach ($sessions as $s): ?>
                     <tr>
                       <td>
-                        <span style="color:var(--gold);font-size:0.78rem"><?= htmlspecialchars($s['course_code']) ?></span>
+                        <span data-label="Course" style="color:var(--gold);font-size:0.78rem"><?= htmlspecialchars($s['course_code']) ?></span>
                       </td>
                       <td class="hide-mobile"><?= htmlspecialchars($s['lecturer_name']) ?></td>
                       <td class="hide-mobile" style="color:var(--muted);font-size:0.78rem"><?= date('d M, H:i', strtotime($s['start_time'])) ?></td>
@@ -877,7 +915,7 @@ $timeRemaining = 120 - (time() % 120);
         </div>
         <div class="card">
           <div class="card-body" style="padding:0;overflow-x:auto">
-            <table class="data-table">
+            <table class="data-table mobile-cards">
               <thead><tr><th>Student</th><th class="hide-mobile">Index No.</th><th class="hide-mobile">Course</th><th>Status</th><th class="hide-mobile">Timestamp</th><th>Selfie</th></tr></thead>
               <tbody>
                 <?php
@@ -990,7 +1028,7 @@ $timeRemaining = 120 - (time() % 120);
         </div>
         <div class="card">
           <div class="card-body" style="padding:0;overflow-x:auto">
-            <table class="data-table">
+            <table class="data-table mobile-cards">
               <thead><tr><th>Name</th><th>Index No.</th><th class="hide-mobile">Device</th><th>Login Status</th><th>Actions</th></tr></thead>
               <tbody>
                 <?php
@@ -1025,7 +1063,7 @@ $timeRemaining = 120 - (time() % 120);
           <form method="POST" style="margin-top:1.5rem"><input type="hidden" name="csrf_token" value="<?= csrfToken() ?>"><input type="hidden" name="action" value="end_session"><input type="hidden" name="session_id" value="<?= $activeSession["id"] ?>"><button type="submit" class="btn btn-danger" onclick="return confirm('End this session?')">End Session</button></form>
         </div></div>
         <div class="card"><div class="card-head"><div class="card-head-title">Live Attendance (<?= count($liveAttendance) ?>)</div></div><div class="card-body" style="padding:0;overflow-x:auto">
-          <table class="data-table"><thead><tr><th>Student</th><th>Index</th><th>Status</th><th>Time</th></tr></thead><tbody>
+          <table class="data-table mobile-cards"><thead><tr><th>Student</th><th>Index</th><th>Status</th><th>Time</th></tr></thead><tbody>
           <?php foreach($liveAttendance as $la): ?>
           <tr><td><?= htmlspecialchars($la["full_name"]) ?></td><td style="color:var(--gold);font-size:.78rem"><?= $la["index_no"] ?></td>
           <td><span class="pill pill-<?= $la["status"]==="present"?"green":"gold" ?>"><?= $la["status"] ?><?= $la["status"]==="late"&&$la["minutes_late"]>0?" (".$la["minutes_late"]."m)":"" ?></span></td>
@@ -1041,7 +1079,7 @@ $timeRemaining = 120 - (time() % 120);
       <div class="page-section" id="sec-approvals">
         <div class="section-header"><div class="section-title">Pending <span>Approvals</span></div><span id="pending-count-badge" style="background:var(--warning);color:#060910;padding:.2rem .7rem;border-radius:2px;font-size:.75rem;font-weight:700"><?= $pendingCount ?> PENDING</span></div>
         <div class="card"><div class="card-body" style="padding:0;overflow-x:auto">
-          <table class="data-table" id="approvals-table"><thead><tr><th>Student</th><th>Index</th><th>Photos</th><th>Submitted</th><th>Actions</th></tr></thead>
+          <table class="data-table mobile-cards" id="approvals-table"><thead><tr><th>Student</th><th>Index</th><th>Photos</th><th>Submitted</th><th>Actions</th></tr></thead>
           <tbody id="approvals-tbody"><tr><td colspan="5" style="color:var(--muted);text-align:center">Loading...</td></tr></tbody></table>
         </div></div>
       </div>
@@ -1050,7 +1088,7 @@ $timeRemaining = 120 - (time() % 120);
       <div class="page-section" id="sec-history">
         <div class="section-header"><div class="section-title">Session <span>History</span></div><a href="../../api/export_attendance.php" class="btn btn-ghost btn-sm">⬇ Export All CSV</a></div>
         <div class="card"><div class="card-body" style="padding:0;overflow-x:auto">
-          <table class="data-table"><thead><tr><th>Course</th><th class="hide-mobile">Date</th><th class="hide-mobile">Start</th><th class="hide-mobile">End</th><th>Present</th><th class="hide-mobile">Late</th><th>Absent</th><th>Export</th></tr></thead><tbody>
+          <table class="data-table mobile-cards"><thead><tr><th>Course</th><th class="hide-mobile">Date</th><th class="hide-mobile">Start</th><th class="hide-mobile">End</th><th>Present</th><th class="hide-mobile">Late</th><th>Absent</th><th>Export</th></tr></thead><tbody>
           <?php if(empty($sessionHistory)): ?><tr><td colspan="8" style="color:var(--muted)">No past sessions yet.</td></tr>
           <?php else: foreach($sessionHistory as $sh): ?>
           <tr><td><strong><?= htmlspecialchars($sh["course_code"]) ?></strong><br><small style="color:var(--muted)"><?= htmlspecialchars($sh["course_name"]) ?></small></td>
@@ -1076,7 +1114,7 @@ $timeRemaining = 120 - (time() % 120);
           </form>
         </div></div>
         <div class="card"><div class="card-head"><div class="card-head-title">Recent Announcements</div></div><div class="card-body" style="padding:0;overflow-x:auto">
-          <table class="data-table"><thead><tr><th>Message</th><th>From</th><th>Date</th></tr></thead><tbody>
+          <table class="data-table mobile-cards"><thead><tr><th>Message</th><th>From</th><th>Date</th></tr></thead><tbody>
           <?php if(empty($announcements)): ?><tr><td colspan="3" style="color:var(--muted)">No announcements yet.</td></tr>
           <?php else: foreach($announcements as $ann): ?>
           <tr><td><?= htmlspecialchars($ann["message"]) ?></td><td style="color:var(--gold);font-size:.75rem"><?= htmlspecialchars($ann["full_name"]) ?></td><td style="color:var(--muted);font-size:.72rem"><?= date("d M H:i",strtotime($ann["created_at"])) ?></td></tr>

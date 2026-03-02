@@ -558,6 +558,17 @@ $timeRemaining = 120 - (time() % 120);
       .data-table th, .data-table td{ padding:.35rem .4rem; white-space:nowrap; }
     }
 
+  
+    @media(max-width:768px){
+      .hide-mobile{ display:none !important; }
+      .card-body{ overflow-x:auto !important; }
+      .data-table{ font-size:.7rem; }
+      .data-table th, .data-table td{ padding:.3rem .35rem; white-space:nowrap; }
+      .btn-sm{ font-size:.65rem !important; padding:.2rem .4rem !important; }
+      .pill{ font-size:.62rem !important; padding:.1rem .3rem !important; }
+      .section-header{ flex-wrap:wrap; gap:.5rem; }
+    }
+
   </style>
 </head>
 <body>
@@ -653,14 +664,14 @@ $timeRemaining = 120 - (time() % 120);
         <div class="topbar-title" id="page-title">OVERVIEW</div>
       </div>
       <div class="topbar-right">
-        <span style="font-size:0.75rem;color:var(--muted)"><?= date('l, d M Y') ?></span>
+        <span class="hide-mobile" style="font-size:0.75rem;color:var(--muted)"><?= date('l, d M Y') ?></span>
         <span class="badge-admin">Boss</span>
         <button id="theme-btn" onclick="toggleTheme()" style="background:none;border:1px solid var(--border);color:var(--muted);cursor:pointer;padding:.25rem .6rem;border-radius:2px;font-size:.75rem">🌙</button>
       </div>
     </div>
 
     <!-- Content -->
-    <div class="content">
+    <div class="content" style="overflow-x:hidden">
 
       <!-- ══ OVERVIEW ══ -->
       <div class="page-section active" id="sec-overview">

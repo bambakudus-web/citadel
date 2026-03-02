@@ -395,7 +395,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       </div>
     </div>
 
-    <div class="content">
+    <div class="content" style="overflow-x:hidden;max-width:100vw">
       <?php if ($msg): ?><div class="alert alert-<?= $msgType ?>"><?= htmlspecialchars($msg) ?></div><?php endif; ?>
 
       <!-- OVERVIEW -->
@@ -425,8 +425,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           </div>
           <div class="card">
             <div class="card-head"><div class="card-head-title">Recent Attendance</div></div>
-            <div class="card-body" style="padding:0">
-              <table class="data-table"><thead><tr><th>Student</th><th>Course</th><th>Status</th><th>Time</th></tr></thead>
+            <div class="card-body" style="padding:0;overflow-x:auto">
+              <table class="data-table" style="width:100%"><thead><tr><th>Student</th><th>Course</th><th>Status</th><th>Time</th></tr></thead>
               <tbody>
                 <?php if (empty($recentAtt)): ?><tr><td colspan="4" style="color:var(--muted)">No records yet.</td></tr>
                 <?php else: foreach ($recentAtt as $r): ?>
@@ -483,8 +483,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
             <div class="card">
               <div class="card-head"><div class="card-head-title">Approved Students</div><span class="pill pill-green" id="live-pill"><?= count($liveAttendance) ?> present</span></div>
-              <div class="card-body" style="padding:0;max-height:400px;overflow-y:auto">
-                <table class="data-table"><thead><tr><th>Student</th><th>Index</th><th>Status</th><th>Time</th></tr></thead>
+              <div class="card-body" style="padding:0;max-height:400px;overflow-y:auto;overflow-x:auto">
+                <table class="data-table" style="width:100%"><thead><tr><th>Student</th><th>Index</th><th>Status</th><th>Time</th></tr></thead>
                 <tbody id="live-tbody">
                   <?php if(empty($liveAttendance)): ?><tr id="empty-row"><td colspan="4" style="color:var(--muted)">No approved students yet...</td></tr>
                   <?php else: foreach($liveAttendance as $a): ?>
@@ -528,7 +528,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <?php else: ?>
           <div class="card">
             <div class="card-body" style="padding:0;overflow-x:auto">
-              <table class="data-table">
+              <table class="data-table" style="width:100%">
                 <thead><tr><th>Student</th><th class="hide-mobile">Index</th><th>Selfie</th><th class="hide-mobile">Submitted</th><th>Actions</th></tr></thead>
                 <tbody id="approvals-tbody">
                   <tr><td colspan="5" style="color:var(--muted);padding:1.5rem">Loading...</td></tr>
@@ -544,7 +544,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       <div class="page-section" id="sec-history">
         <div class="section-header"><div class="section-title">Session <span>History</span></div><a href="../../api/export_attendance.php" class="btn btn-rep btn-sm">⬇ Export All CSV</a></div>
         <div class="card"><div class="card-body" style="padding:0;overflow-x:auto">
-          <table class="data-table"><thead><tr><th>Course</th><th>Present</th><th class="hide-mobile">Late</th><th>Absent</th><th>Export</th></tr></thead>
+          <table class="data-table" style="width:100%"><thead><tr><th>Course</th><th>Present</th><th class="hide-mobile">Late</th><th>Absent</th><th>Export</th></tr></thead>
           <tbody>
             <?php if(empty($sessionHistory)): ?><tr><td colspan="8" style="color:var(--muted)">No past sessions yet.</td></tr>
             <?php else: foreach($sessionHistory as $sh): ?>
@@ -566,7 +566,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="section-header"><div class="section-title">Class <span>Registry</span></div><button class="btn btn-rep" onclick="openModal('modal-add')">+ Add Student</button></div>
         <div class="filter-bar"><input type="text" id="s-search" placeholder="Search name or index number..." oninput="filterStudents()"></div>
         <div class="card"><div class="card-body" style="padding:0;overflow-x:auto">
-          <table class="data-table" id="s-table">
+          <table class="data-table" style="width:100%" id="s-table">
             <thead><tr><th>#</th><th>Index No.</th><th>Full Name</th><th class="hide-mobile">Role</th><th class="hide-mobile">Attendance</th><th>Actions</th></tr></thead>
             <tbody>
               <?php foreach($students as $i=>$s): ?>
@@ -592,7 +592,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       <div class="page-section" id="sec-attendance">
         <div class="section-header"><div class="section-title">Attendance <span>Records</span></div><div style="display:flex;gap:.6rem;flex-wrap:wrap"><a href="../../api/export_attendance.php" class="btn btn-rep btn-sm">⬇ Export All CSV</a><a href="../../api/export_attendance.php?from=<?= date('Y-m-d') ?>&to=<?= date('Y-m-d') ?>" class="btn btn-ghost btn-sm">⬇ Today Only</a></div></div>
         <div class="card"><div class="card-body" style="padding:0;overflow-x:auto">
-          <table class="data-table"><thead><tr><th>Student</th><th class="hide-mobile">Index No.</th><th class="hide-mobile">Course</th><th>Status</th><th>Time</th></tr></thead>
+          <table class="data-table" style="width:100%"><thead><tr><th>Student</th><th class="hide-mobile">Index No.</th><th class="hide-mobile">Course</th><th>Status</th><th>Time</th></tr></thead>
           <tbody>
             <?php $allAtt=$pdo->query("SELECT a.*,u.full_name,u.index_no,s.course_code FROM attendance a JOIN users u ON a.student_id=u.id JOIN sessions s ON a.session_id=s.id ORDER BY a.timestamp DESC LIMIT 100")->fetchAll();
             if(empty($allAtt)): ?><tr><td colspan="5" style="color:var(--muted)">No records yet.</td></tr>
@@ -617,7 +617,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
               <button type="submit" class="btn btn-rep">Post to Class</button>
             </form>
 
-        <div class="card" style="margin-top:1.5rem"><div class="card-head"><div class="card-head-title">Recent Announcements</div></div><div class="card-body" style="padding:0"><table class="data-table"><thead><tr><th>Message</th><th>Date</th></tr></thead><tbody><?php $ann=$pdo->query("SELECT a.*,u.full_name FROM announcements a JOIN users u ON a.rep_id=u.id ORDER BY a.created_at DESC LIMIT 20")->fetchAll();if(empty($ann)):?><tr><td colspan="2" style="color:var(--muted)">No announcements yet.</td></tr><?php else:foreach($ann as $a):?><tr><td><?=htmlspecialchars($a["message"])?></td><td style="color:var(--muted);font-size:.72rem;white-space:nowrap"><?=date("d M Y H:i",strtotime($a["created_at"]))?></td></tr><?php endforeach;endif;?></tbody></table></div></div>
+        <div class="card" style="margin-top:1.5rem"><div class="card-head"><div class="card-head-title">Recent Announcements</div></div><div class="card-body" style="padding:0;overflow-x:auto"><table class="data-table" style="width:100%"><thead><tr><th>Message</th><th>Date</th></tr></thead><tbody><?php $ann=$pdo->query("SELECT a.*,u.full_name FROM announcements a JOIN users u ON a.rep_id=u.id ORDER BY a.created_at DESC LIMIT 20")->fetchAll();if(empty($ann)):?><tr><td colspan="2" style="color:var(--muted)">No announcements yet.</td></tr><?php else:foreach($ann as $a):?><tr><td><?=htmlspecialchars($a["message"])?></td><td style="color:var(--muted);font-size:.72rem;white-space:nowrap"><?=date("d M Y H:i",strtotime($a["created_at"]))?></td></tr><?php endforeach;endif;?></tbody></table></div></div>
 
 
           </div>

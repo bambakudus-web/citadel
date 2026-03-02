@@ -165,7 +165,8 @@ $fullTT = $pdo->query("SELECT t.*, u.full_name as lecturer_name FROM timetable t
 
     @media(max-width:900px){.two-col{grid-template-columns:1fr}}
     @media(min-width:769px){#menu-btn{display:none}}@media(max-width:768px){.sidebar{transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}.main{margin-left:0}.content{padding:1rem;overflow-x:hidden}.topbar{padding:.8rem 1rem}.stats-grid{grid-template-columns:repeat(2,1fr)}.data-table{font-size:.72rem;display:block;overflow-x:auto}.data-table th,.data-table td{padding:.4rem .5rem}.topbar-title{font-size:.78rem}.stat-value{font-size:1.5rem}.code-inputs input{width:38px;height:48px;font-size:1.1rem}.code-inputs{gap:.4rem}.camera-wrap{max-width:100%}.attend-zone{padding:0}.tt-item{flex-direction:column;gap:.3rem}.tt-time{min-width:unset}.section-title{font-size:.95rem}}
-  </style>
+      @media(max-width:768px){.hide-mobile{display:none!important}.card-body{overflow-x:auto!important}.data-table{font-size:.72rem}.data-table th,.data-table td{padding:.35rem .4rem;white-space:nowrap}.btn-sm{font-size:.65rem!important;padding:.2rem .35rem!important}}
+    </style>
 </head>
 <body>
 <div class="layout">
@@ -255,7 +256,7 @@ $fullTT = $pdo->query("SELECT t.*, u.full_name as lecturer_name FROM timetable t
             </div>
           </div>
         </div>
-      <div class="card" style="margin-top:1.5rem"><div class="card-head"><div class="card-head-title">📢 Class Announcements</div></div><div class="card-body" style="padding:0"><table class="data-table"><thead><tr><th>Message</th><th>From</th><th>Date</th></tr></thead><tbody id="ann-list"><?php if(empty($announcements)):?><tr><td colspan="3" style="color:var(--muted)">No announcements yet.</td></tr><?php else:foreach($announcements as $ann):?><tr><td><?=htmlspecialchars($ann["message"])?></td><td style="color:var(--gold);font-size:.75rem"><?=htmlspecialchars($ann["full_name"])?></td><td style="color:var(--muted);font-size:.72rem"><?=date("d M H:i",strtotime($ann["created_at"]))?></td></tr><?php endforeach;endif;?></tbody></table></div></div>
+      <div class="card" style="margin-top:1.5rem"><div class="card-head"><div class="card-head-title">📢 Class Announcements</div></div><div class="card-body" style="padding:0"><table class="data-table"><thead><tr><th>Message</th><th class="hide-mobile">From</th><th class="hide-mobile">Date</th></tr></thead><tbody id="ann-list"><?php if(empty($announcements)):?><tr><td colspan="3" style="color:var(--muted)">No announcements yet.</td></tr><?php else:foreach($announcements as $ann):?><tr><td><?=htmlspecialchars($ann["message"])?></td><td style="color:var(--gold);font-size:.75rem"><?=htmlspecialchars($ann["full_name"])?></td><td style="color:var(--muted);font-size:.72rem"><?=date("d M H:i",strtotime($ann["created_at"]))?></td></tr><?php endforeach;endif;?></tbody></table></div></div>
       </div>
 
       <!-- MARK ATTENDANCE -->

@@ -809,8 +809,7 @@ $timeRemaining = 120 - (time() % 120);
                     <td class="hide-mobile"><div style="display:flex;align-items:center;gap:.5rem"><div style="width:60px;height:5px;background:var(--border);border-radius:3px"><div style="width:<?= min($pct,100) ?>%;height:100%;background:<?= $color ?>;border-radius:3px"></div></div><span style="font-size:.75rem;color:<?= $color ?>;font-weight:600"><?= $pct??0 ?>%</span><?php if($pct<75&&$s['total_sessions']>3): ?><span title="Below 75%" style="color:var(--danger);font-size:.8rem">⚠</span><?php endif; ?></div></td>
                     <td>
                       <a href="../../api/attendance_certificate.php?student_id=<?= $s['id'] ?>" class="btn btn-ghost btn-sm" style="text-decoration:none">⬇ Cert</a>
-                      <button class="btn btn-ghost btn-sm" onclick="editStudent(<?= $s['id'] ?>, '<?= htmlspecialchars(addslashes($s['full_name'])) ?>', '<?= $s['index_no'] ?>', '<?= $s['email'] ?>', '<?= $s['role'] ?>')">Edit</button>
-                      <button class="btn btn-danger btn-sm" onclick="confirmDelete(<?= $s['id'] ?>, 'student')">Remove</button>
+                      <button class="btn btn-ghost btn-sm" onclick="editStudent(<?= $s['id'] ?>, '<?= htmlspecialchars(addslashes($s['full_name'])) ?>', '<?= $s['index_no'] ?>', '<?= $s['email'] ?>', '<?= $s['role'] ?>', <?= $s['is_locked'] ?>, '<?= $s['device_fingerprint'] ? 'registered' : 'none' ?>')">Edit</button>
                     </td>
                   </tr>
                 <?php endforeach; ?>
@@ -1157,6 +1156,26 @@ $timeRemaining = 120 - (time() % 120);
         </div>
         <button type="submit" class="btn btn-gold" style="width:100%">Save Changes</button>
       </form>
+
+      <!-- Danger Zone -->
+      <div style="margin-top:1.5rem;padding-top:1.2rem;border-top:1px solid rgba(224,92,92,.2)">
+        <div style="font-size:.7rem;color:var(--danger);letter-spacing:.12em;margin-bottom:.8rem">DANGER ZONE</div>
+        <div style="display:flex;flex-wrap:wrap;gap:.5rem">
+          <form method="POST" style="display:inline">
+            <input type="hidden" name="csrf_token" value="<?= csrfToken() ?>">
+            <input type="hidden" name="action" value="reset_device">
+            <input type="hidden" name="user_id" id="danger-user-id">
+            <button type="submit" class="btn btn-ghost btn-sm" onclick="return confirm('Reset device fingerprint?')">📱 Reset Device</button>
+          </form>
+          <form method="POST" style="display:inline" id="unlock-form">
+            <input type="hidden" name="csrf_token" value="<?= csrfToken() ?>">
+            <input type="hidden" name="action" value="unlock_account">
+            <input type="hidden" name="user_id" id="danger-user-id2">
+            <button type="submit" class="btn btn-sm" style="background:rgba(76,175,130,.15);color:var(--success);border:1px solid rgba(76,175,130,.3)" onclick="return confirm('Unlock this account?')">🔓 Unlock Account</button>
+          </form>
+          <button class="btn btn-danger btn-sm" id="danger-remove-btn" onclick="">🗑 Remove Student</button>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -1180,12 +1199,15 @@ document.querySelectorAll('.modal-overlay').forEach(o => {
 });
 
 // ── Edit Student ──
-function editStudent(id, name, index, email, role) {
+function editStudent(id, name, index, email, role, locked, device) {
   document.getElementById('edit-id').value    = id;
   document.getElementById('edit-name').value  = name;
   document.getElementById('edit-index').value = index;
   document.getElementById('edit-email').value = email;
   document.getElementById('edit-role').value  = role;
+  document.getElementById('danger-user-id').value  = id;
+  document.getElementById('danger-user-id2').value = id;
+  document.getElementById('danger-remove-btn').onclick = () => confirmDelete(id, 'student');
   openModal('modal-edit-student');
 }
 

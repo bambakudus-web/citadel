@@ -664,7 +664,7 @@ $timeRemaining = 120 - (time() % 120);
         <div class="topbar-title" id="page-title">OVERVIEW</div>
       </div>
       <div class="topbar-right">
-        <span class="hide-mobile" style="font-size:0.75rem;color:var(--muted)"><?= date('l, d M Y') ?></span>
+        <span style="font-size:0.75rem;color:var(--muted)"><?= date('l, d M Y') ?></span>
         <span class="badge-admin">Boss</span>
         <button id="theme-btn" onclick="toggleTheme()" style="background:none;border:1px solid var(--border);color:var(--muted);cursor:pointer;padding:.25rem .6rem;border-radius:2px;font-size:.75rem">🌙</button>
       </div>
@@ -1000,11 +1000,8 @@ $timeRemaining = 120 - (time() % 120);
                   <td style="color:var(--gold);font-size:0.78rem"><?= $d['index_no'] ?></td>
                   <td class="hide-mobile" style="color:var(--muted);font-size:0.72rem;max-width:160px;overflow:hidden;text-overflow:ellipsis"><?= $d['device_fingerprint'] ?: '— not registered —' ?></td>
                   <td><?= $d['is_locked'] ? '<span class="pill pill-red">🔒 Locked ('.$d["login_attempts"].' attempts)</span>' : '<span class="pill pill-green">Active</span>' ?></td>
-                  <td style="display:flex;gap:.4rem;flex-wrap:wrap">
-                  <form method="POST" style="display:inline"><input type="hidden" name="csrf_token" value="<?= csrfToken() ?>"><input type="hidden" name="action" value="reset_device"><input type="hidden" name="user_id" value="<?= $d['id'] ?>"><button type="submit" class="btn btn-ghost btn-sm" onclick="return confirm('Reset device?')">Reset Device</button></form>
-                  <?php if($d['is_locked']): ?>
-                  <form method="POST" style="display:inline"><input type="hidden" name="csrf_token" value="<?= csrfToken() ?>"><input type="hidden" name="action" value="unlock_account"><input type="hidden" name="user_id" value="<?= $d['id'] ?>"><button type="submit" class="btn btn-sm" style="background:rgba(76,175,130,.15);color:var(--success);border:1px solid rgba(76,175,130,.3)" onclick="return confirm('Unlock account for <?= htmlspecialchars($d['full_name']) ?>?')">🔓 Unlock</button></form>
-                  <?php endif; ?>
+                  <td>
+                  <button class="btn btn-ghost btn-sm" onclick="manageDevice(<?= $d['id'] ?>, '<?= htmlspecialchars(addslashes($d['full_name'])) ?>', <?= $d['is_locked'] ?>)">Manage</button>
                   </td>
                 </tr>
                 <?php endforeach; ?>
@@ -1049,17 +1046,16 @@ $timeRemaining = 120 - (time() % 120);
       <div class="page-section" id="sec-history">
         <div class="section-header"><div class="section-title">Session <span>History</span></div><a href="../../api/export_attendance.php" class="btn btn-ghost btn-sm">⬇ Export All CSV</a></div>
         <div class="card"><div class="card-body" style="padding:0;overflow-x:auto">
-          <table class="data-table"><thead><tr><th>Course</th><th class="hide-mobile">Date</th><th class="hide-mobile">Start</th><th class="hide-mobile">End</th><th>Present</th><th class="hide-mobile">Late</th><th>Absent</th><th>Export</th></tr></thead><tbody>
+          <table class="data-table"><thead><tr><th>Course</th><th>Present</th><th class="hide-mobile">Late</th><th>Absent</th><th>Export</th></tr></thead><tbody>
           <?php if(empty($sessionHistory)): ?><tr><td colspan="8" style="color:var(--muted)">No past sessions yet.</td></tr>
           <?php else: foreach($sessionHistory as $sh): ?>
-          <tr><td><strong><?= htmlspecialchars($sh["course_code"]) ?></strong><br><small style="color:var(--muted)"><?= htmlspecialchars($sh["course_name"]) ?></small></td>
-          <td style="color:var(--muted);font-size:.78rem"><?= date("d M Y",strtotime($sh["start_time"])) ?></td>
-          <td style="font-size:.78rem"><?= date("H:i",strtotime($sh["start_time"])) ?></td>
-          <td style="font-size:.78rem;color:var(--muted)"><?= $sh["end_time"]?date("H:i",strtotime($sh["end_time"])):"-" ?></td>
+          <tr>
+          <td><strong><?= htmlspecialchars($sh["course_code"]) ?></strong><br><small style="color:var(--muted)"><?= htmlspecialchars($sh["course_name"]) ?></small><br><small style="color:var(--muted);font-size:.7rem"><?= date("d M Y H:i",strtotime($sh["start_time"])) ?></small></td>
           <td><span class="pill pill-green"><?= $sh["present_count"] ?></span></td>
-          <td><span class="pill pill-gold"><?= $sh["late_count"] ?></span></td>
+          <td class="hide-mobile"><span class="pill pill-gold"><?= $sh["late_count"] ?></span></td>
           <td><span class="pill pill-red"><?= $sh["absent_count"] ?></span></td>
-          <td><a href="../../api/export_attendance.php?session_id=<?= $sh["id"] ?>" class="btn btn-ghost btn-sm">⬇ CSV</a></td></tr>
+          <td><a href="../../api/export_attendance.php?session_id=<?= $sh["id"] ?>" class="btn btn-ghost btn-sm">⬇ CSV</a></td>
+          </tr>
           <?php endforeach; endif; ?>
           </tbody></table></div></div>
       </div>

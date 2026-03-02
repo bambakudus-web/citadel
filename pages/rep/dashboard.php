@@ -426,7 +426,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           <div class="card">
             <div class="card-head"><div class="card-head-title">Recent Attendance</div></div>
             <div class="card-body" style="padding:0;overflow-x:auto">
-              <table class="data-table" style="width:100%"><thead><tr><th>Student</th><th>Course</th><th>Status</th><th>Time</th></tr></thead>
+              <table class="data-table" style="width:100%"><thead><tr><th>Student</th><th class="hide-mobile">Course</th><th>Status</th><th class="hide-mobile">Time</th></tr></thead>
               <tbody>
                 <?php if (empty($recentAtt)): ?><tr><td colspan="4" style="color:var(--muted)">No records yet.</td></tr>
                 <?php else: foreach ($recentAtt as $r): ?>

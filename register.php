@@ -3,7 +3,6 @@
 session_start();
 require_once 'includes/db.php';
 
-// Already logged in? Redirect
 if (!empty($_SESSION['user_id'])) {
     header('Location: pages/student/dashboard.php');
     exit;
@@ -26,16 +25,48 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif ($password !== $confirm) {
         $error = 'Passwords do not match.';
     } else {
-        // Check if index number already exists
         $check = $pdo->prepare("SELECT id FROM users WHERE index_no=? OR email=?");
         $check->execute([$indexNo, $email]);
         if ($check->fetch()) {
             $error = 'This index number or email is already registered.';
         } else {
+            // Get default institution, department, program
+            $institution = $pdo->query("SELECT id FROM institutions LIMIT 1")->fetch();
+            $program     = $pdo->query("SELECT id FROM programs LIMIT 1")->fetch();
+            $department  = $pdo->query("SELECT id FROM departments LIMIT 1")->fetch();
+            $activeSem   = $pdo->query("SELECT id FROM semesters WHERE is_active=1 LIMIT 1")->fetch();
+
+            $institutionId = $institution['id'] ?? 1;
+            $programId     = $program['id']     ?? 1;
+            $departmentId  = $department['id']  ?? 1;
+            $semId         = $activeSem['id']   ?? null;
+
             $hash = password_hash($password, PASSWORD_DEFAULT);
             try {
-                $stmt = $pdo->prepare("INSERT INTO users (full_name, index_no, email, password_hash, role, device_fingerprint) VALUES (?,?,?,?,'student',?)");
-                $stmt->execute([$fullName, $indexNo, $email, $hash, $fingerprint]);
+                $stmt = $pdo->prepare("
+                    INSERT INTO users
+                        (full_name, index_no, email, password_hash, role,
+                         institution_id, department_id, program_id, level,
+                         device_fingerprint)
+                    VALUES (?,?,?,?,'student',?,?,?,2,?)
+                ");
+                $stmt->execute([
+                    $fullName, $indexNo, $email, $hash,
+                    $institutionId, $departmentId, $programId,
+                    $fingerprint ?: null
+                ]);
+                $newId = $pdo->lastInsertId();
+
+                // Auto-enroll in all active semester courses for this program
+                if ($semId && $programId) {
+                    $courses = $pdo->prepare("SELECT id FROM courses WHERE program_id=? AND semester_id=?");
+                    $courses->execute([$programId, $semId]);
+                    $enroll = $pdo->prepare("INSERT IGNORE INTO course_enrollments (course_id, student_id, semester_id) VALUES (?,?,?)");
+                    foreach ($courses->fetchAll() as $c) {
+                        $enroll->execute([$c['id'], $newId, $semId]);
+                    }
+                }
+
                 $success = 'Account created! You can now sign in.';
             } catch (Exception $e) {
                 $error = 'Registration failed. Please try again.';
@@ -47,51 +78,53 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Citadel — Register</title>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
-  <style>
-    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-    :root{--bg:#080b12;--surface:#0e1420;--border:#1e2a3a;--gold:#c9a84c;--gold-dim:#7a5f28;--steel:#4a6fa5;--text:#e8eaf0;--muted:#6b7a8d;--success:#4caf82;--danger:#e05c5c;--warning:#e0a050}
-    html,body{height:100%;background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;overflow-x:hidden}
-    .bg-scene{position:fixed;inset:0;z-index:0;background:radial-gradient(ellipse 80% 60% at 50% -10%,rgba(74,111,165,.15) 0%,transparent 70%),radial-gradient(ellipse 40% 40% at 80% 80%,rgba(201,168,76,.06) 0%,transparent 60%),var(--bg)}
-    .grid-lines{position:fixed;inset:0;z-index:0;background-image:linear-gradient(rgba(74,111,165,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(74,111,165,.05) 1px,transparent 1px);background-size:48px 48px;mask-image:radial-gradient(ellipse 80% 80% at 50% 0%,black 20%,transparent 100%)}
-    .page{position:relative;z-index:1;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:2rem 1rem}
-    .card{width:100%;max-width:460px;background:var(--surface);border:1px solid var(--border);border-radius:2px;padding:2.4rem;position:relative;animation:fadeUp .7s ease both}
-    .card::before,.card::after{content:'';position:absolute;width:16px;height:16px;border-color:var(--gold);border-style:solid}
-    .card::before{top:-1px;left:-1px;border-width:2px 0 0 2px}
-    .card::after{bottom:-1px;right:-1px;border-width:0 2px 2px 0}
-    @keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
-    .brand{text-align:center;margin-bottom:1.8rem}
-    .brand-icon{width:44px;height:44px;margin:0 auto .8rem}
-    .brand-icon svg{width:100%;height:100%}
-    .brand-name{font-family:'Cinzel',serif;font-size:1.5rem;font-weight:700;letter-spacing:.18em;color:var(--gold)}
-    .brand-sub{font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-top:.25rem}
-    .divider{display:flex;align-items:center;gap:.8rem;margin-bottom:1.5rem}
-    .divider span{height:1px;flex:1;background:var(--border)}
-    .divider em{font-style:normal;font-size:.62rem;letter-spacing:.2em;color:var(--muted);text-transform:uppercase}
-    .alert{padding:.65rem .9rem;border-radius:2px;font-size:.8rem;margin-bottom:1.2rem}
-    .alert-error{background:rgba(224,92,92,.08);border:1px solid rgba(224,92,92,.3);color:var(--danger)}
-    .alert-success{background:rgba(76,175,130,.08);border:1px solid rgba(76,175,130,.3);color:var(--success)}
-    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
-    .field{margin-bottom:1rem;position:relative}
-    .field label{display:block;font-size:.68rem;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-bottom:.4rem}
-    .field input{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:2px;padding:.72rem 2.5rem .72rem 1rem;color:var(--text);font-family:'DM Sans',sans-serif;font-size:.92rem;outline:none;transition:border-color .2s}
-    .field input:focus{border-color:var(--steel)}
-    .field input::placeholder{color:var(--muted)}
-    .field input.valid{border-color:var(--success)}
-    .field input.invalid{border-color:var(--danger)}
-    .toggle-pw{position:absolute;right:.75rem;top:2.1rem;background:none;border:none;color:var(--muted);cursor:pointer;font-size:.85rem}
-    .strength-bar{height:3px;background:var(--border);border-radius:2px;margin-top:.3rem;overflow:hidden}
-    .strength-fill{height:100%;border-radius:2px;width:0%;transition:width .4s,background .4s}
-    .field-hint{font-size:.65rem;margin-top:.25rem}
-    .btn-primary{width:100%;padding:.82rem;background:linear-gradient(135deg,var(--gold-dim),var(--gold));color:#080b12;font-family:'Cinzel',serif;font-size:.82rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;border:none;border-radius:2px;cursor:pointer;transition:opacity .2s,transform .15s;margin-top:.5rem}
-    .btn-primary:hover{opacity:.88;transform:translateY(-1px)}
-    .card-footer{text-align:center;margin-top:1.2rem;font-size:.8rem;color:var(--muted)}
-    .card-footer a{color:var(--gold);text-decoration:none}
-    @media(max-width:500px){.form-row{grid-template-columns:1fr}.card{padding:1.8rem 1.2rem}}
-  </style>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Citadel — Register</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#080b12;--surface:#0e1420;--border:#1e2a3a;--gold:#c9a84c;--gold-dim:#7a5f28;--steel:#4a6fa5;--text:#e8eaf0;--muted:#6b7a8d;--success:#4caf82;--danger:#e05c5c;--warning:#e0a050}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;overflow-x:hidden}
+.bg-scene{position:fixed;inset:0;z-index:0;background:radial-gradient(ellipse 80% 60% at 50% -10%,rgba(74,111,165,.15) 0%,transparent 70%),radial-gradient(ellipse 40% 40% at 80% 80%,rgba(201,168,76,.06) 0%,transparent 60%),var(--bg)}
+.grid-lines{position:fixed;inset:0;z-index:0;background-image:linear-gradient(rgba(74,111,165,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(74,111,165,.05) 1px,transparent 1px);background-size:48px 48px;mask-image:radial-gradient(ellipse 80% 80% at 50% 0%,black 20%,transparent 100%)}
+.page{position:relative;z-index:1;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:2rem 1rem}
+.card{width:100%;max-width:460px;background:var(--surface);border:1px solid var(--border);border-radius:2px;padding:2.4rem;position:relative;animation:fadeUp .7s ease both}
+.card::before,.card::after{content:'';position:absolute;width:16px;height:16px;border-color:var(--gold);border-style:solid}
+.card::before{top:-1px;left:-1px;border-width:2px 0 0 2px}
+.card::after{bottom:-1px;right:-1px;border-width:0 2px 2px 0}
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+.brand{text-align:center;margin-bottom:1.8rem}
+.brand-icon{width:44px;height:44px;margin:0 auto .8rem}
+.brand-icon svg{width:100%;height:100%}
+.brand-name{font-family:'Cinzel',serif;font-size:1.5rem;font-weight:700;letter-spacing:.18em;color:var(--gold)}
+.brand-sub{font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-top:.25rem}
+.divider{display:flex;align-items:center;gap:.8rem;margin-bottom:1.5rem}
+.divider span{height:1px;flex:1;background:var(--border)}
+.divider em{font-style:normal;font-size:.62rem;letter-spacing:.2em;color:var(--muted);text-transform:uppercase}
+.alert{padding:.65rem .9rem;border-radius:2px;font-size:.8rem;margin-bottom:1.2rem}
+.alert-error{background:rgba(224,92,92,.08);border:1px solid rgba(224,92,92,.3);color:var(--danger)}
+.alert-success{background:rgba(76,175,130,.08);border:1px solid rgba(76,175,130,.3);color:var(--success)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.field{margin-bottom:1rem;position:relative}
+.field label{display:block;font-size:.68rem;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-bottom:.4rem}
+.field input{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:2px;padding:.72rem 2.5rem .72rem 1rem;color:var(--text);font-family:'DM Sans',sans-serif;font-size:.92rem;outline:none;transition:border-color .2s}
+.field input:focus{border-color:var(--steel)}
+.field input::placeholder{color:var(--muted)}
+.field input.valid{border-color:var(--success)}
+.field input.invalid{border-color:var(--danger)}
+.toggle-pw{position:absolute;right:.75rem;top:2.1rem;background:none;border:none;color:var(--muted);cursor:pointer;font-size:.85rem}
+.strength-bar{height:3px;background:var(--border);border-radius:2px;margin-top:.3rem;overflow:hidden}
+.strength-fill{height:100%;border-radius:2px;width:0%;transition:width .4s,background .4s}
+.field-hint{font-size:.65rem;margin-top:.25rem}
+.btn-primary{width:100%;padding:.82rem;background:linear-gradient(135deg,var(--gold-dim),var(--gold));color:#080b12;font-family:'Cinzel',serif;font-size:.82rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;border:none;border-radius:2px;cursor:pointer;transition:opacity .2s,transform .15s;margin-top:.5rem}
+.btn-primary:hover{opacity:.88;transform:translateY(-1px)}
+.card-footer{text-align:center;margin-top:1.2rem;font-size:.8rem;color:var(--muted)}
+.card-footer a{color:var(--gold);text-decoration:none}
+.info-box{background:rgba(74,111,165,.06);border:1px solid rgba(74,111,165,.2);border-radius:2px;padding:.7rem 1rem;font-size:.75rem;color:var(--muted);margin-bottom:1.2rem;line-height:1.5}
+.info-box strong{color:var(--steel)}
+@media(max-width:500px){.form-row{grid-template-columns:1fr}.card{padding:1.8rem 1.2rem}}
+</style>
 </head>
 <body>
 <div class="bg-scene"></div>
@@ -113,6 +146,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
 
     <div class="divider"><span></span><em>Student Registration</em><span></span></div>
+
+    <div class="info-box">
+      Use your <strong>institutional index number</strong> as your username. Your password will be used to sign in — keep it safe.
+    </div>
 
     <?php if ($error): ?>
       <div class="alert alert-error"><?= htmlspecialchars($error) ?></div>
@@ -191,10 +228,10 @@ function checkStrength(val) {
   if (/[0-9]/.test(val)) score++;
   if (/[^A-Za-z0-9]/.test(val)) score++;
   const levels = [
-    {w:'25%', bg:'var(--danger)',  text:'Weak — add numbers & symbols'},
-    {w:'50%', bg:'var(--warning)', text:'Fair — add uppercase letters'},
-    {w:'75%', bg:'var(--gold)',    text:'Good — almost there!'},
-    {w:'100%',bg:'var(--success)', text:'Strong password ✓'},
+    {w:'25%',bg:'var(--danger)',text:'Weak — add numbers & symbols'},
+    {w:'50%',bg:'var(--warning)',text:'Fair — add uppercase letters'},
+    {w:'75%',bg:'var(--gold)',text:'Good — almost there!'},
+    {w:'100%',bg:'var(--success)',text:'Strong password ✓'},
   ];
   const lvl = val.length ? levels[Math.max(0,score-1)] : {w:'0%',bg:'',text:''};
   fill.style.width = lvl.w; fill.style.background = lvl.bg;

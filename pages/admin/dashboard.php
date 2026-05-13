@@ -1134,7 +1134,7 @@ window.fetch = function(url, options = {}) {
   options.headers['X-CSRF-Token'] = csrfToken;
   return originalFetch(url, options);
 };
-<!-- ══ TIMETABLE MODAL — paste before </body> ══ -->
+</script>
 <div class="modal-overlay" id="modal-timetable">
   <div class="modal">
     <div class="modal-head">
@@ -1201,7 +1201,6 @@ window.fetch = function(url, options = {}) {
   </div>
 </div>
  
-<!-- ══ TIMETABLE JAVASCRIPT — paste inside existing <script> or before </body> ══ -->
 <script>
 function openAddSlot() {
   document.getElementById('tt-edit-id').value = '';

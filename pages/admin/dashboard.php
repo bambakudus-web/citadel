@@ -419,26 +419,48 @@ body::before{content:'';position:fixed;inset:0;z-index:0;background:radial-gradi
       </div>
     </div>
 
-    <!-- ══ TIMETABLE ══ -->
+     <!-- ══ TIMETABLE ══ -->
     <div class="page-section" id="sec-timetable">
-      <div class="section-header"><div class="section-title">Class <span>Timetable</span></div></div>
-      <?php foreach(['Monday','Tuesday','Wednesday','Thursday','Friday'] as $day):
-        $cls = $pdo->prepare("SELECT t.*, u.full_name as lecturer_name FROM timetable t LEFT JOIN users u ON t.lecturer_id=u.id WHERE t.day_of_week=? ORDER BY t.start_time");
-        $cls->execute([$day]); $cls=$cls->fetchAll(); if(empty($cls)) continue; ?>
+      <div class="section-header">
+        <div class="section-title">Class <span>Timetable</span></div>
+        <button class="btn btn-gold" onclick="openAddSlot()">+ Add Slot</button>
+      </div>
+      <?php
+      $ttAll = $pdo->query("
+          SELECT t.*, u.full_name AS lecturer_name,
+                 COALESCE(c.code, t.course_code) AS course_code,
+                 COALESCE(c.name, t.course_name) AS course_name
+          FROM timetable t
+          LEFT JOIN users u ON u.id = t.lecturer_id
+          LEFT JOIN courses c ON c.id = t.course_id
+          ORDER BY FIELD(t.day_of_week,'Monday','Tuesday','Wednesday','Thursday','Friday'), t.start_time
+      ")->fetchAll();
+      $days = ['Monday','Tuesday','Wednesday','Thursday','Friday'];
+      foreach ($days as $day):
+        $dayCls = array_filter($ttAll, fn($c) => $c['day_of_week'] === $day);
+        if (empty($dayCls)) continue;
+      ?>
         <div style="margin-bottom:1.5rem">
           <div style="font-family:'Cinzel',serif;font-size:.8rem;color:var(--gold);letter-spacing:.15em;margin-bottom:.6rem;text-transform:uppercase"><?= $day ?></div>
-          <div class="tt-grid"><?php foreach($cls as $c): ?>
+          <div class="tt-grid"><?php foreach($dayCls as $c): ?>
             <div class="tt-item">
               <div class="tt-time"><?= substr($c['start_time'],0,5) ?> – <?= substr($c['end_time'],0,5) ?></div>
               <div class="tt-course" style="flex:1">
                 <div class="tt-course-code"><?= htmlspecialchars($c['course_code']) ?></div>
                 <div class="tt-course-name"><?= htmlspecialchars($c['course_name']) ?></div>
-                <div class="tt-room">📍 <?= htmlspecialchars($c['room']) ?> · <?= htmlspecialchars($c['lecturer_name']) ?></div>
+                <div class="tt-room">📍 <?= htmlspecialchars($c['room'] ?? '') ?> · <?= htmlspecialchars($c['lecturer_name'] ?? '—') ?></div>
+              </div>
+              <div style="display:flex;gap:.4rem;flex-shrink:0">
+                <button class="btn btn-ghost btn-sm" onclick="editSlot(<?= $c['id'] ?>,'<?= $c['day_of_week'] ?>','<?= substr($c['start_time'],0,5) ?>','<?= substr($c['end_time'],0,5) ?>','<?= htmlspecialchars(addslashes($c['course_code'])) ?>','<?= htmlspecialchars(addslashes($c['course_name'])) ?>','<?= htmlspecialchars(addslashes($c['room'] ?? '')) ?>',<?= $c['lecturer_id'] ?? 'null' ?>)">Edit</button>
+                <button class="btn btn-danger btn-sm" onclick="deleteSlot(<?= $c['id'] ?>,'<?= htmlspecialchars(addslashes($c['course_code'])) ?>')">Del</button>
               </div>
             </div>
           <?php endforeach; ?></div>
         </div>
       <?php endforeach; ?>
+      <?php if (empty($ttAll)): ?>
+        <div class="card"><div class="card-body" style="color:var(--muted)">No timetable slots yet. Click "+ Add Slot" to get started.</div></div>
+      <?php endif; ?>
     </div>
 
     <!-- ══ SEMESTERS ══ -->
@@ -1112,6 +1134,148 @@ window.fetch = function(url, options = {}) {
   options.headers['X-CSRF-Token'] = csrfToken;
   return originalFetch(url, options);
 };
+<!-- ══ TIMETABLE MODAL — paste before </body> ══ -->
+<div class="modal-overlay" id="modal-timetable">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title" id="tt-modal-title">ADD TIMETABLE SLOT</div>
+      <button class="modal-close" onclick="closeModal('modal-timetable')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="tt-edit-id">
+      <div class="form-row">
+        <div class="form-field">
+          <label>Day</label>
+          <select id="tt-day">
+            <option>Monday</option><option>Tuesday</option><option>Wednesday</option>
+            <option>Thursday</option><option>Friday</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label>Room</label>
+          <input type="text" id="tt-room" placeholder="e.g. CLT 303">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-field">
+          <label>Start Time</label>
+          <input type="time" id="tt-start">
+        </div>
+        <div class="form-field">
+          <label>End Time</label>
+          <input type="time" id="tt-end">
+        </div>
+      </div>
+      <div class="form-field">
+        <label>Course</label>
+        <select id="tt-course" onchange="fillTTCourseName()">
+          <option value="">— Select Course —</option>
+          <?php foreach ($activeCourses as $c): ?>
+          <option value="<?= $c['id'] ?>" data-code="<?= htmlspecialchars($c['code']) ?>" data-name="<?= htmlspecialchars($c['name']) ?>">
+            <?= htmlspecialchars($c['code']) ?> — <?= htmlspecialchars($c['name']) ?>
+          </option>
+          <?php endforeach; ?>
+        </select>
+      </div>
+      <div class="form-row">
+        <div class="form-field">
+          <label>Course Code (manual)</label>
+          <input type="text" id="tt-code" placeholder="e.g. CSH221">
+        </div>
+        <div class="form-field">
+          <label>Course Name (manual)</label>
+          <input type="text" id="tt-name" placeholder="e.g. Systems Analysis">
+        </div>
+      </div>
+      <div class="form-field">
+        <label>Lecturer</label>
+        <select id="tt-lecturer">
+          <option value="">— Select Lecturer —</option>
+          <?php foreach ($allLecturers as $l): ?>
+          <option value="<?= $l['id'] ?>"><?= htmlspecialchars($l['full_name']) ?></option>
+          <?php endforeach; ?>
+        </select>
+      </div>
+      <button class="btn btn-gold" style="width:100%;margin-top:.5rem" onclick="saveTimetableSlot()">Save Slot</button>
+    </div>
+  </div>
+</div>
+ 
+<!-- ══ TIMETABLE JAVASCRIPT — paste inside existing <script> or before </body> ══ -->
+<script>
+function openAddSlot() {
+  document.getElementById('tt-edit-id').value = '';
+  document.getElementById('tt-day').value     = 'Monday';
+  document.getElementById('tt-start').value   = '';
+  document.getElementById('tt-end').value     = '';
+  document.getElementById('tt-room').value    = '';
+  document.getElementById('tt-code').value    = '';
+  document.getElementById('tt-name').value    = '';
+  document.getElementById('tt-course').value  = '';
+  document.getElementById('tt-lecturer').value = '';
+  document.getElementById('tt-modal-title').textContent = 'ADD TIMETABLE SLOT';
+  openModal('modal-timetable');
+}
+ 
+function editSlot(id, day, start, end, code, name, room, lecturerId) {
+  document.getElementById('tt-edit-id').value  = id;
+  document.getElementById('tt-day').value      = day;
+  document.getElementById('tt-start').value    = start;
+  document.getElementById('tt-end').value      = end;
+  document.getElementById('tt-code').value     = code;
+  document.getElementById('tt-name').value     = name;
+  document.getElementById('tt-room').value     = room;
+  if (lecturerId) document.getElementById('tt-lecturer').value = lecturerId;
+  document.getElementById('tt-modal-title').textContent = 'EDIT TIMETABLE SLOT';
+  openModal('modal-timetable');
+}
+ 
+function fillTTCourseName() {
+  const sel = document.getElementById('tt-course');
+  const opt = sel?.options[sel.selectedIndex];
+  if (opt && opt.value) {
+    document.getElementById('tt-code').value = opt.dataset.code || '';
+    document.getElementById('tt-name').value = opt.dataset.name || '';
+  }
+}
+ 
+function saveTimetableSlot() {
+  const id = document.getElementById('tt-edit-id').value;
+  const body = {
+    day_of_week:  document.getElementById('tt-day').value,
+    start_time:   document.getElementById('tt-start').value,
+    end_time:     document.getElementById('tt-end').value,
+    course_code:  document.getElementById('tt-code').value.trim().toUpperCase(),
+    course_name:  document.getElementById('tt-name').value.trim(),
+    room:         document.getElementById('tt-room').value.trim(),
+    lecturer_id:  document.getElementById('tt-lecturer').value || null,
+    course_id:    document.getElementById('tt-course').value || null,
+  };
+  if (!body.day_of_week || !body.start_time || !body.end_time || !body.course_code) {
+    alert('Day, times and course code are required'); return;
+  }
+  if (id) body.id = id;
+  fetch('../../api/timetable.php', {
+    method: id ? 'PUT' : 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  }).then(r => r.json()).then(d => {
+    if (d.success) { closeModal('modal-timetable'); location.reload(); }
+    else alert(d.error || 'Failed to save slot');
+  });
+}
+ 
+function deleteSlot(id, code) {
+  if (!confirm('Delete ' + code + ' slot?')) return;
+  fetch('../../api/timetable.php', {
+    method: 'DELETE',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id })
+  }).then(r => r.json()).then(d => {
+    if (d.success) location.reload();
+    else alert(d.error || 'Cannot delete');
+  });
+}
 </script>
 </body>
 </html>

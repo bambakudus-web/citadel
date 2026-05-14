@@ -1277,9 +1277,53 @@ function deleteSlot(id, code) {
   });
 }
 </script>
-full_name,index_no,email,role
-Doe, John,52430540200,john@citadel.edu,student
-Smith, Jane,52430540201,jane@citadel.edu,student
-Brown, James,52430540202,,student
+
+<!-- CSV Import Modal -->
+<div class="modal-overlay" id="modal-import-csv">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title">IMPORT STUDENTS — CSV</div>
+      <button class="modal-close" onclick="closeModal('modal-import-csv')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="background:rgba(74,111,165,.06);border:1px solid rgba(74,111,165,.2);border-radius:2px;padding:.8rem 1rem;font-size:.78rem;color:var(--muted);margin-bottom:1.2rem;line-height:1.6">
+        <strong style="color:var(--steel)">CSV Format:</strong> full_name, index_no, email (optional), role (optional)<br>
+        First row can be a header — skipped automatically.<br>
+        Default password = index number. Auto-enrolled in active semester courses.
+      </div>
+      <div class="form-field">
+        <label>Select CSV File</label>
+        <input type="file" id="csv-file" accept=".csv" style="background:var(--bg);border:1px solid var(--border);color:var(--text);padding:.65rem .9rem;border-radius:2px;width:100%;font-family:'DM Sans',sans-serif">
+      </div>
+      <button class="btn btn-gold" style="width:100%" onclick="importCSV()">Import Students</button>
+      <div id="import-result" style="margin-top:1rem;font-size:.82rem;display:none"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+function importCSV() {
+  const file = document.getElementById('csv-file').files[0];
+  const result = document.getElementById('import-result');
+  if (!file) { alert('Please select a CSV file'); return; }
+  const formData = new FormData();
+  formData.append('csv', file);
+  result.style.display = 'block';
+  result.style.color = 'var(--muted)';
+  result.textContent = 'Importing...';
+  fetch('../../api/import_students.php', { method: 'POST', body: formData })
+    .then(r => r.json())
+    .then(d => {
+      if (d.success) {
+        result.style.color = 'var(--success)';
+        result.innerHTML = '✓ ' + d.inserted + ' students imported, ' + d.skipped + ' skipped.';
+        setTimeout(() => { closeModal('modal-import-csv'); location.reload(); }, 2000);
+      } else {
+        result.style.color = 'var(--danger)';
+        result.textContent = d.error || 'Import failed';
+      }
+    }).catch(() => { result.style.color='var(--danger)'; result.textContent='Connection error'; });
+}
+</script>
 </body>
 </html>

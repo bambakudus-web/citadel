@@ -553,6 +553,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;background:radial-gradi
       <div class="section-header">
         <div class="section-title">Student <span>Registry</span></div>
         <button class="btn btn-gold" onclick="openModal('modal-add-student')">+ Add Student</button>
+        <button class="btn btn-ghost" onclick="openModal('modal-import-csv')">⬆ Import CSV</button>
       </div>
       <div class="filter-bar"><input type="text" id="student-search" placeholder="Search name or index number..." oninput="filterStudents()"></div>
       <div class="card"><div class="card-body" style="padding:0;overflow-x:auto">
@@ -1276,5 +1277,9 @@ function deleteSlot(id, code) {
   });
 }
 </script>
+full_name,index_no,email,role
+Doe, John,52430540200,john@citadel.edu,student
+Smith, Jane,52430540201,jane@citadel.edu,student
+Brown, James,52430540202,,student
 </body>
 </html>

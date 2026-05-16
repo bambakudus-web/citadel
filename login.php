@@ -111,6 +111,7 @@ function roleRedirect(string $role): string {
     @keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
     @media(max-width:480px){.card{padding:2rem 1.4rem}.brand-name{font-size:1.4rem}}
   </style>
+<link rel="manifest" href="/manifest.json"><meta name="theme-color" content="#c9a84c"><script>if("serviceWorker"in navigator)navigator.serviceWorker.register("/sw.js");</script>
 </head>
 <body>
 <div class="bg-scene"></div>

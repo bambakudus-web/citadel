@@ -277,6 +277,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;background:radial-gradi
 @media(max-width:480px){.stats-grid{grid-template-columns:1fr}}
 @media(min-width:769px){#menu-btn{display:none}}
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 </head>
 <body>
 <div class="layout">
@@ -417,6 +418,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;background:radial-gradi
           </div>
         </div>
       </div>
+      <div class="card" style="margin-bottom:1.5rem"><div class="card-body"><div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem"><canvas id="chart-attendance-trend" height="200"></canvas><canvas id="chart-course-rates" height="200"></canvas></div></div></div>
     </div>
 
      <!-- ══ TIMETABLE ══ -->
@@ -1325,5 +1327,8 @@ function importCSV() {
     }).catch(() => { result.style.color='var(--danger)'; result.textContent='Connection error'; });
 }
 </script>
+<?php require_once '../../includes/toast.php'; ?>
+<script src="/admin_charts.js"></script>
+<script src="/admin_charts.js"></script>
 </body>
 </html>

@@ -692,5 +692,6 @@ document.querySelectorAll('form').forEach(form=>{if(!form.querySelector('[name="
 const originalFetch=window.fetch;
 window.fetch=function(url,options={}){options.headers=options.headers||{};options.headers['X-CSRF-Token']=csrfToken;return originalFetch(url,options)};
 </script>
+<?php require_once '../../includes/toast.php'; ?>
 </body>
 </html>

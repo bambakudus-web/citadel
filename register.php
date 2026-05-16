@@ -125,6 +125,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'DM San
 .info-box strong{color:var(--steel)}
 @media(max-width:500px){.form-row{grid-template-columns:1fr}.card{padding:1.8rem 1.2rem}}
 </style>
+<link rel="manifest" href="/manifest.json"><meta name="theme-color" content="#c9a84c"><script>if("serviceWorker"in navigator)navigator.serviceWorker.register("/sw.js");</script>
 </head>
 <body>
 <div class="bg-scene"></div>

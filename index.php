@@ -119,6 +119,7 @@ footer{padding:2rem 4rem;border-top:1px solid var(--border);display:flex;align-i
   .stat-num{font-size:1.5rem}
 }
 </style>
+<link rel="manifest" href="/manifest.json"><meta name="theme-color" content="#c9a84c"><script>if("serviceWorker"in navigator)navigator.serviceWorker.register("/sw.js");</script>
 </head>
 <body>
 <div class="grid"></div>

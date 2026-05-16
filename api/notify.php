@@ -1,6 +1,8 @@
 <?php
 // api/notify.php — Email notifications for attendance events
 require_once '../includes/cors.php';
+require_once '../includes/resend_mail.php';
+require_once '../includes/resend_mail.php';
 require_once '../includes/db.php';
 require_once '../includes/auth.php';
 
@@ -12,8 +14,8 @@ $type   = $input['type']   ?? ''; // 'approved', 'rejected', 'low_attendance', '
 $target = $input['target'] ?? ''; // student_id or 'all'
 
 // Simple PHP mail wrapper — works on most hosts
-// For production, swap sendMail() with PHPMailer or Mailgun
-function sendMail(string $to, string $name, string $subject, string $body): bool {
+// For production, swap sendResendEmail() with PHPMailer or Mailgun
+function sendResendEmail(string $to, string $name, string $subject, string $body): bool {
     $from    = getenv('MAIL_FROM') ?: 'noreply@citadel.edu';
     $fromName = 'Citadel Attendance System';
     $headers  = implode("\r\n", [
@@ -74,7 +76,7 @@ switch ($type) {
                 Log in to Citadel to view your full attendance record.",
                 $color
             );
-            sendMail($student['email'], $student['full_name'], "Citadel — Attendance $status", $body) ? $sent++ : $failed++;
+            sendResendEmail($student['email'], $student['full_name'], "Citadel — Attendance $status", $body) ? $sent++ : $failed++;
         }
         break;
 
@@ -92,7 +94,7 @@ switch ($type) {
                 Please contact your Course Rep if you believe this is an error.",
                 '#e05c5c'
             );
-            sendMail($student['email'], $student['full_name'], "Citadel — Attendance Rejected", $body) ? $sent++ : $failed++;
+            sendResendEmail($student['email'], $student['full_name'], "Citadel — Attendance Rejected", $body) ? $sent++ : $failed++;
         }
         break;
 
@@ -130,7 +132,7 @@ switch ($type) {
                 Please improve your attendance to avoid academic penalties.",
                 '#e05c5c'
             );
-            sendMail($s['email'], $s['full_name'], "Citadel — Low Attendance Warning: {$course['code']}", $body) ? $sent++ : $failed++;
+            sendResendEmail($s['email'], $s['full_name'], "Citadel — Low Attendance Warning: {$course['code']}", $body) ? $sent++ : $failed++;
         }
         break;
 
@@ -160,7 +162,7 @@ switch ($type) {
                 <blockquote style='border-left:3px solid #c9a84c;padding-left:16px;margin:16px 0;color:#e8eaf0'>$message</blockquote>",
                 '#4a6fa5'
             );
-            sendMail($s['email'], $s['full_name'], "Citadel — Class Announcement", $body) ? $sent++ : $failed++;
+            sendResendEmail($s['email'], $s['full_name'], "Citadel — Class Announcement", $body) ? $sent++ : $failed++;
         }
         break;
 

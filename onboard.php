@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once 'includes/db.php';
+require_once 'includes/brevo_mail.php';
 
 $error = ''; $success = '';
 
@@ -57,6 +58,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 $pdo->commit();
                 $success = true;
+                // Send welcome email to new admin
+                try {
+                    $instRow = $pdo->prepare("SELECT name FROM institutions WHERE id=? LIMIT 1");
+                    $instRow->execute([$instId]);
+                    $instName = $instRow->fetchColumn() ?: $schoolName;
+                    sendWelcomeEmail($adminEmail, $adminName, $adminEmail, $adminPass, $instName);
+                } catch(Exception $e) { /* non-fatal */ }
             } catch (Exception $e) {
                 $pdo->rollBack();
                 $error = 'Registration failed. Please try again.';

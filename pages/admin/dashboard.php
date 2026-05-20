@@ -41,21 +41,23 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 $user = currentUser();
 
 // ── Stats ──
-$totalStudents   = $pdo->query("SELECT COUNT(*) FROM users WHERE role='student'")->fetchColumn();
-$totalLecturers  = $pdo->query("SELECT COUNT(*) FROM users WHERE role='lecturer'")->fetchColumn();
-$totalSessions   = $pdo->query("SELECT COUNT(*) FROM sessions")->fetchColumn();
-$todayAttendance = $pdo->query("SELECT COUNT(*) FROM attendance WHERE DATE(timestamp)=CURDATE()")->fetchColumn();
+$inst_id = (int)($_SESSION['institution_id'] ?? 1);
+
+$totalStudents   = $pdo->query("SELECT COUNT(*) FROM users WHERE role='student' AND institution_id=$inst_id")->fetchColumn();
+$totalLecturers  = $pdo->query("SELECT COUNT(*) FROM users WHERE role='lecturer' AND institution_id=$inst_id")->fetchColumn();
+$totalSessions   = $pdo->query("SELECT COUNT(*) FROM sessions s JOIN users u ON u.id=s.lecturer_id WHERE u.institution_id=$inst_id")->fetchColumn();
+$todayAttendance = $pdo->query("SELECT COUNT(*) FROM attendance a JOIN sessions s ON s.id=a.session_id JOIN users u ON u.id=s.lecturer_id WHERE DATE(a.timestamp)=CURDATE() AND u.institution_id=$inst_id")->fetchColumn();
 
 // ── Today's timetable ──
 $today = date('l');
-$todayClasses = $pdo->prepare("SELECT t.*, u.full_name as lecturer_name FROM timetable t LEFT JOIN users u ON t.lecturer_id=u.id WHERE t.day_of_week=? ORDER BY t.start_time");
+$todayClasses = $pdo->prepare("SELECT t.*, u.full_name as lecturer_name FROM timetable t JOIN users u ON t.lecturer_id=u.id WHERE t.day_of_week=? AND u.institution_id=$inst_id ORDER BY t.start_time");
 $todayClasses->execute([$today]);
 $todayClasses = $todayClasses->fetchAll();
 
 // ── Recent activity ──
 $recentActivity = $pdo->query("
     SELECT a.timestamp, u.full_name, u.index_no, s.course_code, a.status
-    FROM attendance a JOIN users u ON a.student_id=u.id JOIN sessions s ON a.session_id=s.id
+    FROM attendance a JOIN users u ON a.student_id=u.id JOIN sessions s ON a.session_id=s.id WHERE u.institution_id=$inst_id
     ORDER BY a.timestamp DESC LIMIT 10
 ")->fetchAll();
 
@@ -64,18 +66,18 @@ $students = $pdo->query("
     SELECT u.*, COUNT(DISTINCT s.id) as total_sessions,
     SUM(CASE WHEN a.status IN ('present','late') THEN 1 ELSE 0 END) as attended,
     ROUND(SUM(CASE WHEN a.status IN ('present','late') THEN 1 ELSE 0 END) / NULLIF(COUNT(DISTINCT s.id),0) * 100) as attendance_pct
-    FROM users u LEFT JOIN attendance a ON u.id=a.student_id LEFT JOIN sessions s ON a.session_id=s.id
-    WHERE u.role='student' GROUP BY u.id ORDER BY attendance_pct ASC, u.full_name
+    FROM users u LEFT JOIN attendance a ON u.id=a.student_id LEFT JOIN sessions s ON a.session_id=s.id WHERE u.institution_id=$inst_id AND u.role='student' AND u.institution_id=$inst_id GROUP BY u.id ORDER BY attendance_pct ASC, u.full_name
 ")->fetchAll();
 
 // ── Sessions ──
 $sessions = $pdo->query("
     SELECT s.*, u.full_name as lecturer_name, COUNT(a.id) as attendance_count
-    FROM sessions s LEFT JOIN users u ON s.lecturer_id=u.id LEFT JOIN attendance a ON s.id=a.session_id
+    FROM sessions s JOIN users u ON s.lecturer_id=u.id LEFT JOIN attendance a ON s.id=a.session_id
+    WHERE u.institution_id=$inst_id
     GROUP BY s.id ORDER BY s.created_at DESC LIMIT 20
 ")->fetchAll();
 
-$activeSession = $pdo->query("SELECT * FROM sessions WHERE active_status=1 ORDER BY start_time DESC LIMIT 1")->fetch();
+$activeSession = $pdo->query("SELECT s.* FROM sessions s JOIN users u ON u.id=s.lecturer_id WHERE s.active_status=1 AND u.institution_id=$inst_id ORDER BY s.start_time DESC LIMIT 1")->fetch();
 $pendingCount = 0;
 if ($activeSession) {
     $pc = $pdo->prepare("SELECT COUNT(*) FROM attendance WHERE session_id=? AND status='pending'");
@@ -86,11 +88,13 @@ $sessionHistory = $pdo->query("
     SELECT s.*, COUNT(DISTINCT CASE WHEN a.status IN ('present','late') THEN a.student_id END) as present_count,
     COUNT(DISTINCT CASE WHEN a.status='absent' THEN a.student_id END) as absent_count,
     COUNT(DISTINCT CASE WHEN a.status='late' THEN a.student_id END) as late_count
-    FROM sessions s LEFT JOIN attendance a ON s.id=a.session_id
-    WHERE s.active_status=0 GROUP BY s.id ORDER BY s.start_time DESC LIMIT 30
+    FROM sessions s
+    JOIN users u2 ON u2.id=s.lecturer_id
+    LEFT JOIN attendance a ON s.id=a.session_id
+    WHERE s.active_status=0 AND u2.institution_id=$inst_id GROUP BY s.id ORDER BY s.start_time DESC LIMIT 30
 ")->fetchAll();
 
-$announcements = $pdo->query("SELECT a.message, a.created_at, u.full_name FROM announcements a JOIN users u ON a.rep_id=u.id ORDER BY a.created_at DESC LIMIT 20")->fetchAll();
+$announcements = $pdo->query("SELECT a.message, a.created_at, u.full_name FROM announcements a JOIN users u ON u.id=a.rep_id WHERE u.institution_id=$inst_id ORDER BY a.created_at DESC LIMIT 20")->fetchAll();
 
 $liveAttendance = [];
 if ($activeSession) {
@@ -99,12 +103,12 @@ if ($activeSession) {
 }
 
 // ── NEW: Semester & Course data ──
-$activeSemester = $pdo->query("SELECT * FROM semesters WHERE is_active=1 LIMIT 1")->fetch();
+$activeSemester = $pdo->query("SELECT * FROM semesters WHERE is_active=1 AND institution_id=$inst_id LIMIT 1")->fetch();
 $activeSemId    = $activeSemester['id'] ?? null;
 
 $allSemesters = $pdo->query("
     SELECT s.*, COUNT(DISTINCT c.id) AS course_count
-    FROM semesters s LEFT JOIN courses c ON c.semester_id=s.id
+    FROM semesters s LEFT JOIN courses c ON c.semester_id=s.id WHERE s.institution_id=$inst_id
     GROUP BY s.id ORDER BY s.academic_year DESC, s.semester_no DESC
 ")->fetchAll();
 
@@ -127,19 +131,20 @@ $allLecturers = $pdo->query("
     SELECT u.*, d.name AS department_name, COUNT(DISTINCT ca.course_id) AS assigned_courses
     FROM users u LEFT JOIN departments d ON d.id=u.department_id
     LEFT JOIN course_assignments ca ON ca.lecturer_id=u.id
-    WHERE u.role='lecturer' GROUP BY u.id ORDER BY u.full_name ASC
+    WHERE u.role='lecturer' AND u.institution_id=$inst_id GROUP BY u.id ORDER BY u.full_name ASC
 ")->fetchAll();
 
-$allPrograms    = $pdo->query("SELECT * FROM programs ORDER BY name")->fetchAll();
-$allDepartments = $pdo->query("SELECT * FROM departments ORDER BY name")->fetchAll();
+$allPrograms    = $pdo->query("SELECT p.* FROM programs p JOIN departments d ON d.id=p.department_id WHERE d.institution_id=$inst_id ORDER BY p.name")->fetchAll();
+$allDepartments = $pdo->query("SELECT * FROM departments WHERE institution_id=$inst_id ORDER BY name")->fetchAll();
 
 $auditLog = $pdo->query("
     SELECT al.*, u.full_name AS actor_name
     FROM audit_log al JOIN users u ON u.id=al.actor_id
+    WHERE u.institution_id=$inst_id
     ORDER BY al.created_at DESC LIMIT 50
 ")->fetchAll();
 
-$devs = $pdo->query("SELECT id, full_name, index_no, device_fingerprint, is_locked, login_attempts FROM users WHERE role IN ('student','rep','lecturer') ORDER BY is_locked DESC, full_name")->fetchAll();
+$devs = $pdo->query("SELECT id, full_name, index_no, device_fingerprint, is_locked, login_attempts FROM users WHERE role IN ('student','rep','lecturer') AND institution_id=$inst_id ORDER BY is_locked DESC, full_name")->fetchAll();
 
 // ── Code gen ──
 function generateCode(string $secret, int $window): string {
@@ -447,8 +452,9 @@ function showSection(name, el) {
                  COALESCE(c.code, t.course_code) AS course_code,
                  COALESCE(c.name, t.course_name) AS course_name
           FROM timetable t
-          LEFT JOIN users u ON u.id = t.lecturer_id
+          JOIN users u ON u.id = t.lecturer_id
           LEFT JOIN courses c ON c.id = t.course_id
+          WHERE u.institution_id=$inst_id
           ORDER BY FIELD(t.day_of_week,'Monday','Tuesday','Wednesday','Thursday','Friday'), t.start_time
       ")->fetchAll();
       $days = ['Monday','Tuesday','Wednesday','Thursday','Friday'];
@@ -636,7 +642,7 @@ function showSection(name, el) {
       <div class="card"><div class="card-body" style="padding:0;overflow-x:auto">
         <table class="data-table"><thead><tr><th>Student</th><th class="hide-mobile">Index No.</th><th class="hide-mobile">Course</th><th>Status</th><th class="hide-mobile">Timestamp</th><th class="hide-mobile">Selfie</th></tr></thead><tbody>
         <?php
-        $records = $pdo->query("SELECT a.*,u.full_name,u.index_no,s.course_code FROM attendance a JOIN users u ON a.student_id=u.id JOIN sessions s ON a.session_id=s.id ORDER BY a.timestamp DESC LIMIT 50")->fetchAll();
+        $records = $pdo->query("SELECT a.*,u.full_name,u.index_no,s.course_code FROM attendance a JOIN users u ON a.student_id=u.id JOIN sessions s ON a.session_id=s.id WHERE u.institution_id=$inst_id ORDER BY a.timestamp DESC LIMIT 50")->fetchAll();
         if(empty($records)): ?><tr><td colspan="6" style="color:var(--muted)">No attendance records yet.</td></tr>
         <?php else: foreach($records as $r): ?>
           <tr>

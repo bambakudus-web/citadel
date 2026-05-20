@@ -277,7 +277,21 @@ body::before{content:'';position:fixed;inset:0;z-index:0;background:radial-gradi
 @media(max-width:480px){.stats-grid{grid-template-columns:1fr}}
 @media(min-width:769px){#menu-btn{display:none}}
 </style>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="/assets/chart.min.js"></script>
+<script>
+function showSection(name, el) {
+  document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  var sec = document.getElementById('sec-' + name);
+  if (sec) sec.classList.add('active');
+  var title = document.getElementById('page-title');
+  if (title) title.textContent = name.charAt(0).toUpperCase() + name.slice(1);
+  if (el) el.classList.add('active');
+  var sb = document.getElementById('sidebar');
+  if (sb) sb.classList.remove('open');
+}
+</script>
+
 </head>
 <body>
 <div class="layout">
@@ -418,7 +432,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;background:radial-gradi
           </div>
         </div>
       </div>
-      <div class="card" style="margin-bottom:1.5rem"><div class="card-body"><div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem"><canvas id="chart-attendance-trend" height="200"></canvas><canvas id="chart-course-rates" height="200"></canvas></div></div></div>
+      <div class="card" style="margin-bottom:1.5rem" id="charts-card"><div class="card-head"><div class="card-head-title">Attendance <span>Analytics</span></div></div><div class="card-body"><div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem"><div><canvas id="chart-attendance-trend" height="200"></canvas></div><div><canvas id="chart-course-rates" height="200"></canvas></div></div></div></div>
     </div>
 
      <!-- ══ TIMETABLE ══ -->
@@ -1328,7 +1342,6 @@ function importCSV() {
 }
 </script>
 <?php require_once '../../includes/toast.php'; ?>
-<script src="/admin_charts.js"></script>
 <script src="/admin_charts.js"></script>
 </body>
 </html>

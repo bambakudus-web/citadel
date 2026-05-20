@@ -1,7 +1,5 @@
 <?php
-// Block cross-origin API access
-$allowed = 'https://citadel-production-5edc.up.railway.app';
-if (isset($_SERVER['HTTP_ORIGIN']) && $_SERVER['HTTP_ORIGIN'] !== $allowed) {
-    http_response_code(403);
-    die(json_encode(['success' => false, 'message' => 'Cross-origin request blocked.']));
-}
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
+header('Access-Control-Allow-Headers: Content-Type, Authorization');
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') { http_response_code(200); exit; }

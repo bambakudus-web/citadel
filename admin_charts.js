@@ -37,6 +37,10 @@ function initCharts() {
     .then(data => {
       const ctx = document.getElementById('chart-attendance-trend');
       if (!ctx) return;
+      if (!data.labels || data.labels.length === 0) {
+        ctx.parentElement.innerHTML = '<div style="height:200px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:.82rem">No attendance data yet</div>';
+        return;
+      }
       new Chart(ctx, {
         type: 'line',
         data: {
@@ -82,6 +86,10 @@ function initCharts() {
       const ctx = document.getElementById('chart-course-rates');
       if (!ctx) return;
       const rates = data.rates || [];
+      if (!rates.length) {
+        ctx.parentElement.innerHTML = '<div style="height:200px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:.82rem">No course data yet</div>';
+        return;
+      }
       const colors = rates.map(r => r >= 75 ? chartColors.success : r >= 50 ? chartColors.gold : chartColors.danger);
       new Chart(ctx, {
         type: 'bar',

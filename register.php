@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once 'includes/db.php';
+require_once 'includes/brevo_mail.php';
 
 if (!empty($_SESSION['user_id'])) {
     header('Location: pages/student/dashboard.php');
@@ -76,6 +77,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             }
                         }
                         $success = true;
+                        // Send welcome email
+                        try {
+                            $realEmail = $_POST['email'] ?? '';
+                            if ($realEmail && filter_var($realEmail, FILTER_VALIDATE_EMAIL)) {
+                                sendWelcomeEmail($realEmail, $fullName, $indexNo, $password, $institution['name']);
+                            }
+                        } catch(Exception $e2) {}
                     } catch (Exception $e) { $error = 'Registration failed. Try again.'; $step = 2; }
                 }
             }

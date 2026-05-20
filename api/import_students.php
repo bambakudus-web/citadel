@@ -3,6 +3,7 @@
 require_once '../includes/cors.php';
 require_once '../includes/db.php';
 require_once '../includes/auth.php';
+require_once '../includes/brevo_mail.php';
 
 header('Content-Type: application/json');
 requireRole('admin', 'rep');
@@ -20,13 +21,24 @@ if (empty($_FILES['csv']['tmp_name'])) {
 }
 
 // Active semester for auto-enrollment
-$activeSem = $pdo->query("SELECT id FROM semesters WHERE is_active=1 LIMIT 1")->fetch();
+$activeSem = $pdo->prepare("SELECT id FROM semesters WHERE is_active=1 AND institution_id=$inst_id LIMIT 1"); $activeSem->execute(); $activeSem = $activeSem->fetch();
 $semId     = $activeSem['id'] ?? null;
 
-// Default program/department/institution
-$programId     = 1;
-$departmentId  = 1;
-$institutionId = 1;
+// Scope to logged-in admin's institution
+$inst_id       = (int)($_SESSION['institution_id'] ?? 1);
+$institutionId = $inst_id;
+
+// Get default program/dept for this institution
+$progRow = $pdo->prepare("SELECT p.id, p.department_id FROM programs p JOIN departments d ON d.id=p.department_id WHERE d.institution_id=? LIMIT 1");
+$progRow->execute([$inst_id]);
+$progRow = $progRow->fetch();
+$programId    = $progRow['id']            ?? 1;
+$departmentId = $progRow['department_id'] ?? 1;
+
+// Get institution name for welcome email
+$instNameRow = $pdo->prepare("SELECT name FROM institutions WHERE id=? LIMIT 1");
+$instNameRow->execute([$inst_id]);
+$instName = $instNameRow->fetchColumn() ?: 'Citadel';
 
 $file    = $_FILES['csv']['tmp_name'];
 $handle  = fopen($file, 'r');
@@ -71,7 +83,7 @@ while (($line = fgetcsv($handle, 1000, ',')) !== false) {
     // Expected columns: full_name, index_no, email (optional), role (optional)
     $fullName = trim($line[0] ?? '');
     $indexNo  = trim($line[1] ?? '');
-    $email    = trim($line[2] ?? '') ?: ($indexNo . '@citadel.edu');
+    $email    = trim($line[2] ?? '') ?: ($indexNo . '@' . strtolower($instName) . '.edu.gh');
     $role     = in_array(trim($line[3] ?? ''), ['student','rep']) ? trim($line[3]) : 'student';
 
     if (!$fullName || !$indexNo) {
@@ -102,6 +114,10 @@ while (($line = fgetcsv($handle, 1000, ',')) !== false) {
         }
 
         $inserted++;
+        // Send welcome email if real email provided
+        if (!empty($email) && strpos($email, '@citadel.edu') === false && strpos($email, '.edu.gh') === false) {
+            try { sendWelcomeEmail($email, $fullName, $indexNo, $indexNo, $instName); } catch(Exception $e2) {}
+        }
     } catch (Exception $e) {
         $errors[] = "Row $row: $indexNo — " . $e->getMessage();
         $skipped++;

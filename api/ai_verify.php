@@ -47,16 +47,26 @@ Respond ONLY with a JSON object in this exact format:
 Be strict. If there is no face, or the face is too small, blurry, or appears to be a photo of a photo, set detected to false.";
 
 } else if ($type === 'environment') {
-    $prompt = "Analyze this image carefully. I need to verify this is a legitimate classroom/lecture environment. Check for:
-1. Signs of a classroom: desks, chairs, tables, whiteboard, projector, screen, lecture equipment
-2. Presence of other people (students or lecturer) in the background
-3. Academic/educational setting indicators
-4. Adequate lighting suggesting an indoor institutional environment
+    $prompt = "You are a strict attendance verification system. Analyze this image and determine if it shows a REAL classroom or lecture hall environment.
 
-Respond ONLY with a JSON object in this exact format:
-{\"is_classroom\": true/false, \"confidence\": 0-100, \"reason\": \"brief explanation\", \"people_visible\": true/false, \"classroom_indicators\": [\"list\", \"of\", \"detected\", \"items\"]}
+STRICT REQUIREMENTS — ALL must be true:
+1. The image must show a ROOM ENVIRONMENT, not a close-up of a face or person
+2. Must show institutional furniture: rows of desks/chairs, lecture benches, or laboratory tables
+3. Must show at least 2-3 other people (students or lecturer) clearly visible in the background
+4. Must show academic equipment: whiteboard, blackboard, projector, screen, or lecture podium
+5. The primary subject must be the ROOM, not a face
 
-Be VERY STRICT. A bedroom, living room, corridor, or outdoor area should return is_classroom: false. There must be clear classroom furniture and at least some indication of other people present.";
+AUTOMATIC FAIL conditions:
+- Image is primarily a selfie or close-up face shot
+- Only one person visible
+- Looks like a bedroom, living room, office, corridor, or outdoor area
+- Cannot clearly identify classroom furniture
+- Image is blurry or too dark to verify
+
+Respond ONLY with this exact JSON:
+{\"is_classroom\": true/false, \"confidence\": 0-100, \"reason\": \"brief explanation\", \"people_visible\": true/false, \"person_count\": 0, \"classroom_indicators\": [\"list\", \"of\", \"items\"], \"is_selfie\": true/false}
+
+Be EXTREMELY strict. When in doubt, return false.";
 
 } else {
     echo json_encode(['success' => false, 'message' => 'Invalid verification type']);
@@ -145,18 +155,28 @@ if ($type === 'face') {
     $indicators   = $result['classroom_indicators'] ?? [];
     $reason       = $result['reason']               ?? 'Unknown';
 
-    if (!$isClassroom || $confidence < 70) {
+    $isSelfie    = $result['is_selfie']    ?? false;
+    $personCount = (int)($result['person_count'] ?? 0);
+
+    if ($isSelfie) {
         echo json_encode([
             'success'    => false,
             'confidence' => $confidence,
-            'message'    => 'Not a classroom environment. Show your surroundings including desks, chairs, and other students.',
+            'message'    => 'This looks like a selfie, not a classroom photo. Turn your camera around and show the room with other students.',
             'reason'     => $reason
         ]);
-    } else if (!$peopleVisible && $confidence < 85) {
+    } else if (!$isClassroom || $confidence < 75) {
         echo json_encode([
             'success'    => false,
             'confidence' => $confidence,
-            'message'    => 'No other people visible. Make sure other students are in the frame.',
+            'message'    => 'Not a valid classroom. Show desks, chairs, whiteboard and other students clearly.',
+            'reason'     => $reason
+        ]);
+    } else if (!$peopleVisible || $personCount < 2) {
+        echo json_encode([
+            'success'    => false,
+            'confidence' => $confidence,
+            'message'    => 'At least 2 other students must be visible in your classroom photo.',
             'reason'     => $reason
         ]);
     } else {

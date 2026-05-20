@@ -48,12 +48,15 @@ async function captureSelfie() {
     document.getElementById('capture-btn').disabled = false;
     document.getElementById('retake-btn').style.display = 'flex';
     document.getElementById('video-preview').style.display = 'block';
-    document.getElementById('step-label').textContent = 'Step 3: Show your classroom';
+    document.getElementById('step-label').textContent = 'Step 3: Turn camera around — show room, desks & other students';
     stopCamera();
     cameraStep = 'classroom';
-    navigator.mediaDevices.getUserMedia({ video: { facingMode: { exact: 'environment' } } })
-      .then(s => { stream = s; document.getElementById('video-preview').srcObject = s; })
-      .catch(() => navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } })
+    // Force back camera for classroom shot
+    navigator.mediaDevices.getUserMedia({ 
+        video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 } } 
+    })
+    .then(s => { stream = s; document.getElementById('video-preview').srcObject = s; })
+    .catch(() => navigator.mediaDevices.getUserMedia({ video: true })
         .then(s => { stream = s; document.getElementById('video-preview').srcObject = s; }));
 
   } else {
@@ -77,9 +80,9 @@ async function captureSelfie() {
         capturedClassroom = null;
         document.getElementById('capture-btn').disabled = false;
         document.getElementById('capture-btn').textContent = '📸 Capture Classroom';
-        document.getElementById('step-label').textContent = 'Step 3: Show your classroom';
+        document.getElementById('step-label').textContent = 'Step 3: Turn camera around — show room, desks & other students';
         const errEl = document.getElementById('submit-error');
-        errEl.textContent = classData.message || 'Not a classroom. Show desks and other students.';
+        errEl.textContent = classData.message || 'Not valid. Turn camera to show the classroom with desks and at least 2 other students.';
         errEl.style.display = 'block';
         return;
       }

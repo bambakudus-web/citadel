@@ -20,8 +20,19 @@ if (empty($type) || empty($image)) {
 // Strip data URL prefix to get pure base64
 $base64 = preg_replace('/^data:image\/\w+;base64,/', '', $image);
 
-// Get Anthropic API key from environment
+// Get Anthropic API key from environment or .env file
 $apiKey = getenv('ANTHROPIC_API_KEY') ?: '';
+if (empty($apiKey)) {
+    $envFile = __DIR__ . '/../.env';
+    if (file_exists($envFile)) {
+        foreach (file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) as $line) {
+            if (strpos($line, 'ANTHROPIC_API_KEY=') === 0) {
+                $apiKey = trim(substr($line, strlen('ANTHROPIC_API_KEY=')));
+                break;
+            }
+        }
+    }
+}
 
 if (empty($apiKey)) {
     // Fallback: if no API key, do basic validation only

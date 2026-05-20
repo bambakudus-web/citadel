@@ -8,7 +8,8 @@ $user   = currentUser();
 $userId = $_SESSION['user_id'];
 
 // Active semester
-$activeSem = $pdo->query("SELECT * FROM semesters WHERE is_active=1 LIMIT 1")->fetch();
+$inst_id = (int)($_SESSION['institution_id'] ?? 1);
+$activeSem = $pdo->query("SELECT * FROM semesters WHERE is_active=1 AND institution_id=$inst_id LIMIT 1")->fetch();
 $semId     = $activeSem['id'] ?? null;
 
 // Student's enrolled courses this semester
@@ -60,13 +61,13 @@ if (!empty($enrolledCourseIds)) {
 
 // Fallback: if no course_id links, use old timetable
 if (empty($todayClasses)) {
-    $stmt = $pdo->prepare("SELECT t.*, u.full_name AS lecturer_name FROM timetable t LEFT JOIN users u ON t.lecturer_id=u.id WHERE t.day_of_week=? ORDER BY t.start_time");
+    $stmt = $pdo->prepare("SELECT t.*, u.full_name AS lecturer_name FROM timetable t JOIN users u ON t.lecturer_id=u.id WHERE t.day_of_week=? AND u.institution_id=$inst_id ORDER BY t.start_time");
     $stmt->execute([$today]); $todayClasses = $stmt->fetchAll();
 }
 
 // Active session — only if student is enrolled in that course
 $activeSession = null;
-$rawActive = $pdo->query("SELECT * FROM sessions WHERE active_status=1 ORDER BY start_time DESC LIMIT 1")->fetch();
+$rawActive = $pdo->query("SELECT s.* FROM sessions s JOIN users u ON u.id=s.lecturer_id WHERE s.active_status=1 AND u.institution_id=$inst_id ORDER BY s.start_time DESC LIMIT 1")->fetch();
 if ($rawActive) {
     if ($rawActive['course_id'] && !empty($enrolledCourseIds) && in_array($rawActive['course_id'], $enrolledCourseIds)) {
         $activeSession = $rawActive;

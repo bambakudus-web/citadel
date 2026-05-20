@@ -5,12 +5,13 @@ require_once '../includes/db.php';
 require_once '../includes/auth.php';
 requireRole('admin', 'lecturer');
 header('Content-Type: application/json');
+$inst_id = (int)($_SESSION['institution_id'] ?? 1);
 
 $type   = $_GET['type']        ?? 'trend';
 $semId  = (int)($_GET['semester_id'] ?? 0);
 
 if (!$semId) {
-    $row   = $pdo->query("SELECT id FROM semesters WHERE is_active=1 LIMIT 1")->fetch();
+    $row   = $pdo->query("SELECT id FROM semesters WHERE is_active=1 AND institution_id=$inst_id LIMIT 1")->fetch();
     $semId = $row['id'] ?? null;
 }
 
@@ -23,9 +24,10 @@ switch ($type) {
                    DATE_FORMAT(s.start_time,'%d %b') AS label,
                    COUNT(DISTINCT CASE WHEN a.status IN ('present','late') THEN a.student_id END) AS present,
                    COUNT(DISTINCT CASE WHEN a.status='absent' THEN a.student_id END) AS absent
-            FROM sessions s
+            FROM sessions s JOIN users u ON u.id=s.lecturer_id
             LEFT JOIN attendance a ON a.session_id = s.id
             WHERE s.active_status = 0
+              AND u.institution_id = $inst_id
               AND (s.semester_id = ? OR ? IS NULL)
             GROUP BY s.id
             ORDER BY s.start_time DESC
@@ -47,11 +49,11 @@ switch ($type) {
             SELECT c.code,
                    COUNT(DISTINCT CASE WHEN a.status IN ('present','late') THEN a.student_id END) AS attended,
                    COUNT(DISTINCT ce.student_id) AS enrolled
-            FROM courses c
+            FROM courses c JOIN semesters sem ON sem.id=c.semester_id
             LEFT JOIN sessions s ON s.course_id = c.id AND s.active_status = 0
             LEFT JOIN attendance a ON a.session_id = s.id
             LEFT JOIN course_enrollments ce ON ce.course_id = c.id AND ce.status = 'active'
-            WHERE c.semester_id = ?
+            WHERE c.semester_id = ? AND sem.institution_id = $inst_id
             GROUP BY c.id
             ORDER BY c.code ASC
         ");
@@ -80,6 +82,7 @@ switch ($type) {
             CROSS JOIN sessions s
             LEFT JOIN attendance a ON a.session_id = s.id AND a.student_id = u.id
             WHERE u.role IN ('student','rep')
+              AND u.institution_id = $inst_id
               AND (s.semester_id = ? OR ? IS NULL)
         ");
         $stmt->execute([$semId, $semId]);

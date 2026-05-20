@@ -4,6 +4,7 @@ require_once '../includes/cors.php';
 require_once '../includes/db.php';
 require_once '../includes/auth.php';
 requireLogin();
+$inst_id = (int)($_SESSION['institution_id'] ?? 1);
 
 $fullName    = trim($_POST['full_name'] ?? '');
 $indexNo     = trim($_POST['index_no']  ?? '');
@@ -13,8 +14,8 @@ $hash        = password_hash($indexNo, PASSWORD_DEFAULT);
 
 if ($fullName && $indexNo) {
     try {
-        $stmt = $pdo->prepare("INSERT INTO users (full_name, index_no, email, password_hash, role) VALUES (?,?,?,?,?)");
-        $stmt->execute([$fullName, $indexNo, $email, $hash, $role]);
+        $stmt = $pdo->prepare("INSERT INTO users (full_name, index_no, email, password_hash, role, institution_id) VALUES (?,?,?,?,?,?)");
+        $stmt->execute([$fullName, $indexNo, $email, $hash, $role, $inst_id]);
     } catch (Exception $e) {}
 }
 

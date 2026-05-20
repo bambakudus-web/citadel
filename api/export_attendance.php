@@ -56,7 +56,7 @@ $stmt = $pdo->prepare("
         a.status,
         DATE(a.timestamp)    AS date,
         TIME(a.timestamp)    AS time
-    FROM attendance a
+    FROM attendance a JOIN users su ON su.id=a.student_id
     JOIN users u    ON a.student_id  = u.id
     JOIN sessions s ON a.session_id  = s.id
     LEFT JOIN semesters sem ON sem.id = s.semester_id

@@ -15,7 +15,7 @@ switch ($method) {
         if (!empty($_GET['id'])) {
             $stmt = $pdo->prepare("
                 SELECT s.*, i.name AS institution_name
-                FROM semesters s
+                FROM semesters WHERE institution_id=$inst_id s
                 JOIN institutions i ON i.id = s.institution_id
                 WHERE s.id = ?
             ");

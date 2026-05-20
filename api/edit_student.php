@@ -4,6 +4,7 @@ require_once '../includes/cors.php';
 require_once '../includes/db.php';
 require_once '../includes/auth.php';
 requireLogin();
+$inst_id = (int)($_SESSION['institution_id'] ?? 1);
 
 $id       = (int)($_POST['id']        ?? 0);
 $fullName = trim($_POST['full_name']  ?? '');
@@ -12,7 +13,7 @@ $email    = trim($_POST['email']      ?? '');
 $role     = in_array($_POST['role'] ?? '', ['student','rep','lecturer','admin']) ? $_POST['role'] : 'student';
 
 if ($id && $fullName && $indexNo) {
-    $stmt = $pdo->prepare("UPDATE users SET full_name=?, index_no=?, email=?, role=? WHERE id=?");
+    $stmt = $pdo->prepare("UPDATE users SET full_name=?, index_no=?, email=?, role=? WHERE id=? AND institution_id=$inst_id");
     $stmt->execute([$fullName, $indexNo, $email, $role, $id]);
 }
 

@@ -64,7 +64,7 @@ if ($session['course_id']) {
     $students->execute([$session['course_id']]);
 } else {
     // Fallback: no course_id set (old session) — use semester enrollments or all students
-    $students = $pdo->query("SELECT id AS student_id FROM users WHERE role IN ('student','rep') AND is_active = 1");
+    $students = $pdo->query("SELECT id AS student_id FROM users WHERE role IN ('student','rep') AND is_active = 1 AND institution_id=$inst_id AND institution_id=$inst_id");
 }
 
 $absentCount   = 0;

@@ -8,6 +8,7 @@ header('Content-Type: application/json');
 
 $method = $_SERVER['REQUEST_METHOD'];
 requireRole('admin');
+$inst_id = (int)($_SESSION['institution_id'] ?? 1);
 
 switch ($method) {
 

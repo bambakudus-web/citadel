@@ -9,6 +9,7 @@ $method = $_SERVER['REQUEST_METHOD'];
 
 // GET is open to all logged-in users; mutations are admin-only
 requireLogin();
+$inst_id = (int)($_SESSION['institution_id'] ?? 1);
 
 switch ($method) {
 
@@ -26,7 +27,7 @@ switch ($method) {
             $stmt = $pdo->prepare("
                 SELECT c.*, s.name AS semester_name, p.name AS program_name,
                        u.full_name AS lecturer_name
-                FROM courses c
+                FROM courses c2 JOIN semesters s2 ON s2.id=c2.semester_id WHERE s2.institution_id=$inst_id c
                 JOIN semesters s ON s.id = c.semester_id
                 JOIN programs  p ON p.id = c.program_id
                 LEFT JOIN course_assignments ca ON ca.course_id = c.id AND ca.semester_id = c.semester_id

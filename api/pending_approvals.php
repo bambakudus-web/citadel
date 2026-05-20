@@ -6,6 +6,7 @@ session_start();
 require_once '../includes/db.php';
 require_once '../includes/auth.php';
 requireRole('rep', 'admin');
+$inst_id = (int)($_SESSION['institution_id'] ?? 1);
 
 $sessionId = (int)($_GET['session_id'] ?? 0);
 

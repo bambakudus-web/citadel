@@ -48,16 +48,26 @@ async function captureSelfie() {
     document.getElementById('capture-btn').disabled = false;
     document.getElementById('retake-btn').style.display = 'flex';
     document.getElementById('video-preview').style.display = 'block';
-    document.getElementById('step-label').textContent = 'Step 3: Turn camera around — show room, desks & other students';
+    // instruction set after camera init below
     stopCamera();
     cameraStep = 'classroom';
-    // Force back camera for classroom shot
-    navigator.mediaDevices.getUserMedia({ 
-        video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 } } 
-    })
-    .then(s => { stream = s; document.getElementById('video-preview').srcObject = s; })
-    .catch(() => navigator.mediaDevices.getUserMedia({ video: true })
+    // Detect if mobile (has back camera) or laptop
+    const isMobile = /Android|iPhone|iPad/i.test(navigator.userAgent);
+    if (isMobile) {
+      // Try back camera on mobile
+      navigator.mediaDevices.getUserMedia({ 
+        video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 } }
+      })
+      .then(s => { stream = s; document.getElementById('video-preview').srcObject = s; })
+      .catch(() => navigator.mediaDevices.getUserMedia({ video: true })
         .then(s => { stream = s; document.getElementById('video-preview').srcObject = s; }));
+      document.getElementById('step-label').textContent = 'Step 3: Flip phone — show room, desks & other students';
+    } else {
+      // Laptop — keep same camera, just ask them to turn laptop or show surroundings
+      navigator.mediaDevices.getUserMedia({ video: true })
+        .then(s => { stream = s; document.getElementById('video-preview').srcObject = s; });
+      document.getElementById('step-label').textContent = 'Step 3: Turn laptop to show classroom — desks, chairs & other students must be visible';
+    }
 
   } else {
     // Classroom capture
@@ -80,7 +90,7 @@ async function captureSelfie() {
         capturedClassroom = null;
         document.getElementById('capture-btn').disabled = false;
         document.getElementById('capture-btn').textContent = '📸 Capture Classroom';
-        document.getElementById('step-label').textContent = 'Step 3: Turn camera around — show room, desks & other students';
+        // instruction set after camera init below
         const errEl = document.getElementById('submit-error');
         errEl.textContent = classData.message || 'Not valid. Turn camera to show the classroom with desks and at least 2 other students.';
         errEl.style.display = 'block';

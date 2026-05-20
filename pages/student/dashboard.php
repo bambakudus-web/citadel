@@ -347,8 +347,8 @@ canvas{display:none}
           </div>
           <div id="step-selfie-section" style="display:none">
             <div style="text-align:center;margin-bottom:1rem">
-              <div style="font-size:.72rem;color:var(--gold);letter-spacing:.15em;text-transform:uppercase">Step 2: Take Your Selfie</div>
-              <div style="font-size:.78rem;color:var(--muted);margin-top:.3rem">Position your face clearly in the oval</div>
+              <div id="step-main-heading" style="font-size:.72rem;color:var(--gold);letter-spacing:.15em;text-transform:uppercase">Step 2: Take Your Selfie</div>
+              <div id="step-main-sub" style="font-size:.78rem;color:var(--muted);margin-top:.3rem">Position your face clearly in the oval</div>
             </div>
             <div class="camera-wrap"><video id="video-preview" autoplay playsinline muted></video><div class="face-guide"><div class="face-oval"></div></div></div>
             <canvas id="capture-canvas"></canvas>
@@ -467,7 +467,7 @@ setInterval(()=>{timeLeft--;if(timeLeft<0){timeLeft=119;clearCodeInputs();}updat
 <?php endif; ?>
 
 let lastStatus="<?= $myRecord?$myRecord['status']:'none' ?>";
-setInterval(()=>{fetch('../../api/session_status.php').then(r=>r.json()).then(data=>{const hasActive=<?= $activeSession?'true':'false' ?>;if(data.active&&!hasActive){location.reload();return;}const newStatus=data.my_status||'none';if(newStatus!==lastStatus){if(newStatus==='present'||newStatus==='late'){const t=document.createElement('div');t.style.cssText='position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:var(--success);color:#060910;padding:.8rem 1.5rem;border-radius:2px;font-family:Cinzel,serif;font-size:.82rem;font-weight:700;z-index:999';t.textContent='✓ Approved! Marked '+newStatus.toUpperCase();document.body.appendChild(t);setTimeout(()=>location.reload(),2000);}else if(lastStatus==='pending'&&newStatus==='none'){const t=document.createElement('div');t.style.cssText='position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:var(--danger);color:#fff;padding:.8rem 1.5rem;border-radius:2px;font-family:Cinzel,serif;font-size:.82rem;font-weight:700;z-index:999';t.textContent='✗ Attendance Rejected. Please try again.';document.body.appendChild(t);setTimeout(()=>location.reload(),2500);}lastStatus=newStatus;}}).catch(()=>{})},10000);
+setInterval(()=>{fetch('../../api/session_status.php').then(r=>r.json()).then(data=>{const hasActive=<?= $activeSession?'true':'false' ?>;if(data.active&&!hasActive){location.reload();return;}if(!data.active&&hasActive){location.reload();return;}const newStatus=data.my_status||'none';if(newStatus!==lastStatus){if(newStatus==='present'||newStatus==='late'){const t=document.createElement('div');t.style.cssText='position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:var(--success);color:#060910;padding:.8rem 1.5rem;border-radius:2px;font-family:Cinzel,serif;font-size:.82rem;font-weight:700;z-index:999';t.textContent='✓ Approved! Marked '+newStatus.toUpperCase();document.body.appendChild(t);setTimeout(()=>location.reload(),2000);}else if(lastStatus==='pending'&&newStatus==='none'){const t=document.createElement('div');t.style.cssText='position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:var(--danger);color:#fff;padding:.8rem 1.5rem;border-radius:2px;font-family:Cinzel,serif;font-size:.82rem;font-weight:700;z-index:999';t.textContent='✗ Attendance Rejected. Please try again.';document.body.appendChild(t);setTimeout(()=>location.reload(),2500);}lastStatus=newStatus;}}).catch(()=>{})},10000);
 
 function codeInput(el,idx){el.value=el.value.replace(/\D/,'');if(el.value)el.classList.add('filled');else el.classList.remove('filled');if(el.value&&idx<6)document.getElementById('ci'+(idx+1)).focus();checkCodeReady()}
 function codeBack(e,idx){if(e.key==='Backspace'&&!document.getElementById('ci'+idx).value&&idx>1)document.getElementById('ci'+(idx-1)).focus()}
@@ -535,6 +535,11 @@ async function captureSelfie() {
     document.getElementById('retake-btn').style.display = 'flex';
     document.getElementById('video-preview').style.display = 'block';
     document.getElementById('step-label').textContent = 'Step 3: Show your classroom';
+    // Update the main heading too
+    const stepHeading = document.getElementById('step-main-heading');
+    if (stepHeading) { stepHeading.textContent = 'STEP 3: SHOW YOUR CLASSROOM'; }
+    const stepSub = document.getElementById('step-main-sub');
+    if (stepSub) { stepSub.textContent = 'Turn camera to show desks, chairs and other students'; }
     stopCamera();
     cameraStep = 'classroom';
     navigator.mediaDevices.getUserMedia({ video: { facingMode: { exact: 'environment' } } })

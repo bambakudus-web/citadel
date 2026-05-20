@@ -5,9 +5,10 @@ session_start();
 require_once '../includes/db.php';
 require_once '../includes/auth.php';
 requireLogin();
+$inst_id = (int)($_SESSION['institution_id'] ?? 1);
 $user   = currentUser();
 $userId = $user['id'];
-$session = $pdo->query("SELECT id, course_code FROM sessions WHERE active_status=1 LIMIT 1")->fetch();
+$session = $pdo->query("SELECT s.id, s.course_code FROM sessions s JOIN users u ON u.id=s.lecturer_id WHERE s.active_status=1 AND u.institution_id=$inst_id LIMIT 1")->fetch();
 $myRecord = null;
 if ($session) {
     $chk = $pdo->prepare("SELECT status FROM attendance WHERE session_id=? AND student_id=?");

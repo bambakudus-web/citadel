@@ -156,6 +156,10 @@ a{color:inherit;text-decoration:none}
   .menu-toggle{display:none!important}
 }
 .menu-toggle{display:none;align-items:center;justify-content:center;width:36px;height:36px;background:var(--surface2,var(--surface));border:1px solid var(--border);border-radius:2px;color:var(--text);cursor:pointer;font-size:1.1rem;margin-bottom:1rem}
+
+/* Safari zoom fix — inputs must be 16px */
+input,select,textarea{font-size:16px!important}
+@media(min-width:769px){input,select,textarea{font-size:inherit!important}}
 </style>
 </head>
 <body>

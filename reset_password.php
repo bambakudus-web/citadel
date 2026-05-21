@@ -138,6 +138,10 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 .back:hover{color:var(--gold)}
 .hint{font-size:.78rem;color:var(--muted);margin-bottom:1.4rem;line-height:1.6}
 .sent-icon{font-size:3rem;text-align:center;margin-bottom:1rem}
+
+/* Safari zoom fix — inputs must be 16px */
+input,select,textarea{font-size:16px!important}
+@media(min-width:769px){input,select,textarea{font-size:inherit!important}}
 </style>
 </head>
 <body>

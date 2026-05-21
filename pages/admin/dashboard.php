@@ -160,7 +160,7 @@ $timeRemaining = 120 - (time() % 120);
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
 <title>Citadel — Boss Dashboard</title>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -327,6 +327,10 @@ body::before{content:'';position:fixed;inset:0;z-index:0;background:radial-gradi
 }
 /* Sidebar overlay background */
 .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:199;backdrop-filter:blur(2px)}
+
+/* Safari zoom fix — inputs must be 16px */
+input,select,textarea{font-size:16px!important}
+@media(min-width:769px){input,select,textarea{font-size:inherit!important}}
 </style>
 <script src="/assets/chart.min.js">
 // ── Mobile menu ──
@@ -345,6 +349,10 @@ if (overlay) overlay.addEventListener('click', () => {
 
 </script>
 <script>
+document.getElementById('sidebar-overlay')?.addEventListener('click',function(){
+  document.getElementById('sidebar').classList.remove('open');
+  this.classList.remove('open');
+});
 function showSection(name, el) {
   document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
@@ -440,7 +448,9 @@ function showSection(name, el) {
 <div class="main">
   <div class="topbar">
     <div style="display:flex;align-items:center;gap:1rem">
-      <button onclick="document.getElementById('sidebar').classList.toggle('open')" style="background:none;border:none;color:var(--muted);cursor:pointer" id="menu-btn">
+      <button onclick="document.getElementById('sidebar').classList.toggle('open');
+    var ov=document.getElementById('sidebar-overlay');
+    if(ov)ov.classList.toggle('open',document.getElementById('sidebar').classList.contains('open'))" style="background:none;border:none;color:var(--muted);cursor:pointer" id="menu-btn">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
       </button>
       <div class="topbar-title" id="page-title">OVERVIEW</div>

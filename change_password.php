@@ -54,7 +54,7 @@ $backLink = match($user['role'] ?? '') {
 <html lang="en">
 <head>
   <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
   <title>Citadel — Change Password</title>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
   <style>
@@ -97,7 +97,11 @@ $backLink = match($user['role'] ?? '') {
     .back-link span{color:var(--gold)}
     .back-link:hover span{opacity:.75}
     @media(max-width:480px){.card{padding:1.8rem 1.2rem}}
-  </style>
+  
+/* Safari zoom fix — inputs must be 16px */
+input,select,textarea{font-size:16px!important}
+@media(min-width:769px){input,select,textarea{font-size:inherit!important}}
+</style>
 </head>
 <body>
 <div class="bg-scene"></div>

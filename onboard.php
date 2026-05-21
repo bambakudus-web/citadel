@@ -77,7 +77,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
 <title>Citadel — Register Your School</title>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -115,6 +115,10 @@ body::before{content:'';position:fixed;inset:0;z-index:0;background:radial-gradi
 .footer-link{text-align:center;margin-top:1.2rem;font-size:.8rem;color:var(--muted)}
 .footer-link a{color:var(--gold);text-decoration:none}
 @media(max-width:540px){.form-row{grid-template-columns:1fr}.card-body{padding:1.5rem}}
+
+/* Safari zoom fix — inputs must be 16px */
+input,select,textarea{font-size:16px!important}
+@media(min-width:769px){input,select,textarea{font-size:inherit!important}}
 </style>
 </head>
 <body>

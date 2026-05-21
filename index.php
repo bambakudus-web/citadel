@@ -88,7 +88,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['_action'] ?? '') === 'logi
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
 <title>Citadel — Attendance Management System</title>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="manifest" href="/manifest.json">
@@ -209,6 +209,10 @@ footer{padding:2rem 4rem;border-top:1px solid var(--border);display:flex;align-i
 .forgot{display:block;text-align:center;margin-top:.8rem;font-size:.78rem;color:var(--muted);text-decoration:none}
 .forgot:hover{color:var(--text)}
 @media(max-width:768px){nav{padding:1rem 1.5rem}.features,.roles{padding:3rem 1.5rem}footer{padding:1.5rem;flex-direction:column;text-align:center}.modal{padding:2rem 1.4rem}}
+
+/* Safari zoom fix — inputs must be 16px */
+input,select,textarea{font-size:16px!important}
+@media(min-width:769px){input,select,textarea{font-size:inherit!important}}
 </style>
 </head>
 <body>

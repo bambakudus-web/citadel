@@ -82,6 +82,34 @@ html,body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-seri
 .pag-info{font-size:.75rem;color:var(--muted);margin-left:auto}
 .empty{text-align:center;padding:3rem;color:var(--muted);font-size:.83rem}
 @media(max-width:768px){.sidebar{display:none}.main{margin-left:0}.fi{grid-template-columns:1fr;gap:.3rem}.thead{display:none}}
+
+/* ── MOBILE ── */
+@media(max-width:768px){
+  .sidebar{width:280px;position:fixed;transform:translateX(-100%);transition:transform .3s;z-index:200;box-shadow:4px 0 24px rgba(0,0,0,.5)}
+  .sidebar.open{transform:translateX(0)}
+  .main{margin-left:0!important;padding:1rem!important}
+  .ph{flex-direction:column!important;align-items:flex-start!important}
+  .toolbar{width:100%}
+  .sbox{width:100%!important}
+  .stats,.stats-row{grid-template-columns:repeat(2,1fr)!important;gap:.6rem!important}
+  .sc,.stat-card{padding:1rem!important}
+  .sn,.stat-num{font-size:1.6rem!important}
+  .wrap2{grid-template-columns:1fr!important}
+  .tbl{font-size:.78rem;min-width:600px}
+  .tbl th,.tbl td{padding:.5rem .7rem!important}
+  .sec{overflow-x:auto}
+  .drw,.drawer{width:100vw!important}
+  .menu-toggle{display:flex!important}
+  .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:199}
+  .sidebar-overlay.active{display:block}
+}
+@media(max-width:480px){
+  .stats,.stats-row{grid-template-columns:1fr!important}
+}
+@media(min-width:769px){
+  .menu-toggle{display:none!important}
+}
+.menu-toggle{display:none;align-items:center;justify-content:center;width:36px;height:36px;background:var(--surface2,var(--surface));border:1px solid var(--border);border-radius:2px;color:var(--text);cursor:pointer;font-size:1.1rem;margin-bottom:1rem}
 </style></head><body>
 <div class="layout">
 <aside class="sidebar">
@@ -158,4 +186,21 @@ html,body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-seri
   </div>
 </main>
 </div>
+<script>
+// Mobile sidebar
+(function(){
+  var toggle = document.getElementById('menu-toggle');
+  var sidebar = document.querySelector('.sidebar');
+  var overlay = document.getElementById('sidebar-overlay');
+  if(!toggle||!sidebar) return;
+  toggle.addEventListener('click', function(){
+    sidebar.classList.toggle('open');
+    if(overlay) overlay.classList.toggle('active', sidebar.classList.contains('open'));
+  });
+  if(overlay) overlay.addEventListener('click', function(){
+    sidebar.classList.remove('open');
+    overlay.classList.remove('active');
+  });
+})();
+</script>
 </body></html>

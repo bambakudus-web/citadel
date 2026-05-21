@@ -204,9 +204,55 @@ canvas{display:none}
 .course-bar-label{display:flex;justify-content:space-between;font-size:.78rem;margin-bottom:.3rem}
 .bar-track{height:5px;background:var(--border);border-radius:3px;overflow:hidden}
 .bar-fill{height:100%;border-radius:3px;transition:width .8s ease}
-@media(max-width:900px){.two-col{grid-template-columns:1fr}}
+
 @media(max-width:768px){.sidebar{transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}.main{margin-left:0}.content{padding:1rem;overflow-x:hidden}.topbar{padding:.8rem 1rem}.stats-grid{grid-template-columns:repeat(2,1fr)}.data-table{font-size:.72rem}.data-table th,.data-table td{padding:.4rem .5rem}.topbar-title{font-size:.78rem}.stat-value{font-size:1.5rem}.code-inputs input{width:38px;height:48px;font-size:1.1rem}.code-inputs{gap:.4rem}.camera-wrap{max-width:100%}.attend-zone{padding:0}.tt-item{flex-direction:column;gap:.3rem}.tt-time{min-width:unset}#menu-btn{display:block}.hide-mobile{display:none!important}}
 @media(min-width:769px){#menu-btn{display:none}}
+
+/* ── MOBILE OVERHAUL ── */
+@media(max-width:768px){
+  :root{--sidebar-w:0px}
+  .sidebar{width:280px;transform:translateX(-100%);z-index:200;box-shadow:4px 0 24px rgba(0,0,0,.5)}
+  .sidebar.open{transform:translateX(0)}
+  .main{margin-left:0!important}
+  .content{padding:.8rem!important;overflow-x:hidden}
+  .topbar{padding:.7rem 1rem!important;position:sticky;top:0;z-index:100;background:var(--surface);border-bottom:1px solid var(--border)}
+  .topbar-title{font-size:.82rem!important}
+  #menu-btn{display:flex!important;align-items:center;justify-content:center;width:36px;height:36px;background:var(--surface2);border:1px solid var(--border);border-radius:2px;color:var(--text);cursor:pointer;font-size:1.1rem}
+  .stats-grid{grid-template-columns:repeat(2,1fr)!important;gap:.6rem!important}
+  .stat-card{padding:1rem!important}
+  .stat-value{font-size:1.6rem!important}
+  .stat-label{font-size:.6rem!important}
+  .two-col{grid-template-columns:1fr!important;gap:.8rem!important}
+  .form-row{grid-template-columns:1fr!important}
+  .card-body{padding:.9rem!important;overflow-x:auto}
+  .card-head{padding:.8rem 1rem!important}
+  .data-table{font-size:.75rem!important;min-width:500px}
+  .data-table th,.data-table td{padding:.45rem .55rem!important;white-space:nowrap}
+  .section-header{flex-direction:column!important;align-items:flex-start!important;gap:.6rem!important}
+  .section-title{font-size:.95rem!important}
+  .pill{font-size:.62rem!important;padding:.12rem .4rem!important}
+  .modal{width:96vw!important;max-height:90vh;overflow-y:auto}
+  .modal-body{padding:1rem!important}
+  .btn{padding:.6rem .9rem!important;font-size:.75rem!important}
+  .btn-sm{padding:.35rem .6rem!important;font-size:.68rem!important}
+  .hide-mobile{display:none!important}
+  .topbar-right .badge-admin{display:none}
+  /* Sidebar overlay */
+  .sidebar-overlay{display:block!important}
+}
+@media(max-width:480px){
+  .stats-grid{grid-template-columns:1fr!important}
+  .stat-card{padding:.85rem!important}
+  .stat-value{font-size:1.8rem!important}
+  .content{padding:.6rem!important}
+  .topbar-title{display:none}
+}
+@media(min-width:769px){
+  #menu-btn{display:none!important}
+  .sidebar-overlay{display:none!important}
+}
+/* Sidebar overlay background */
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:199;backdrop-filter:blur(2px)}
 </style>
 </head>
 <body>
@@ -634,6 +680,21 @@ function toggleTheme(){const body=document.body;const btn=document.getElementByI
 const csrfToken="<?= csrfToken() ?>";
 const originalFetch=window.fetch;
 window.fetch=function(url,options={}){options.headers=options.headers||{};options.headers['X-CSRF-Token']=csrfToken;return originalFetch(url,options)};
+
+// ── Mobile menu ──
+const menuBtn = document.getElementById('menu-btn');
+const sidebar = document.getElementById('sidebar');
+const overlay = document.getElementById('sidebar-overlay');
+if (menuBtn) menuBtn.addEventListener('click', () => {
+    sidebar.classList.toggle('open');
+    if (overlay) overlay.classList.toggle('active', sidebar.classList.contains('open'));
+    overlay.style.display = sidebar.classList.contains('open') ? 'block' : 'none';
+});
+if (overlay) overlay.addEventListener('click', () => {
+    sidebar.classList.remove('open');
+    overlay.style.display = 'none';
+});
+
 </script>
 <?php require_once '../../includes/toast.php'; ?>
 </body>

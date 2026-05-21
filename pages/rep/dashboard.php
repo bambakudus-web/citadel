@@ -92,8 +92,7 @@ if (!empty($repCourseIds)) {
         SELECT u.*, COUNT(DISTINCT s.id) as total_sessions,
         SUM(CASE WHEN a.status IN ('present','late') THEN 1 ELSE 0 END) as attended,
         ROUND(SUM(CASE WHEN a.status IN ('present','late') THEN 1 ELSE 0 END) / NULLIF(COUNT(DISTINCT s.id),0) * 100) as attendance_pct
-        FROM users u LEFT JOIN attendance a ON u.id=a.student_id LEFT JOIN sessions s ON a.session_id=s.id WHERE u.institution_id=$inst_id AND
-        WHERE u.role IN ('student','rep') GROUP BY u.id ORDER BY u.full_name
+        FROM users u LEFT JOIN attendance a ON u.id=a.student_id LEFT JOIN sessions s ON a.session_id=s.id WHERE u.institution_id=$inst_id AND u.role IN ('student','rep') GROUP BY u.id ORDER BY u.full_name
     ");
 }
 $students = $students->fetchAll();
@@ -105,8 +104,7 @@ $sessionHistory = $pdo->query("
     COUNT(DISTINCT CASE WHEN a.status IN ('present','late') THEN a.student_id END) as present_count,
     COUNT(DISTINCT CASE WHEN a.status='absent' THEN a.student_id END) as absent_count,
     COUNT(DISTINCT CASE WHEN a.status='late' THEN a.student_id END) as late_count
-    FROM sessions s JOIN users lu ON lu.id=s.lecturer_id LEFT JOIN attendance a ON s.id=a.session_id WHERE lu.institution_id=$inst_id AND
-    WHERE s.active_status=0 GROUP BY s.id ORDER BY s.start_time DESC LIMIT 30
+    FROM sessions s JOIN users lu ON lu.id=s.lecturer_id LEFT JOIN attendance a ON s.id=a.session_id WHERE lu.institution_id=$inst_id AND s.active_status=0 GROUP BY s.id ORDER BY s.start_time DESC LIMIT 30
 ")->fetchAll();
 $todayAttendance = $pdo->query("SELECT COUNT(*) FROM attendance a JOIN sessions s ON s.id=a.session_id JOIN users u ON u.id=s.lecturer_id WHERE DATE(a.timestamp)=CURDATE() AND u.institution_id=$inst_id")->fetchColumn();
 
@@ -313,9 +311,55 @@ body::before{content:'';position:fixed;inset:0;z-index:0;background:radial-gradi
 .start-form{background:var(--surface2);border:1px solid var(--border);border-radius:2px;padding:1.6rem;max-width:500px}
 .selfie-thumb{width:48px;height:48px;object-fit:cover;border-radius:50%;border:2px solid var(--border);cursor:pointer;transition:border-color .2s}
 .selfie-thumb:hover{border-color:var(--rep)}
-@media(max-width:900px){.two-col{grid-template-columns:1fr}}
+
 @media(max-width:768px){.sidebar{transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}.main{margin-left:0}.content{padding:1rem}.topbar{padding:.8rem 1rem}.stats-grid{grid-template-columns:repeat(2,1fr)}.code-number{font-size:2rem}.data-table{font-size:.72rem}.data-table th,.data-table td{padding:.4rem .5rem}.tt-item{flex-direction:column;gap:.3rem}.tt-time{min-width:unset}.two-col{grid-template-columns:1fr}.form-row{grid-template-columns:1fr}.topbar-title{font-size:.78rem}.stat-value{font-size:1.5rem}#menu-btn{display:block}.hide-mobile{display:none!important}}
 @media(min-width:769px){#menu-btn{display:none}}
+
+/* ── MOBILE OVERHAUL ── */
+@media(max-width:768px){
+  :root{--sidebar-w:0px}
+  .sidebar{width:280px;transform:translateX(-100%);z-index:200;box-shadow:4px 0 24px rgba(0,0,0,.5)}
+  .sidebar.open{transform:translateX(0)}
+  .main{margin-left:0!important}
+  .content{padding:.8rem!important;overflow-x:hidden}
+  .topbar{padding:.7rem 1rem!important;position:sticky;top:0;z-index:100;background:var(--surface);border-bottom:1px solid var(--border)}
+  .topbar-title{font-size:.82rem!important}
+  #menu-btn{display:flex!important;align-items:center;justify-content:center;width:36px;height:36px;background:var(--surface2);border:1px solid var(--border);border-radius:2px;color:var(--text);cursor:pointer;font-size:1.1rem}
+  .stats-grid{grid-template-columns:repeat(2,1fr)!important;gap:.6rem!important}
+  .stat-card{padding:1rem!important}
+  .stat-value{font-size:1.6rem!important}
+  .stat-label{font-size:.6rem!important}
+  .two-col{grid-template-columns:1fr!important;gap:.8rem!important}
+  .form-row{grid-template-columns:1fr!important}
+  .card-body{padding:.9rem!important;overflow-x:auto}
+  .card-head{padding:.8rem 1rem!important}
+  .data-table{font-size:.75rem!important;min-width:500px}
+  .data-table th,.data-table td{padding:.45rem .55rem!important;white-space:nowrap}
+  .section-header{flex-direction:column!important;align-items:flex-start!important;gap:.6rem!important}
+  .section-title{font-size:.95rem!important}
+  .pill{font-size:.62rem!important;padding:.12rem .4rem!important}
+  .modal{width:96vw!important;max-height:90vh;overflow-y:auto}
+  .modal-body{padding:1rem!important}
+  .btn{padding:.6rem .9rem!important;font-size:.75rem!important}
+  .btn-sm{padding:.35rem .6rem!important;font-size:.68rem!important}
+  .hide-mobile{display:none!important}
+  .topbar-right .badge-admin{display:none}
+  /* Sidebar overlay */
+  .sidebar-overlay{display:block!important}
+}
+@media(max-width:480px){
+  .stats-grid{grid-template-columns:1fr!important}
+  .stat-card{padding:.85rem!important}
+  .stat-value{font-size:1.8rem!important}
+  .content{padding:.6rem!important}
+  .topbar-title{display:none}
+}
+@media(min-width:769px){
+  #menu-btn{display:none!important}
+  .sidebar-overlay{display:none!important}
+}
+/* Sidebar overlay background */
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:199;backdrop-filter:blur(2px)}
 </style>
 </head>
 <body>
@@ -692,6 +736,21 @@ const csrfToken="<?= csrfToken() ?>";
 document.querySelectorAll('form').forEach(form=>{if(!form.querySelector('[name="csrf_token"]')){const input=document.createElement('input');input.type='hidden';input.name='csrf_token';input.value=csrfToken;form.appendChild(input)}});
 const originalFetch=window.fetch;
 window.fetch=function(url,options={}){options.headers=options.headers||{};options.headers['X-CSRF-Token']=csrfToken;return originalFetch(url,options)};
+
+// ── Mobile menu ──
+const menuBtn = document.getElementById('menu-btn');
+const sidebar = document.getElementById('sidebar');
+const overlay = document.getElementById('sidebar-overlay');
+if (menuBtn) menuBtn.addEventListener('click', () => {
+    sidebar.classList.toggle('open');
+    if (overlay) overlay.classList.toggle('active', sidebar.classList.contains('open'));
+    overlay.style.display = sidebar.classList.contains('open') ? 'block' : 'none';
+});
+if (overlay) overlay.addEventListener('click', () => {
+    sidebar.classList.remove('open');
+    overlay.style.display = 'none';
+});
+
 </script>
 <?php require_once '../../includes/toast.php'; ?>
 </body>

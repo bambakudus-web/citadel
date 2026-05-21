@@ -74,7 +74,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['_action'] ?? '') === 'logi
     }
     $pdo->prepare("UPDATE users SET login_attempts=0 WHERE id=?")->execute([$user['id']]);
     // Clear IP rate limit on success
-    try { if(function_exists('clearRateLimit')) clearRateLimit('login_fail_' . md5(($ip ?? '') . date('YmdHi'))); } catch(Exception \$e){}
+    try { if(function_exists('clearRateLimit')) clearRateLimit('login_fail_' . md5(($ip ?? '') . date('YmdHi'))); } catch(Exception $e){}
 
     $_SESSION['user_id']        = $user['id'];
     $_SESSION['role']           = $user['role'];

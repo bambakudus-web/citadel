@@ -4,6 +4,7 @@ header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
 header("Pragma: no-cache");
 header("Expires: 0");
 require_once 'includes/db.php';
+require_once 'includes/security.php';
 
 if (!empty($_SESSION['user_id'])) {
     $role = $_SESSION['role'] ?? 'student';
@@ -18,6 +19,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['_action'] ?? '') === 'logi
     $identifier  = trim($_POST['identifier'] ?? '');
     $password    = $_POST['password'] ?? '';
     $fingerprint = $_POST['device_fingerprint'] ?? '';
+
+    // Rate limit by IP
+    $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+    $rlKey = 'login_' . md5($ip);
+    if (function_exists('checkRateLimit')) {
+        $limited = checkRateLimit($rlKey, 10, 300); // 10 attempts per 5 min
+        if ($limited) {
+            echo json_encode(['ok'=>false,'msg'=>'Too many login attempts. Please wait 5 minutes.']);
+            exit;
+        }
+    }
 
     if (!$identifier || !$password) {
         echo json_encode(['ok'=>false,'msg'=>'Please enter your ID and password.']); exit;

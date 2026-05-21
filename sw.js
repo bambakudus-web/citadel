@@ -1,8 +1,7 @@
-// Citadel Service Worker — PWA offline support
-const CACHE_NAME = 'citadel-v2';
+const CACHE_NAME = 'citadel-v3';
 const STATIC_ASSETS = [
   '/',
-  '/login.php',
+  '/index.php',
   '/register.php',
   'https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap'
 ];
@@ -24,7 +23,6 @@ self.addEventListener('activate', e => {
 });
 
 self.addEventListener('fetch', e => {
-  // Network first for API calls
   if (e.request.url.includes('/api/')) {
     e.respondWith(
       fetch(e.request).catch(() =>
@@ -35,14 +33,16 @@ self.addEventListener('fetch', e => {
     );
     return;
   }
-
-  // Cache first for static assets
+  // Never cache login/auth pages
+  if (e.request.url.includes('login.php') || e.request.url.includes('logout.php')) {
+    e.respondWith(fetch(e.request));
+    return;
+  }
   e.respondWith(
     caches.match(e.request).then(cached => cached || fetch(e.request))
   );
 });
 
-// Push notification handler
 self.addEventListener('push', e => {
   const data = e.data?.json() || {};
   e.waitUntil(

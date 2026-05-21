@@ -2,6 +2,7 @@
 require_once '../../includes/security.php';
 require_once '../../includes/db.php';
 require_once '../../includes/auth.php';
+require_once '../../includes/brevo_mail.php';
 requireRole('lecturer');
 
 $user   = currentUser();
@@ -88,6 +89,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'start
     $pdo->prepare("UPDATE sessions SET active_status=0, end_time=NOW() WHERE lecturer_id=? AND active_status=1")->execute([$userId]);
     $ins = $pdo->prepare("INSERT INTO sessions (course_code, course_name, course_id, semester_id, lecturer_id, secret_key, start_time, active_status) VALUES (?,?,?,?,?,?,NOW(),1)");
     $ins->execute([$courseCode, $courseName, $courseId ?: null, $semId, $userId, $secretKey]);
+    $newSessionId = $pdo->lastInsertId();
+
+    // Notify enrolled students via email
+    try {
+        $toNotify = $pdo->prepare("
+            SELECT u.email, u.full_name 
+            FROM users u
+            JOIN course_enrollments ce ON ce.student_id = u.id
+            WHERE ce.course_id = ? AND ce.status = 'active'
+            AND u.email IS NOT NULL AND u.email != ''
+            AND u.email NOT LIKE '%@citadel.edu%'
+            AND u.email NOT LIKE '%.edu.gh%'
+            LIMIT 50
+        ");
+        $toNotify->execute([$courseId ?: 0]);
+        $students = $toNotify->fetchAll();
+        foreach ($students as $stu) {
+            if (filter_var($stu['email'], FILTER_VALIDATE_EMAIL)) {
+                sendSessionStartEmail($stu['email'], $stu['full_name'], $courseCode, $courseName, $secretKey);
+            }
+        }
+    } catch(Exception $e) { /* non-fatal */ }
+
     header('Location: dashboard.php'); exit;
 }
 

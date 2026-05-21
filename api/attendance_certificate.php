@@ -29,7 +29,10 @@ $student = $stmt->fetch();
 if (!$student) { die('Student not found.'); }
 
 // Active semester
-$activeSem = $pdo->query("SELECT * FROM semesters WHERE is_active=1 LIMIT 1")->fetch();
+$instId2 = (int)($student['institution_id'] ?? 1);
+$activeSem = $pdo->prepare("SELECT * FROM semesters WHERE is_active=1 AND institution_id=? LIMIT 1");
+$activeSem->execute([$instId2]);
+$activeSem = $activeSem->fetch();
 $semId     = $activeSem['id'] ?? null;
 
 // Per-course stats — scoped to enrolled courses if semester active

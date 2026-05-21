@@ -1,5 +1,7 @@
 <?php
 session_start();
+header("Cache-Control: no-store, no-cache, must-revalidate");
+header("Pragma: no-cache");
 require_once 'includes/db.php';
 
 if (!empty($_SESSION['user_id'])) {

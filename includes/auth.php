@@ -6,7 +6,7 @@ function requireLogin() {
     require_once __DIR__ . '/security.php';
     checkSessionTimeout(30);
     if (empty($_SESSION['user_id'])) {
-        header('Location: /login.php');
+        header('Location: /index.php');
         exit;
     }
 }
@@ -16,7 +16,7 @@ function requireRole(string ...$roles) {
     if (!in_array($_SESSION['role'], $roles)) {
         // Super admin can access everything
         if ($_SESSION['role'] === 'super_admin') return;
-        header('Location: /login.php');
+        header('Location: /index.php');
         exit;
     }
 }

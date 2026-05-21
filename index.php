@@ -20,20 +20,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['_action'] ?? '') === 'logi
     $password    = $_POST['password'] ?? '';
     $fingerprint = $_POST['device_fingerprint'] ?? '';
 
-    // Rate limit by IP
-    $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
-    $rlKey = 'login_' . md5($ip);
-    if (function_exists('checkRateLimit')) {
-        $limited = checkRateLimit($rlKey, 10, 300); // 10 attempts per 5 min
-        if ($limited) {
-            echo json_encode(['ok'=>false,'msg'=>'Too many login attempts. Please wait 5 minutes.']);
-            exit;
-        }
-    }
-
     if (!$identifier || !$password) {
         echo json_encode(['ok'=>false,'msg'=>'Please enter your ID and password.']); exit;
     }
+
+    // Rate limit failed attempts by IP — max 20 failures per 10 min
+    $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+    $rlKey = 'login_fail_' . md5($ip . date('YmdHi'));
 
     if (empty($schoolCode) || $schoolCode === 'citadel') {
         $stmt = $pdo->prepare("SELECT * FROM users WHERE email=? AND role='super_admin' LIMIT 1");
@@ -80,6 +73,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['_action'] ?? '') === 'logi
         $pdo->prepare("UPDATE users SET device_fingerprint=? WHERE id=?")->execute([$fingerprint,$user['id']]);
     }
     $pdo->prepare("UPDATE users SET login_attempts=0 WHERE id=?")->execute([$user['id']]);
+    // Clear IP rate limit on success
+    try { if(function_exists('clearRateLimit')) clearRateLimit('login_fail_' . md5(($ip ?? '') . date('YmdHi'))); } catch(Exception \$e){}
 
     $_SESSION['user_id']        = $user['id'];
     $_SESSION['role']           = $user['role'];

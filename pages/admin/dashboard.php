@@ -537,7 +537,7 @@ const API = BASE_URL + '/api';
         <button class="btn btn-gold" onclick="openAddSlot()">+ Add Slot</button>
       </div>
       <?php
-      $ttAll = $pdo->query("
+      $ttStmt = $pdo->prepare("
           SELECT t.*, u.full_name AS lecturer_name,
                  COALESCE(c.code, t.course_code) AS course_code,
                  COALESCE(c.name, t.course_name) AS course_name
@@ -545,9 +545,11 @@ const API = BASE_URL + '/api';
           JOIN users u ON u.id = t.lecturer_id
           LEFT JOIN courses c ON c.id = t.course_id
           WHERE u.institution_id=$inst_id
-          AND (t.semester_id=$activeSemId OR t.semester_id IS NULL OR $activeSemId=0)
+          AND (t.semester_id=? OR t.semester_id IS NULL OR ?=0)
           ORDER BY FIELD(t.day_of_week,'Monday','Tuesday','Wednesday','Thursday','Friday'), t.start_time
-      ")->fetchAll();
+      ");
+$ttStmt->execute([$activeSemId, $activeSemId]);
+$ttAll = $ttStmt->fetchAll();
       $days = ['Monday','Tuesday','Wednesday','Thursday','Friday'];
       foreach ($days as $day):
         $dayCls = array_filter($ttAll, fn($c) => $c['day_of_week'] === $day);

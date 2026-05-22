@@ -33,8 +33,8 @@ $allCourses = $pdo->query("SELECT DISTINCT t.course_code, t.course_name FROM tim
 
 // Today's timetable
 $today = date('l');
-$todayStmt = $pdo->prepare("SELECT t.*, u.full_name as lecturer_name FROM timetable t JOIN users u ON t.lecturer_id=u.id WHERE t.day_of_week=? AND u.institution_id=$inst_id AND (t.semester_id=$activeSemId OR t.semester_id IS NULL OR $activeSemId=0) ORDER BY t.start_time");
-$todayStmt->execute([$today]); $todayClasses = $todayStmt->fetchAll();
+$todayStmt = $pdo->prepare("SELECT t.*, u.full_name as lecturer_name FROM timetable t JOIN users u ON t.lecturer_id=u.id WHERE t.day_of_week=? AND u.institution_id=$inst_id AND (t.semester_id=? OR t.semester_id IS NULL) ORDER BY t.start_time");
+$todayStmt->execute([$today, $activeSemId]); $todayClasses = $todayStmt->fetchAll();
 
 // Active session
 $activeSession = $pdo->query("SELECT s.* FROM sessions s JOIN users u ON u.id=s.lecturer_id WHERE s.active_status=1 AND u.institution_id=$inst_id ORDER BY s.start_time DESC LIMIT 1")->fetch();
@@ -481,7 +481,7 @@ const API = BASE_URL + '/api';
     <div class="page-section" id="sec-timetable">
       <div class="section-header"><div class="section-title">Class <span>Timetable</span></div></div>
       <?php foreach(['Monday','Tuesday','Wednesday','Thursday','Friday'] as $day):
-        $cls=$pdo->prepare("SELECT t.*,u.full_name as lecturer_name FROM timetable t JOIN users u ON t.lecturer_id=u.id WHERE t.day_of_week=? AND u.institution_id=$inst_id AND (t.semester_id=$activeSemId OR t.semester_id IS NULL OR $activeSemId=0) ORDER BY t.start_time");
+        $cls=$pdo->prepare("SELECT t.*,u.full_name as lecturer_name FROM timetable t JOIN users u ON t.lecturer_id=u.id WHERE t.day_of_week=? AND u.institution_id=$inst_id AND (t.semester_id=? OR t.semester_id IS NULL) ORDER BY t.start_time");
         $cls->execute([$day]); $cls=$cls->fetchAll(); if(empty($cls)) continue; ?>
         <div style="margin-bottom:1.5rem">
           <div style="font-family:'Cinzel',serif;font-size:.78rem;color:var(--rep);letter-spacing:.15em;margin-bottom:.6rem;text-transform:uppercase"><?= $day ?></div>

@@ -12,6 +12,7 @@ $userId = $_SESSION['user_id'];
 $inst_id = (int)($_SESSION['institution_id'] ?? 1);
 $activeSem = $pdo->query("SELECT * FROM semesters WHERE is_active=1 AND institution_id=$inst_id LIMIT 1")->fetch();
 $semId     = $activeSem['id'] ?? null;
+$activeSemId = (int)($activeSem['id'] ?? 0);
 
 // Lecturer's assigned courses this semester
 $myCourses = [];
@@ -37,13 +38,13 @@ $todayClasses = $pdo->prepare("
     WHERE t.lecturer_id = ? AND t.day_of_week = ?
     ORDER BY t.start_time
 ");
-$todayClasses->execute([$userId, $today]);
+$todayClasses->execute([$userId, $today, $activeSemId]);
 $todayClasses = $todayClasses->fetchAll();
 
 // Fallback: if timetable has no course_id yet, use old columns
 if (empty($todayClasses)) {
     $todayClasses = $pdo->prepare("SELECT * FROM timetable WHERE lecturer_id=? AND day_of_week=? ORDER BY start_time");
-    $todayClasses->execute([$userId, $today]);
+    $todayClasses->execute([$userId, $today, $activeSemId]);
     $todayClasses = $todayClasses->fetchAll();
 }
 

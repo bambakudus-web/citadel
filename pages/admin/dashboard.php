@@ -387,6 +387,7 @@ const API = BASE_URL + '/api';
 <div class="layout">
 
 <!-- ── Sidebar ── -->
+<div id="sidebar-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:199;backdrop-filter:blur(3px)"></div>
 <aside class="sidebar" id="sidebar">
   <div class="sidebar-brand">
     <svg viewBox="0 0 52 52" fill="none">

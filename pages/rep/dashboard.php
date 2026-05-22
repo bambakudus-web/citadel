@@ -371,6 +371,20 @@ input,select,textarea{font-size:16px!important}
 // Absolute base URL for API calls — fixes mobile network errors
 const BASE_URL = window.location.origin;
 const API = BASE_URL + '/api';
+function showSection(name,el){
+  document.querySelectorAll('.page-section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  var sec=document.getElementById('sec-'+name);
+  if(sec)sec.classList.add('active');
+  var title=document.getElementById('page-title');
+  if(title)title.textContent=name.charAt(0).toUpperCase()+name.slice(1);
+  if(el)el.classList.add('active');
+  // Close sidebar on mobile
+  var sb=document.getElementById('sidebar');
+  if(sb)sb.classList.remove('open');
+  var ov=document.getElementById('sidebar-overlay');
+  if(ov)ov.style.display='none';
+}
 </script>
 </head>
 <body>
@@ -684,7 +698,7 @@ const API = BASE_URL + '/api';
 </div>
 
 <script>
-function showSection(name,el){document.querySelectorAll('.page-section').forEach(s=>s.classList.remove('active'));document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));document.getElementById('sec-'+name).classList.add('active');document.getElementById('page-title').textContent=name.toUpperCase();if(el)el.classList.add('active');document.getElementById('sidebar').classList.remove('open')}
+
 function openModal(id){document.getElementById(id).classList.add('open')}
 function closeModal(id){document.getElementById(id).classList.remove('open')}
 document.querySelectorAll('.modal-overlay').forEach(o=>{o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('open')})});

@@ -357,23 +357,23 @@ if (overlay) overlay.addEventListener('click', () => {
     overlay.style.display = 'none';
 });
 
+function showSection(name,el){
+  document.querySelectorAll('.page-section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  var sec=document.getElementById('sec-'+name);
+  if(sec)sec.classList.add('active');
+  var title=document.getElementById('page-title');
+  if(title)title.textContent=name.charAt(0).toUpperCase()+name.slice(1);
+  if(el)el.classList.add('active');
+  // Close sidebar on mobile
+  var sb=document.getElementById('sidebar');
+  if(sb)sb.classList.remove('open');
+  var ov=document.getElementById('sidebar-overlay');
+  if(ov)ov.style.display='none';
+}
 </script>
 <script>
-document.getElementById('sidebar-overlay')?.addEventListener('click',function(){
-  document.getElementById('sidebar').classList.remove('open');
-  this.classList.remove('open');
-});
-function showSection(name, el) {
-  document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  var sec = document.getElementById('sec-' + name);
-  if (sec) sec.classList.add('active');
-  var title = document.getElementById('page-title');
-  if (title) title.textContent = name.charAt(0).toUpperCase() + name.slice(1);
-  if (el) el.classList.add('active');
-  var sb = document.getElementById('sidebar');
-  if (sb) sb.classList.remove('open');
-}
+
 </script>
 
 
@@ -1034,14 +1034,7 @@ $ttAll = $ttStmt->fetchAll();
 
 <script>
 // ── Navigation ──
-function showSection(name, el) {
-  document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  document.getElementById('sec-' + name).classList.add('active');
-  document.getElementById('page-title').textContent = name.toUpperCase();
-  if (el) el.classList.add('active');
-  document.getElementById('sidebar').classList.remove('open');
-}
+
 
 // ── Modals ──
 function openModal(id) { document.getElementById(id).classList.add('open'); }

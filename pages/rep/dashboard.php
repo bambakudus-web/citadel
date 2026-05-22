@@ -11,6 +11,7 @@ $userId = $_SESSION['user_id'];
 $inst_id = (int)($_SESSION['institution_id'] ?? 1);
 $activeSem = $pdo->query("SELECT * FROM semesters WHERE is_active=1 AND institution_id=$inst_id LIMIT 1")->fetch();
 $semId     = $activeSem['id'] ?? null;
+$activeSemId = (int)($activeSem['id'] ?? 0);
 
 // Rep's assigned courses this semester
 $repCourses = [];

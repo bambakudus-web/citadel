@@ -25,15 +25,23 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $u = $pdo->prepare("SELECT id FROM users WHERE index_no=?");
             $u->execute([$index]); $u = $u->fetch();
             if ($u) {
-                if ($action === "ban_device") $pdo->prepare("UPDATE users SET device_fingerprint='BANNED' WHERE id=?")->execute([$u["id"]]);
-                else $pdo->prepare("UPDATE users SET device_fingerprint=NULL WHERE id=?")->execute([$u["id"]]);
+                if ($action === "ban_device") {
+                    $pdo->prepare("UPDATE users SET device_fingerprint='BANNED' WHERE id=? AND institution_id=?")->execute([$u["id"], $inst_id]);
+                    audit('BAN_DEVICE','user',$u["id"]);
+                } else {
+                    $pdo->prepare("UPDATE users SET device_fingerprint=NULL WHERE id=? AND institution_id=?")->execute([$u["id"], $inst_id]);
+                    audit('UNBAN_DEVICE','user',$u["id"]);
+                }
             }
         }
         header("Location: dashboard.php"); exit;
     }
     if ($action === "unlock_account") {
         $uid = (int)($_POST["user_id"] ?? 0);
-        if ($uid) $pdo->prepare("UPDATE users SET is_locked=0, login_attempts=0 WHERE id=?")->execute([$uid]);
+        if ($uid) {
+            $pdo->prepare("UPDATE users SET is_locked=0, login_attempts=0 WHERE id=? AND institution_id=?")->execute([$uid, $inst_id]);
+            audit('UNLOCK_ACCOUNT', 'user', $uid);
+        }
         header("Location: dashboard.php"); exit;
     }
 }
@@ -145,6 +153,7 @@ $auditLog = $pdo->query("
 ")->fetchAll();
 
 $devs = $pdo->query("SELECT id, full_name, index_no, device_fingerprint, is_locked, login_attempts FROM users WHERE role IN ('student','rep','lecturer') AND institution_id=$inst_id ORDER BY is_locked DESC, full_name")->fetchAll();
+$lockedUsers = $pdo->query("SELECT id, full_name, index_no, role, login_attempts FROM users WHERE is_locked=1 AND institution_id=$inst_id ORDER BY full_name")->fetchAll();
 
 // ── Code gen ──
 function generateCode(string $secret, int $window): string {
@@ -432,6 +441,9 @@ function showSection(name, el) {
     <a class="nav-item" onclick="showSection('live',this)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
       <?= $activeSession ? '🟢 Live Session' : 'Live Session' ?>
+    </a>
+    <a class="nav-item" onclick="showSection('locked',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Locked Accounts<?php if(!empty($lockedUsers)): ?> <span style="background:var(--danger);color:#fff;font-size:.6rem;padding:.1rem .35rem;border-radius:2px;margin-left:auto"><?= count($lockedUsers) ?></span><?php endif ?>
     </a>
     <a class="nav-item" onclick="showSection('devices',this)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>Device Control
@@ -774,6 +786,38 @@ function showSection(name, el) {
     </div>
 
     <!-- ══ DEVICES ══ -->
+    <div class="page-section" id="sec-locked">
+      <div class="section-header">
+        <div class="section-title">Locked <span>Accounts</span></div>
+      </div>
+      <?php if(empty($lockedUsers)): ?>
+        <div class="card"><div class="card-body" style="text-align:center;color:var(--muted);padding:3rem">No locked accounts</div></div>
+      <?php else: ?>
+      <div class="card"><div class="card-body" style="padding:0;overflow-x:auto">
+        <table class="data-table">
+          <thead><tr><th>Name</th><th>Index</th><th>Role</th><th>Attempts</th><th>Action</th></tr></thead>
+          <tbody>
+          <?php foreach($lockedUsers as $lu): ?>
+          <tr>
+            <td><?= htmlspecialchars($lu["full_name"]) ?></td>
+            <td style="color:var(--muted)"><?= htmlspecialchars($lu["index_no"] ?? "N/A") ?></td>
+            <td><span class="pill pill-red"><?= $lu["role"] ?></span></td>
+            <td style="color:var(--danger)"><?= $lu["login_attempts"] ?></td>
+            <td>
+              <form method="POST" style="display:inline">
+                <input type="hidden" name="csrf_token" value="<?= csrfToken() ?>">
+                <input type="hidden" name="action" value="unlock_account">
+                <input type="hidden" name="user_id" value="<?= $lu["id"] ?>">
+                <button type="submit" class="btn btn-sm" style="background:rgba(76,175,130,.15);color:var(--success);border:1px solid rgba(76,175,130,.3)">Unlock</button>
+              </form>
+            </td>
+          </tr>
+          <?php endforeach ?>
+          </tbody>
+        </table>
+      </div></div>
+      <?php endif ?>
+    </div>
     <div class="page-section" id="sec-devices">
       <div class="section-header"><div class="section-title">Device <span>Control</span></div></div>
       <div class="card"><div class="card-body" style="padding:0;overflow-x:auto">

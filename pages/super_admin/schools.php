@@ -1,11 +1,39 @@
 <?php
 require_once __DIR__ . '/../../includes/guard.php';
+require_once __DIR__ . '/../../includes/brevo_mail.php';
 guardSuperAdmin();
 
 if ($_SERVER['REQUEST_METHOD']==='POST') {
     header('Content-Type: application/json');
     $action=(string)($_POST['action']??''); $id=(int)($_POST['id']??0);
-    if ($action==='toggle_school'){$val=(int)($_POST['val']??0);$pdo->prepare("UPDATE institutions SET is_active=? WHERE id=?")->execute([$val,$id]);audit('TOGGLE_SCHOOL','institution',$id);echo json_encode(['ok'=>true]);exit;}
+    if ($action==='toggle_school'){
+        $val=(int)($_POST['val']??0);
+        $pdo->prepare("UPDATE institutions SET is_active=? WHERE id=?")->execute([$val,$id]);
+        audit('TOGGLE_SCHOOL','institution',$id,"is_active=$val");
+        // Send activation email to school admin
+        if ($val === 1) {
+            try {
+                $adminRow = $pdo->prepare("SELECT u.email, u.full_name, u.password_hash, i.name AS inst_name, i.slug FROM users u JOIN institutions i ON i.id=u.institution_id WHERE u.institution_id=? AND u.role='admin' LIMIT 1");
+                $adminRow->execute([$id]);
+                $admin = $adminRow->fetch();
+                if ($admin && filter_var($admin['email'], FILTER_VALIDATE_EMAIL)) {
+                    $html = "
+                    <div style='font-family:sans-serif;background:#060910;color:#e8eaf0;padding:2rem;border-radius:4px'>
+                        <div style='font-family:Georgia,serif;font-size:1.2rem;color:#c9a84c;letter-spacing:4px;margin-bottom:1rem'>CITADEL</div>
+                        <h2 style='color:#4caf82;margin-bottom:.8rem'>✓ School Approved!</h2>
+                        <p style='color:#6b7a8d'>Hi {$admin['full_name']}, your institution <strong style='color:#e8eaf0'>{$admin['inst_name']}</strong> has been approved on Citadel.</p>
+                        <div style='background:#0c1018;border:1px solid #1a2535;padding:1rem 1.2rem;margin:1.2rem 0;border-radius:2px'>
+                            <div style='margin-bottom:.6rem'><span style='color:#6b7a8d;font-size:.8rem'>School Code</span><br><span style='color:#c9a84c;font-size:1.3rem;font-family:Georgia,serif;letter-spacing:4px'>".strtoupper($admin['slug'])."</span></div>
+                            <div><span style='color:#6b7a8d;font-size:.8rem'>Login URL</span><br><span style='color:#e8eaf0'>https://citadel-production-5edc.up.railway.app</span></div>
+                        </div>
+                        <a href='https://citadel-production-5edc.up.railway.app' style='display:inline-block;background:linear-gradient(135deg,#7a5f28,#c9a84c);color:#060910;padding:12px 24px;border-radius:2px;text-decoration:none;font-weight:700;font-size:13px;letter-spacing:2px'>Login to Citadel</a>
+                    </div>";
+                    sendBrevoEmail($admin['email'], $admin['full_name'], 'Your School Has Been Approved — Citadel', $html);
+                }
+            } catch(Exception $e) {}
+        }
+        echo json_encode(['ok'=>true]);exit;
+    }
     if ($action==='change_plan'){$plan=$_POST['plan']??'free';if(!in_array($plan,['free','pro','enterprise'])){echo json_encode(['ok'=>false,'msg'=>'Bad plan']);exit;}$pdo->prepare("UPDATE institutions SET plan=? WHERE id=?")->execute([$plan,$id]);audit('CHANGE_PLAN','institution',$id,"plan=$plan");echo json_encode(['ok'=>true]);exit;}
     if ($action==='delete_school'){if($id===1){echo json_encode(['ok'=>false,'msg'=>'Cannot delete default.']);exit;}$pdo->prepare("DELETE FROM institutions WHERE id=?")->execute([$id]);audit('DELETE_SCHOOL','institution',$id);echo json_encode(['ok'=>true]);exit;}
     if ($action==='update_school'){$pdo->prepare("UPDATE institutions SET name=?,email=?,phone=?,address=? WHERE id=?")->execute([trim($_POST['name']??''),trim($_POST['email']??''),trim($_POST['phone']??''),trim($_POST['address']??''),$id]);audit('UPDATE_SCHOOL','institution',$id);echo json_encode(['ok'=>true]);exit;}

@@ -35,7 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // Create institution
                 $pdo->prepare("
                     INSERT INTO institutions (name, slug, email, phone, is_active, plan)
-                    VALUES (?, ?, ?, ?, 1, 'free')
+                    VALUES (?, ?, ?, ?, 0, 'free')
                 ")->execute([$schoolName, $schoolCode, $adminEmail, $phone ?: null]);
                 $instId = $pdo->lastInsertId();
 
@@ -58,12 +58,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 $pdo->commit();
                 $success = true;
-                // Send welcome email to new admin
+                // Notify super admin of new registration
                 try {
-                    $instRow = $pdo->prepare("SELECT name FROM institutions WHERE id=? LIMIT 1");
-                    $instRow->execute([$instId]);
-                    $instName = $instRow->fetchColumn() ?: $schoolName;
-                    sendWelcomeEmail($adminEmail, $adminName, $adminEmail, $adminPass, $instName);
+                    $superAdmins = $pdo->query("SELECT email, full_name FROM users WHERE role='super_admin' AND is_active=1 LIMIT 5")->fetchAll();
+                    foreach ($superAdmins as $sa) {
+                        if (!filter_var($sa['email'], FILTER_VALIDATE_EMAIL)) continue;
+                        $html = "
+                        <div style='font-family:sans-serif;background:#060910;color:#e8eaf0;padding:2rem;border-radius:4px'>
+                            <div style='font-family:Georgia,serif;font-size:1.2rem;color:#c9a84c;letter-spacing:4px;margin-bottom:1rem'>CITADEL</div>
+                            <h2 style='color:#e8eaf0;margin-bottom:.8rem'>New School Registration</h2>
+                            <p style='color:#6b7a8d'>A new institution has registered and is awaiting approval:</p>
+                            <table style='margin:1rem 0;width:100%'>
+                                <tr><td style='color:#6b7a8d;padding:.3rem 0'>School:</td><td style='color:#e8eaf0'><strong>$schoolName</strong></td></tr>
+                                <tr><td style='color:#6b7a8d;padding:.3rem 0'>Code:</td><td style='color:#c9a84c'><strong>" . strtoupper($schoolCode) . "</strong></td></tr>
+                                <tr><td style='color:#6b7a8d;padding:.3rem 0'>Admin:</td><td style='color:#e8eaf0'>$adminName ($adminEmail)</td></tr>
+                            </table>
+                            <a href='https://citadel-production-5edc.up.railway.app/pages/super_admin/schools.php' style='display:inline-block;background:linear-gradient(135deg,#7a5f28,#c9a84c);color:#060910;padding:12px 24px;border-radius:2px;text-decoration:none;font-weight:700;font-size:13px;letter-spacing:2px'>Review & Approve</a>
+                        </div>";
+                        sendBrevoEmail($sa['email'], $sa['full_name'], "New School Registration: $schoolName", $html);
+                    }
+                    // Also send pending email to new admin
+                    $pendingHtml = "
+                    <div style='font-family:sans-serif;background:#060910;color:#e8eaf0;padding:2rem;border-radius:4px'>
+                        <div style='font-family:Georgia,serif;font-size:1.2rem;color:#c9a84c;letter-spacing:4px;margin-bottom:1rem'>CITADEL</div>
+                        <h2 style='color:#e8eaf0;margin-bottom:.8rem'>Registration Received</h2>
+                        <p style='color:#6b7a8d'>Hi $adminName, your registration for <strong style='color:#e8eaf0'>$schoolName</strong> has been received.</p>
+                        <p style='color:#6b7a8d;margin-top:.8rem'>Your account is pending approval. You will receive another email once your institution is activated — usually within 24 hours.</p>
+                        <div style='background:#0c1018;border:1px solid #1a2535;border-left:3px solid #c9a84c;padding:1rem;margin-top:1.2rem;border-radius:2px'>
+                            <div style='color:#6b7a8d;font-size:.8rem'>School Code</div>
+                            <div style='color:#c9a84c;font-size:1.4rem;font-family:Georgia,serif;letter-spacing:4px'>" . strtoupper($schoolCode) . "</div>
+                        </div>
+                    </div>";
+                    sendBrevoEmail($adminEmail, $adminName, 'Citadel Registration Pending Approval', $pendingHtml);
                 } catch(Exception $e) { /* non-fatal */ }
             } catch (Exception $e) {
                 $pdo->rollBack();
@@ -144,7 +170,7 @@ input,select,textarea{font-size:16px!important}
 
       <?php if ($success): ?>
         <div class="alert alert-success">
-          ✓ Your school has been registered successfully!<br><br>
+          ✓ Registration submitted! Your school is pending approval. You will receive an email once activated.<br><br>
           Your school code is: <strong><?= strtoupper(htmlspecialchars($schoolCode)) ?></strong><br>
           Share this code with your students and staff so they can log in.
         </div>

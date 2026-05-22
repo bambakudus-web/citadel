@@ -4,6 +4,7 @@ guardSuperAdmin();
 
 $stats = [];
 $stats['schools']      = (int)$pdo->query("SELECT COUNT(*) FROM institutions WHERE is_active=1")->fetchColumn();
+$stats['pending']      = (int)$pdo->query("SELECT COUNT(*) FROM institutions WHERE is_active=0")->fetchColumn();
 $stats['users']        = (int)$pdo->query("SELECT COUNT(*) FROM users WHERE role NOT IN ('super_admin')")->fetchColumn();
 $stats['students']     = (int)$pdo->query("SELECT COUNT(*) FROM users WHERE role='student'")->fetchColumn();
 $stats['attendance']   = (int)$pdo->query("SELECT COUNT(*) FROM attendance")->fetchColumn();

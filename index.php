@@ -50,16 +50,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['_action'] ?? '') === 'logi
     if (isset($user['is_active']) && !$user['is_active']) { echo json_encode(['ok'=>false,'msg'=>'Account deactivated.']); exit; }
 
     if (!password_verify($password, $user['password_hash'])) {
+        // Never lock super_admin or admin accounts
+        $canLock = !in_array($user['role'], ['super_admin', 'admin']);
         $attempts = ($user['login_attempts'] ?? 0) + 1;
-        if ($attempts >= 3) {
+        if ($canLock && $attempts >= 5) {
             $pdo->prepare("UPDATE users SET login_attempts=?, is_locked=1 WHERE id=?")->execute([$attempts,$user['id']]);
-            echo json_encode(['ok'=>false,'msg'=>'Account locked after too many failed attempts.']);
-        } elseif ($attempts == 2) {
+            echo json_encode(['ok'=>false,'msg'=>'Account locked after too many failed attempts. Contact your administrator.']);
+        } elseif ($canLock && $attempts >= 4) {
             $pdo->prepare("UPDATE users SET login_attempts=? WHERE id=?")->execute([$attempts,$user['id']]);
             echo json_encode(['ok'=>false,'msg'=>'Wrong password. 1 attempt left before lockout.']);
         } else {
-            $pdo->prepare("UPDATE users SET login_attempts=? WHERE id=?")->execute([$attempts,$user['id']]);
-            echo json_encode(['ok'=>false,'msg'=>'Invalid credentials.']);
+            if ($canLock) {
+                $pdo->prepare("UPDATE users SET login_attempts=? WHERE id=?")->execute([$attempts,$user['id']]);
+            }
+            echo json_encode(['ok'=>false,'msg'=>'Invalid credentials. Please try again.']);
         }
         exit;
     }

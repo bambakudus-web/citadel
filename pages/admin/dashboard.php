@@ -58,8 +58,9 @@ $todayAttendance = $pdo->query("SELECT COUNT(*) FROM attendance a JOIN sessions 
 
 // ── Today's timetable ──
 $today = date('l');
-$todayClasses = $pdo->prepare("SELECT t.*, u.full_name as lecturer_name FROM timetable t JOIN users u ON t.lecturer_id=u.id WHERE t.day_of_week=? AND u.institution_id=$inst_id ORDER BY t.start_time");
-$todayClasses->execute([$today]);
+$activeSemId = $activeSemester["id"] ?? 0;
+$todayClasses = $pdo->prepare("SELECT t.*, u.full_name as lecturer_name FROM timetable t JOIN users u ON t.lecturer_id=u.id WHERE t.day_of_week=? AND u.institution_id=$inst_id AND (t.semester_id=? OR t.semester_id IS NULL) ORDER BY t.start_time");
+$todayClasses->execute([$today, $activeSemId]);
 $todayClasses = $todayClasses->fetchAll();
 
 // ── Recent activity ──
@@ -375,6 +376,12 @@ function showSection(name, el) {
 }
 </script>
 
+
+<script>
+// Absolute base URL for API calls — fixes mobile network errors
+const BASE_URL = window.location.origin;
+const API = BASE_URL + '/api';
+</script>
 </head>
 <body>
 <div class="layout">
@@ -538,6 +545,7 @@ function showSection(name, el) {
           JOIN users u ON u.id = t.lecturer_id
           LEFT JOIN courses c ON c.id = t.course_id
           WHERE u.institution_id=$inst_id
+          AND (t.semester_id=$activeSemId OR t.semester_id IS NULL OR $activeSemId=0)
           ORDER BY FIELD(t.day_of_week,'Monday','Tuesday','Wednesday','Thursday','Friday'), t.start_time
       ")->fetchAll();
       $days = ['Monday','Tuesday','Wednesday','Thursday','Friday'];
@@ -1054,7 +1062,7 @@ function editStudent(id, name, index, email, role, locked, device) {
 
 function confirmDelete(id, type) {
   if (confirm('Remove this ' + type + '? Cannot be undone.')) {
-    window.location.href = '../../api/delete_user.php?id=' + id;
+    window.location.href = API + '/delete_user.php?id=' + id;
   }
 }
 
@@ -1068,7 +1076,7 @@ function filterStudents() {
 
 function closeSession(id) {
   if (confirm('Close this session?')) {
-    fetch('../../api/close_session.php?id=' + id).then(() => location.reload());
+    fetch(API + '/close_session.php?id=' + id).then(() => location.reload());
   }
 }
 
@@ -1105,13 +1113,13 @@ function saveSemester() {
   };
   if (!body.name || !body.academic_year || !body.start_date || !body.end_date) { alert('All fields required'); return; }
   if (id) body.id = id;
-  fetch('../../api/semesters.php', { method: id ? 'PUT' : 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(body) })
+  fetch(API + '/semesters.php', { method: id ? 'PUT' : 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(body) })
     .then(r => r.json()).then(d => { if (d.success) { closeModal('modal-add-semester'); location.reload(); } else alert(d.error || 'Failed'); });
 }
 
 function setActiveSemester(id, name) {
   if (!confirm('Set "' + name + '" as the active semester?')) return;
-  fetch('../../api/semesters.php', { method: 'PATCH', headers: {'Content-Type':'application/json'}, body: JSON.stringify({id, action:'set_active'}) })
+  fetch(API + '/semesters.php', { method: 'PATCH', headers: {'Content-Type':'application/json'}, body: JSON.stringify({id, action:'set_active'}) })
     .then(r => r.json()).then(d => { if (d.success) location.reload(); else alert(d.error || 'Failed'); });
 }
 
@@ -1149,13 +1157,13 @@ function saveCourse() {
   if (!body.code || !body.name) { alert('Code and name required'); return; }
   if (!id && !semId) { alert('No active semester. Create and activate one first.'); return; }
   if (id) body.id = id;
-  fetch('../../api/courses.php', { method: id ? 'PUT' : 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(body) })
+  fetch(API + '/courses.php', { method: id ? 'PUT' : 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(body) })
     .then(r => r.json()).then(d => { if (d.success) { closeModal('modal-add-course'); location.reload(); } else alert(d.error || 'Failed'); });
 }
 
 function deleteCourse(id, code) {
   if (!confirm('Delete course ' + code + '?')) return;
-  fetch('../../api/courses.php', { method: 'DELETE', headers: {'Content-Type':'application/json'}, body: JSON.stringify({id}) })
+  fetch(API + '/courses.php', { method: 'DELETE', headers: {'Content-Type':'application/json'}, body: JSON.stringify({id}) })
     .then(r => r.json()).then(d => { if (d.success) location.reload(); else alert(d.error || 'Cannot delete'); });
 }
 
@@ -1189,19 +1197,19 @@ function saveLecturer() {
   if (!id) body.password = document.getElementById('lecturer-password').value.trim() || 'citadel123';
   if (!body.full_name || !body.email) { alert('Name and email required'); return; }
   if (id) body.id = id;
-  fetch('../../api/users.php', { method: id ? 'PUT' : 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(body) })
+  fetch(API + '/users.php', { method: id ? 'PUT' : 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(body) })
     .then(r => r.json()).then(d => { if (d.success) { closeModal('modal-add-lecturer'); location.reload(); } else alert(d.error || 'Failed'); });
 }
 
 function toggleUser(id, isActive) {
   if (!confirm((isActive ? 'Deactivate' : 'Activate') + ' this user?')) return;
-  fetch('../../api/users.php', { method: 'PATCH', headers: {'Content-Type':'application/json'}, body: JSON.stringify({id}) })
+  fetch(API + '/users.php', { method: 'PATCH', headers: {'Content-Type':'application/json'}, body: JSON.stringify({id}) })
     .then(r => r.json()).then(d => { if (d.success) location.reload(); else alert(d.error || 'Failed'); });
 }
 
 // ── Approvals ──
 function loadApprovalsAdmin() {
-  fetch('../../api/pending_approvals.php').then(r => r.json()).then(data => {
+  fetch(API + '/pending_approvals.php').then(r => r.json()).then(data => {
     const tbody = document.getElementById('approvals-tbody');
     const badge = document.getElementById('pending-badge');
     const countBadge = document.getElementById('pending-count-badge');
@@ -1232,7 +1240,7 @@ function loadApprovalsAdmin() {
 }
 
 function approveAdmin(id, action) {
-  fetch('../../api/approve_attendance.php', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({attendance_id:id,action}) })
+  fetch(API + '/approve_attendance.php', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({attendance_id:id,action}) })
     .then(r => r.json()).then(() => loadApprovalsAdmin()).catch(() => {});
 }
 
@@ -1392,7 +1400,7 @@ function saveTimetableSlot() {
     alert('Day, times and course code are required'); return;
   }
   if (id) body.id = id;
-  fetch('../../api/timetable.php', {
+  fetch(API + '/timetable.php', {
     method: id ? 'PUT' : 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body)
@@ -1404,7 +1412,7 @@ function saveTimetableSlot() {
  
 function deleteSlot(id, code) {
   if (!confirm('Delete ' + code + ' slot?')) return;
-  fetch('../../api/timetable.php', {
+  fetch(API + '/timetable.php', {
     method: 'DELETE',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ id })
@@ -1448,7 +1456,7 @@ function importCSV() {
   result.style.display = 'block';
   result.style.color = 'var(--muted)';
   result.textContent = 'Importing...';
-  fetch('../../api/import_students.php', { method: 'POST', body: formData })
+  fetch(API + '/import_students.php', { method: 'POST', body: formData })
     .then(r => r.json())
     .then(d => {
       if (d.success) {

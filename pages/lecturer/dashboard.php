@@ -324,6 +324,12 @@ body::before{content:'';position:fixed;inset:0;z-index:0;background:radial-gradi
 input,select,textarea{font-size:16px!important}
 @media(min-width:769px){input,select,textarea{font-size:inherit!important}}
 </style>
+
+<script>
+// Absolute base URL for API calls — fixes mobile network errors
+const BASE_URL = window.location.origin;
+const API = BASE_URL + '/api';
+</script>
 </head>
 <body>
 <div class="layout">
@@ -568,8 +574,8 @@ const ringNum=document.getElementById('ring-num');
 function updateRing(){if(!ringFill)return;const offset=circumference*(1-timeLeft/120);ringFill.style.strokeDashoffset=offset;ringNum.textContent=timeLeft;if(timeLeft<=10)ringFill.style.stroke='var(--danger)';else if(timeLeft<=20)ringFill.style.stroke='var(--warning)';else ringFill.style.stroke='var(--lec)'}
 updateRing();
 setInterval(()=>{timeLeft--;if(timeLeft<0)timeLeft=119;updateRing()},1000);
-setInterval(()=>{fetch('../../api/get_code.php?session_id=<?= $activeSession['id'] ?>').then(r=>r.json()).then(d=>{if(d.code){const el=document.getElementById('live-code');if(el)el.textContent=d.code.slice(0,3)+' '+d.code.slice(3)}})},120000);
-setInterval(()=>{fetch('../../api/live_attendance.php?session_id=<?= $activeSession['id'] ?>').then(r=>r.json()).then(data=>{if(!data.rows)return;const tbody=document.getElementById('live-tbody');const pill=document.getElementById('live-pill');const count=document.getElementById('live-count');if(count)count.textContent=data.total;if(pill)pill.textContent=data.total+' present';if(tbody&&data.rows.length>0){const empty=document.getElementById('empty-row');if(empty)empty.remove();tbody.innerHTML=data.rows.map(r=>`<tr><td>${r.full_name}</td><td style="color:var(--gold);font-size:.78rem">${r.index_no}</td><td><span class="pill pill-${r.status==='present'?'green':'gold'}">${r.status}</span></td><td style="color:var(--muted);font-size:.72rem">${r.time}</td></tr>`).join('')}})},10000);
+setInterval(()=>{fetch(API + '/get_code.php?session_id=<?= $activeSession['id'] ?>').then(r=>r.json()).then(d=>{if(d.code){const el=document.getElementById('live-code');if(el)el.textContent=d.code.slice(0,3)+' '+d.code.slice(3)}})},120000);
+setInterval(()=>{fetch(API + '/live_attendance.php?session_id=<?= $activeSession['id'] ?>').then(r=>r.json()).then(data=>{if(!data.rows)return;const tbody=document.getElementById('live-tbody');const pill=document.getElementById('live-pill');const count=document.getElementById('live-count');if(count)count.textContent=data.total;if(pill)pill.textContent=data.total+' present';if(tbody&&data.rows.length>0){const empty=document.getElementById('empty-row');if(empty)empty.remove();tbody.innerHTML=data.rows.map(r=>`<tr><td>${r.full_name}</td><td style="color:var(--gold);font-size:.78rem">${r.index_no}</td><td><span class="pill pill-${r.status==='present'?'green':'gold'}">${r.status}</span></td><td style="color:var(--muted);font-size:.72rem">${r.time}</td></tr>`).join('')}})},10000);
 <?php endif; ?>
 
 function toggleTheme(){const body=document.body;const btn=document.getElementById('theme-btn');if(body.classList.contains('light')){body.classList.remove('light');localStorage.setItem('theme','dark');if(btn)btn.textContent='🌙';}else{body.classList.add('light');localStorage.setItem('theme','light');if(btn)btn.textContent='☀️';}}

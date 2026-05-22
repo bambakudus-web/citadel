@@ -80,13 +80,19 @@ switch ($method) {
             http_response_code(400); echo json_encode(['error'=>'id and action required']); exit;
         }
         if ($data['action'] === 'set_active') {
+            // Close all active sessions for this institution before switching
+            $pdo->prepare("
+                UPDATE sessions s JOIN users u ON u.id=s.lecturer_id
+                SET s.active_status=0, s.end_time=NOW()
+                WHERE s.active_status=1 AND u.institution_id=?
+            ")->execute([$inst_id]);
             // Deactivate all semesters for this institution
             $pdo->prepare("UPDATE semesters SET is_active=0 WHERE institution_id=?")->execute([$inst_id]);
             // Activate the selected one
             $pdo->prepare("UPDATE semesters SET is_active=1 WHERE id=? AND institution_id=?")->execute([$data['id'], $inst_id]);
             $pdo->prepare("INSERT INTO audit_log (actor_id,action,target_type,target_id,ip_address) VALUES (?,'SET_ACTIVE_SEMESTER','semester',?,?)")
                 ->execute([$_SESSION['user_id'], $data['id'], $_SERVER['REMOTE_ADDR']??null]);
-            echo json_encode(['success'=>true,'message'=>'Active semester updated']);
+            echo json_encode(['success'=>true,'message'=>'Active semester updated. Old sessions closed.']);
         } else {
             http_response_code(400); echo json_encode(['error'=>'Unknown action']);
         }

@@ -258,6 +258,12 @@ canvas{display:none}
 input,select,textarea{font-size:16px!important}
 @media(min-width:769px){input,select,textarea{font-size:inherit!important}}
 </style>
+
+<script>
+// Absolute base URL for API calls — fixes mobile network errors
+const BASE_URL = window.location.origin;
+const API = BASE_URL + '/api';
+</script>
 </head>
 <body>
 <div class="layout">
@@ -517,7 +523,7 @@ setInterval(()=>{timeLeft--;if(timeLeft<0){timeLeft=119;clearCodeInputs();}updat
 <?php endif; ?>
 
 let lastStatus="<?= $myRecord?$myRecord['status']:'none' ?>";
-setInterval(()=>{fetch('../../api/session_status.php').then(r=>r.json()).then(data=>{const hasActive=<?= $activeSession?'true':'false' ?>;if(data.active&&!hasActive){location.reload();return;}if(!data.active&&hasActive){location.reload();return;}const newStatus=data.my_status||'none';if(newStatus!==lastStatus){if(newStatus==='present'||newStatus==='late'){const t=document.createElement('div');t.style.cssText='position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:var(--success);color:#060910;padding:.8rem 1.5rem;border-radius:2px;font-family:Cinzel,serif;font-size:.82rem;font-weight:700;z-index:999';t.textContent='✓ Approved! Marked '+newStatus.toUpperCase();document.body.appendChild(t);setTimeout(()=>location.reload(),2000);}else if(lastStatus==='pending'&&newStatus==='none'){const t=document.createElement('div');t.style.cssText='position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:var(--danger);color:#fff;padding:.8rem 1.5rem;border-radius:2px;font-family:Cinzel,serif;font-size:.82rem;font-weight:700;z-index:999';t.textContent='✗ Attendance Rejected. Please try again.';document.body.appendChild(t);setTimeout(()=>location.reload(),2500);}lastStatus=newStatus;}}).catch(()=>{})},10000);
+setInterval(()=>{fetch(API + '/session_status.php').then(r=>r.json()).then(data=>{const hasActive=<?= $activeSession?'true':'false' ?>;if(data.active&&!hasActive){location.reload();return;}if(!data.active&&hasActive){location.reload();return;}const newStatus=data.my_status||'none';if(newStatus!==lastStatus){if(newStatus==='present'||newStatus==='late'){const t=document.createElement('div');t.style.cssText='position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:var(--success);color:#060910;padding:.8rem 1.5rem;border-radius:2px;font-family:Cinzel,serif;font-size:.82rem;font-weight:700;z-index:999';t.textContent='✓ Approved! Marked '+newStatus.toUpperCase();document.body.appendChild(t);setTimeout(()=>location.reload(),2000);}else if(lastStatus==='pending'&&newStatus==='none'){const t=document.createElement('div');t.style.cssText='position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:var(--danger);color:#fff;padding:.8rem 1.5rem;border-radius:2px;font-family:Cinzel,serif;font-size:.82rem;font-weight:700;z-index:999';t.textContent='✗ Attendance Rejected. Please try again.';document.body.appendChild(t);setTimeout(()=>location.reload(),2500);}lastStatus=newStatus;}}).catch(()=>{})},10000);
 
 function codeInput(el,idx){el.value=el.value.replace(/\D/,'');if(el.value)el.classList.add('filled');else el.classList.remove('filled');if(el.value&&idx<6)document.getElementById('ci'+(idx+1)).focus();checkCodeReady()}
 function codeBack(e,idx){if(e.key==='Backspace'&&!document.getElementById('ci'+idx).value&&idx>1)document.getElementById('ci'+(idx-1)).focus()}
@@ -525,7 +531,7 @@ function clearCodeInputs(){for(let i=1;i<=6;i++){const el=document.getElementByI
 function checkCodeReady(){let full=true;for(let i=1;i<=6;i++){if(!document.getElementById('ci'+i)?.value)full=false}const btn=document.getElementById('verify-code-btn');if(btn)btn.disabled=!full}
 document.addEventListener('DOMContentLoaded',()=>{const ci1=document.getElementById('ci1');if(ci1)ci1.addEventListener('paste',e=>{e.preventDefault();const text=(e.clipboardData||window.clipboardData).getData('text').replace(/\D/g,'').slice(0,6);for(let i=0;i<text.length;i++){const el=document.getElementById('ci'+(i+1));if(el){el.value=text[i];el.classList.add('filled')}}checkCodeReady()})});
 
-async function verifyCode(){const btn=document.getElementById('verify-code-btn');const errEl=document.getElementById('code-error');btn.disabled=true;btn.textContent='Verifying...';errEl.style.display='none';let code='';for(let i=1;i<=6;i++)code+=document.getElementById('ci'+i)?.value||'';try{const res=await fetch('../../api/verify_code.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({session_id:<?= $activeSession?$activeSession['id']:'null' ?>,code})});const data=await res.json();if(data.success){document.getElementById('dot-code').className='step-dot done';document.getElementById('dot-selfie').className='step-dot active';document.getElementById('step-label').textContent='Step 2: Take your selfie';document.getElementById('step-code-section').style.display='none';document.getElementById('step-selfie-section').style.display='block';startCamera();}else{errEl.textContent=data.message||'Invalid code. Try again.';errEl.style.display='block';btn.disabled=false;btn.textContent='Verify Code'}}catch(e){errEl.textContent='Connection error. Try again.';errEl.style.display='block';btn.disabled=false;btn.textContent='Verify Code'}}
+async function verifyCode(){const btn=document.getElementById('verify-code-btn');const errEl=document.getElementById('code-error');btn.disabled=true;btn.textContent='Verifying...';errEl.style.display='none';let code='';for(let i=1;i<=6;i++)code+=document.getElementById('ci'+i)?.value||'';try{const res=await fetch(API + '/verify_code.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({session_id:<?= $activeSession?$activeSession['id']:'null' ?>,code})});const data=await res.json();if(data.success){document.getElementById('dot-code').className='step-dot done';document.getElementById('dot-selfie').className='step-dot active';document.getElementById('step-label').textContent='Step 2: Take your selfie';document.getElementById('step-code-section').style.display='none';document.getElementById('step-selfie-section').style.display='block';startCamera();}else{errEl.textContent=data.message||'Invalid code. Try again.';errEl.style.display='block';btn.disabled=false;btn.textContent='Verify Code'}}catch(e){errEl.textContent='Connection error. Try again.';errEl.style.display='block';btn.disabled=false;btn.textContent='Verify Code'}}
 
 let stream=null;
 function startCamera(){navigator.mediaDevices.getUserMedia({video:{facingMode:'user',width:{ideal:640},height:{ideal:480}}}).then(s=>{stream=s;document.getElementById('video-preview').srcObject=s}).catch(()=>{document.getElementById('submit-error').textContent='Camera access denied.';document.getElementById('submit-error').style.display='block'})}
@@ -554,7 +560,7 @@ async function captureSelfie() {
     document.getElementById('capture-btn').textContent = '🤖 Verifying...';
 
     try {
-      const faceRes = await fetch('../../api/ai_verify.php', {
+      const faceRes = await fetch(API + '/ai_verify.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ type: 'face', image: capturedSelfie })
@@ -607,7 +613,7 @@ async function captureSelfie() {
     document.getElementById('capture-btn').textContent = '🤖 Verifying...';
 
     try {
-      const classRes = await fetch('../../api/ai_verify.php', {
+      const classRes = await fetch(API + '/ai_verify.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ type: 'environment', image: capturedClassroom })
@@ -647,7 +653,7 @@ async function submitAttendance() {
   if (!capturedSelfie) { errEl.textContent = 'Please take a selfie first.'; errEl.style.display = 'block'; return; }
   btn.disabled = true; btn.textContent = 'Submitting...'; errEl.style.display = 'none';
   try {
-    const res  = await fetch('../../api/mark_attendance.php', {
+    const res  = await fetch(API + '/mark_attendance.php', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

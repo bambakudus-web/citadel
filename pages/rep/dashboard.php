@@ -33,7 +33,7 @@ $allCourses = $pdo->query("SELECT DISTINCT t.course_code, t.course_name FROM tim
 
 // Today's timetable
 $today = date('l');
-$todayStmt = $pdo->prepare("SELECT t.*, u.full_name as lecturer_name FROM timetable t JOIN users u ON t.lecturer_id=u.id WHERE t.day_of_week=? AND u.institution_id=$inst_id ORDER BY t.start_time");
+$todayStmt = $pdo->prepare("SELECT t.*, u.full_name as lecturer_name FROM timetable t JOIN users u ON t.lecturer_id=u.id WHERE t.day_of_week=? AND u.institution_id=$inst_id AND (t.semester_id=$activeSemId OR t.semester_id IS NULL OR $activeSemId=0) ORDER BY t.start_time");
 $todayStmt->execute([$today]); $todayClasses = $todayStmt->fetchAll();
 
 // Active session
@@ -365,6 +365,12 @@ body::before{content:'';position:fixed;inset:0;z-index:0;background:radial-gradi
 input,select,textarea{font-size:16px!important}
 @media(min-width:769px){input,select,textarea{font-size:inherit!important}}
 </style>
+
+<script>
+// Absolute base URL for API calls — fixes mobile network errors
+const BASE_URL = window.location.origin;
+const API = BASE_URL + '/api';
+</script>
 </head>
 <body>
 <div class="layout">
@@ -475,7 +481,7 @@ input,select,textarea{font-size:16px!important}
     <div class="page-section" id="sec-timetable">
       <div class="section-header"><div class="section-title">Class <span>Timetable</span></div></div>
       <?php foreach(['Monday','Tuesday','Wednesday','Thursday','Friday'] as $day):
-        $cls=$pdo->prepare("SELECT t.*,u.full_name as lecturer_name FROM timetable t JOIN users u ON t.lecturer_id=u.id WHERE t.day_of_week=? AND u.institution_id=$inst_id ORDER BY t.start_time");
+        $cls=$pdo->prepare("SELECT t.*,u.full_name as lecturer_name FROM timetable t JOIN users u ON t.lecturer_id=u.id WHERE t.day_of_week=? AND u.institution_id=$inst_id AND (t.semester_id=$activeSemId OR t.semester_id IS NULL OR $activeSemId=0) ORDER BY t.start_time");
         $cls->execute([$day]); $cls=$cls->fetchAll(); if(empty($cls)) continue; ?>
         <div style="margin-bottom:1.5rem">
           <div style="font-family:'Cinzel',serif;font-size:.78rem;color:var(--rep);letter-spacing:.15em;margin-bottom:.6rem;text-transform:uppercase"><?= $day ?></div>
@@ -694,11 +700,11 @@ const ringNum=document.getElementById('ring-num');
 function updateRing(){if(!ringFill)return;const offset=150.8*(1-timeLeft/120);ringFill.style.strokeDashoffset=offset;ringNum.textContent=timeLeft;ringFill.style.stroke=timeLeft<=20?'var(--danger)':timeLeft<=60?'var(--warning)':'var(--rep)'}
 updateRing();
 setInterval(()=>{timeLeft--;if(timeLeft<0)timeLeft=119;updateRing()},1000);
-setInterval(()=>{fetch('../../api/get_code.php?session_id=<?= $activeSession['id'] ?>').then(r=>r.json()).then(d=>{if(d.code){const el=document.getElementById('live-code');if(el)el.textContent=d.code.slice(0,3)+' '+d.code.slice(3)}})},120000);
-setInterval(()=>{fetch('../../api/live_attendance.php?session_id=<?= $activeSession['id'] ?>').then(r=>r.json()).then(data=>{if(!data.rows)return;const tbody=document.getElementById('live-tbody');const pill=document.getElementById('live-pill');const count=document.getElementById('live-count');if(count)count.textContent=data.total;if(pill)pill.textContent=data.total+' present';if(tbody&&data.rows.length>0){const empty=document.getElementById('empty-row');if(empty)empty.remove();tbody.innerHTML=data.rows.map(r=>`<tr><td>${r.full_name}</td><td style="color:var(--gold);font-size:.78rem">${r.index_no}</td><td><span class="pill pill-${r.status==='present'?'green':'gold'}">${r.status}</span></td><td style="color:var(--muted);font-size:.72rem">${r.time}</td></tr>`).join('')}})},10000);
+setInterval(()=>{fetch(API + '/get_code.php?session_id=<?= $activeSession['id'] ?>').then(r=>r.json()).then(d=>{if(d.code){const el=document.getElementById('live-code');if(el)el.textContent=d.code.slice(0,3)+' '+d.code.slice(3)}})},120000);
+setInterval(()=>{fetch(API + '/live_attendance.php?session_id=<?= $activeSession['id'] ?>').then(r=>r.json()).then(data=>{if(!data.rows)return;const tbody=document.getElementById('live-tbody');const pill=document.getElementById('live-pill');const count=document.getElementById('live-count');if(count)count.textContent=data.total;if(pill)pill.textContent=data.total+' present';if(tbody&&data.rows.length>0){const empty=document.getElementById('empty-row');if(empty)empty.remove();tbody.innerHTML=data.rows.map(r=>`<tr><td>${r.full_name}</td><td style="color:var(--gold);font-size:.78rem">${r.index_no}</td><td><span class="pill pill-${r.status==='present'?'green':'gold'}">${r.status}</span></td><td style="color:var(--muted);font-size:.72rem">${r.time}</td></tr>`).join('')}})},10000);
 
 function loadApprovals(){
-  fetch('../../api/pending_approvals.php?session_id=<?= $activeSession['id'] ?>').then(r=>r.json()).then(data=>{
+  fetch(API + '/pending_approvals.php?session_id=<?= $activeSession['id'] ?>').then(r=>r.json()).then(data=>{
     const tbody=document.getElementById('approvals-tbody');
     const badge=document.getElementById('approvals-count-badge');
     const pendingCount=document.getElementById('pending-count');
@@ -728,7 +734,7 @@ setInterval(loadApprovals,6000);
 async function approveAtt(id,action){
   const row=document.getElementById('arow-'+id);
   if(row){row.style.opacity='.4';row.style.pointerEvents='none'}
-  try{const res=await fetch('../../api/approve_attendance.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({attendance_id:id,action})});const data=await res.json();if(data.success)loadApprovals();else if(row){row.style.opacity='1';row.style.pointerEvents='auto'}}
+  try{const res=await fetch(API + '/approve_attendance.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({attendance_id:id,action})});const data=await res.json();if(data.success)loadApprovals();else if(row){row.style.opacity='1';row.style.pointerEvents='auto'}}
   catch(e){if(row){row.style.opacity='1';row.style.pointerEvents='auto'}}
 }
 <?php endif; ?>

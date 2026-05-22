@@ -7,7 +7,16 @@ function checkSessionTimeout(int $minutes = 30): void {
         if (time() - $_SESSION['last_activity'] > $minutes * 60) {
             session_unset();
             session_destroy();
-            header('Location: /login.php?timeout=1');
+            // Return JSON for AJAX requests
+            $isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) ||
+                      strpos($_SERVER['HTTP_ACCEPT'] ?? '', 'application/json') !== false ||
+                      strpos($_SERVER['CONTENT_TYPE'] ?? '', 'application/json') !== false;
+            if ($isAjax) {
+                header('Content-Type: application/json');
+                echo json_encode(['ok'=>false,'msg'=>'Session expired. Please log in again.','redirect'=>'/index.php']);
+                exit;
+            }
+            header('Location: /index.php?timeout=1');
             exit;
         }
     }

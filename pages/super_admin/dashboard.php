@@ -201,6 +201,11 @@ input,select,textarea{font-size:16px!important}
   /* Buttons */
   .btn-sm{font-size:.68rem!important;padding:.3rem .5rem!important}
 }
+
+/* SIDEBAR SCROLL FIX */
+.sidebar{display:flex!important;flex-direction:column!important}
+.sidebar-nav,.sb-nav{flex:1!important;overflow-y:auto!important;min-height:0!important}
+.sidebar-user,.sidebar-footer,.sb-foot{flex-shrink:0!important;margin-top:auto!important}
 </style>
 <script>
 function toggleSidebar(){

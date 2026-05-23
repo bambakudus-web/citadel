@@ -376,23 +376,34 @@ function showSection(name,el){
 </script>
 
 <script>
-// Absolute base URL for API calls — fixes mobile network errors
 const BASE_URL = window.location.origin;
 const API = BASE_URL + '/api';
-</script>
-<script>
+
 function toggleSidebar(){
   var sb=document.getElementById('sidebar');
   var ov=document.getElementById('sidebar-overlay');
   if(!sb)return;
-  var open=sb.classList.toggle('open');
-  if(ov){ov.style.display=open?'block':'none';}
+  var isOpen=sb.classList.toggle('open');
+  if(ov)ov.style.display=isOpen?'block':'none';
 }
+
+function showSection(name,el){
+  document.querySelectorAll('.page-section').forEach(function(s){s.classList.remove('active');});
+  document.querySelectorAll('.nav-item').forEach(function(n){n.classList.remove('active');});
+  var sec=document.getElementById('sec-'+name);
+  if(sec)sec.classList.add('active');
+  var title=document.getElementById('page-title');
+  if(title)title.textContent=name.charAt(0).toUpperCase()+name.slice(1);
+  if(el)el.classList.add('active');
+  var sb=document.getElementById('sidebar');
+  if(sb&&sb.classList.contains('open'))toggleSidebar();
+}
+
 document.addEventListener('DOMContentLoaded',function(){
   var btn=document.getElementById('menu-btn')||document.getElementById('menu-toggle');
-  if(btn)btn.addEventListener('click',function(e){e.stopPropagation();toggleSidebar();});
+  if(btn)btn.onclick=function(e){e.stopPropagation();toggleSidebar();};
   var ov=document.getElementById('sidebar-overlay');
-  if(ov)ov.addEventListener('click',function(){toggleSidebar();});
+  if(ov)ov.onclick=function(){toggleSidebar();};
 });
 </script>
 </head>

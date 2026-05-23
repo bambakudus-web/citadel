@@ -181,7 +181,7 @@ body.light::before{display:none}
 html,body{height:100%;background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;overflow-x:hidden}
 body::before{content:'';position:fixed;inset:0;z-index:0;background:radial-gradient(ellipse 60% 40% at 20% 0%,rgba(74,111,165,.12) 0%,transparent 60%),radial-gradient(ellipse 40% 30% at 90% 90%,rgba(201,168,76,.06) 0%,transparent 60%);pointer-events:none}
 .layout{display:flex;min-height:100vh;position:relative;z-index:1}
-.sidebar{width:var(--sidebar-w);background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100;transition:transform .3s ease}
+.sidebar{width:var(--sidebar-w);background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:500!important;transition:transform .3s ease}
 .sidebar-brand{padding:1.6rem 1.4rem 1.2rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:.8rem}
 .sidebar-brand svg{width:32px;height:32px;flex-shrink:0}
 .sidebar-brand-text .name{font-family:'Cinzel',serif;font-size:1rem;font-weight:700;color:var(--gold);letter-spacing:.12em}
@@ -333,25 +333,13 @@ input,select,textarea{font-size:16px!important}
 
 #sidebar-overlay{
   display:none;position:fixed;inset:0;
-  background:rgba(0,0,0,.7);z-index:499;
+  background:rgba(0,0,0,.7);z-index:400;
   backdrop-filter:blur(2px)
 }
 #sidebar-overlay.show{display:block}
 </style>
 <script src="/assets/chart.min.js">
-// ── Mobile menu ──
-const menuBtn = document.getElementById('menu-btn');
-const sidebar = document.getElementById('sidebar');
-const overlay = document.getElementById('sidebar-overlay');
-if (menuBtn) menuBtn.addEventListener('click', () => {
-    sidebar.classList.toggle('open');
-    if (overlay) overlay.classList.toggle('active', sidebar.classList.contains('open'));
-    overlay.style.display = sidebar.classList.contains('open') ? 'block' : 'none';
-});
-if (overlay) overlay.addEventListener('click', () => {
-    sidebar.classList.remove('open');
-    overlay.style.display = 'none';
-});
+// Mobile handled in head script
 
 function showSection(name,el){
   document.querySelectorAll('.page-section').forEach(s=>s.classList.remove('active'));
@@ -411,7 +399,7 @@ document.addEventListener('DOMContentLoaded',function(){
 <div class="layout">
 
 <!-- ── Sidebar ── -->
-<div id="sidebar-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:199;backdrop-filter:blur(3px)"></div>
+<div id="sidebar-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:400;backdrop-filter:blur(2px)"></div>
 <aside class="sidebar" id="sidebar">
   <div class="sidebar-brand">
     <svg viewBox="0 0 52 52" fill="none">

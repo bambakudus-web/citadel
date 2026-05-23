@@ -182,7 +182,7 @@ body.light::before{display:none}
 html,body{height:100%;background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;overflow-x:hidden}
 body::before{content:'';position:fixed;inset:0;z-index:0;background:radial-gradient(ellipse 60% 40% at 50% 0%,rgba(138,111,212,.1) 0%,transparent 60%);pointer-events:none}
 .layout{display:flex;min-height:100vh;position:relative;z-index:1}
-.sidebar{width:var(--sidebar-w);background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100;transition:transform .3s}
+.sidebar{width:var(--sidebar-w);background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:500!important;transition:transform .3s}
 .sidebar-brand{padding:1.6rem 1.4rem 1.2rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:.8rem}
 .sidebar-brand svg{width:32px;height:32px;flex-shrink:0}
 .brand-name{font-family:'Cinzel',serif;font-size:1rem;font-weight:700;color:var(--gold);letter-spacing:.12em}
@@ -336,7 +336,7 @@ input,select,textarea{font-size:16px!important}
 
 #sidebar-overlay{
   display:none;position:fixed;inset:0;
-  background:rgba(0,0,0,.7);z-index:499;
+  background:rgba(0,0,0,.7);z-index:400;
   backdrop-filter:blur(2px)
 }
 #sidebar-overlay.show{display:block}
@@ -376,7 +376,7 @@ document.addEventListener('DOMContentLoaded',function(){
 </head>
 <body>
 <div class="layout">
-<div id="sidebar-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:199;backdrop-filter:blur(3px)"></div>
+<div id="sidebar-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:400;backdrop-filter:blur(2px)"></div>
 <aside class="sidebar" id="sidebar">
   <div class="sidebar-brand">
     <svg viewBox="0 0 52 52" fill="none"><polygon points="26,2 50,14 50,38 26,50 2,38 2,14" fill="none" stroke="#c9a84c" stroke-width="1.5"/><polygon points="26,9 43,18 43,34 26,43 9,34 9,18" fill="none" stroke="#c9a84c" stroke-width="0.8" opacity="0.5"/><rect x="20" y="20" width="12" height="14" rx="1" fill="none" stroke="#8a6fd4" stroke-width="1.5"/><circle cx="26" cy="25" r="2" fill="#c9a84c"/><line x1="26" y1="27" x2="26" y2="31" stroke="#8a6fd4" stroke-width="1.5"/></svg>
@@ -413,7 +413,7 @@ document.addEventListener('DOMContentLoaded',function(){
 <div class="main">
   <div class="topbar">
     <div style="display:flex;align-items:center;gap:1rem">
-      <button id="menu-btn" aria-label="Menu">☰</button>
+      <button id="menu-btn" aria-label="Menu" onclick="toggleSidebar()">☰</button>
       <div class="topbar-title" id="page-title">LIVE SESSION</div>
     </div>
     <div style="display:flex;align-items:center;gap:1rem">
@@ -626,19 +626,7 @@ const csrfToken="<?= csrfToken() ?>";
 const originalFetch=window.fetch;
 window.fetch=function(url,options={}){options.headers=options.headers||{};options.headers['X-CSRF-Token']=csrfToken;return originalFetch(url,options)};
 
-// ── Mobile menu ──
-const menuBtn = document.getElementById('menu-btn');
-const sidebar = document.getElementById('sidebar');
-const overlay = document.getElementById('sidebar-overlay');
-if (menuBtn) menuBtn.addEventListener('click', () => {
-    sidebar.classList.toggle('open');
-    if (overlay) overlay.classList.toggle('active', sidebar.classList.contains('open'));
-    overlay.style.display = sidebar.classList.contains('open') ? 'block' : 'none';
-});
-if (overlay) overlay.addEventListener('click', () => {
-    sidebar.classList.remove('open');
-    overlay.style.display = 'none';
-});
+// Mobile handled in head script
 
 </script>
 <?php require_once '../../includes/toast.php'; ?>

@@ -136,6 +136,45 @@ html,body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-seri
 #sidebar-overlay.show{display:block}
 input,select,textarea{font-size:16px!important}
 @media(min-width:769px){input,select,textarea{font-size:unset!important}}
+
+/* TABLE SCROLL FIX */
+.table-wrap{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+@media(max-width:768px){
+  .data-table,.tbl{font-size:.7rem!important;min-width:0!important;width:100%}
+  .data-table th,.data-table td,.tbl th,.tbl td{
+    padding:.35rem .4rem!important;
+    white-space:nowrap!important;
+    font-size:.7rem!important
+  }
+  /* Hide less important columns on mobile */
+  .hide-col-mobile{display:none!important}
+  /* Wrap all card tables */
+  .card-body{overflow-x:auto!important;-webkit-overflow-scrolling:touch!important}
+  /* Prevent body scroll caused by tables */
+  body{overflow-x:hidden!important}
+  .content{overflow-x:hidden!important}
+  /* Stats grid */
+  .stats-grid{grid-template-columns:repeat(2,1fr)!important;gap:.5rem!important}
+  .stat-card{padding:.75rem!important}
+  .stat-value,.stat-num{font-size:1.3rem!important}
+  .stat-label,.stat-sub{font-size:.62rem!important}
+  /* Two col */
+  .two-col,.wrap2{grid-template-columns:1fr!important;gap:.6rem!important}
+  /* Forms */
+  .form-row{grid-template-columns:1fr!important}
+  /* Topbar */
+  .topbar{padding:.6rem .8rem!important}
+  .topbar-title{font-size:.8rem!important}
+  /* Modals */
+  .modal,.modal-box{width:95vw!important;max-height:88vh!important;overflow-y:auto!important}
+  /* Pills */
+  .pill,.badge{font-size:.6rem!important;padding:.1rem .35rem!important}
+  /* Section header */
+  .section-header{flex-wrap:wrap!important;gap:.4rem!important}
+  .section-title{font-size:.88rem!important}
+  /* Buttons */
+  .btn-sm{font-size:.68rem!important;padding:.3rem .5rem!important}
+}
 </style><script>
 function toggleSidebar(){
   var sb=document.getElementById('sidebar');

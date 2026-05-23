@@ -371,11 +371,6 @@ function showSection(name,el){
 </script>
 <script>
 
-function toggleSidebar(){
-  var sb  = document.getElementById('sidebar');
-  var ov  = document.getElementById('sidebar-overlay');
-  var open = sb.classList.toggle('open');
-  if(ov){ ov.classList.toggle('show', open); }
 }
 
 </script>
@@ -384,6 +379,21 @@ function toggleSidebar(){
 // Absolute base URL for API calls — fixes mobile network errors
 const BASE_URL = window.location.origin;
 const API = BASE_URL + '/api';
+</script>
+<script>
+function toggleSidebar(){
+  var sb=document.getElementById('sidebar');
+  var ov=document.getElementById('sidebar-overlay');
+  if(!sb)return;
+  var open=sb.classList.toggle('open');
+  if(ov){ov.style.display=open?'block':'none';}
+}
+document.addEventListener('DOMContentLoaded',function(){
+  var btn=document.getElementById('menu-btn')||document.getElementById('menu-toggle');
+  if(btn)btn.addEventListener('click',function(e){e.stopPropagation();toggleSidebar();});
+  var ov=document.getElementById('sidebar-overlay');
+  if(ov)ov.addEventListener('click',function(){toggleSidebar();});
+});
 </script>
 </head>
 <body>

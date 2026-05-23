@@ -278,11 +278,6 @@ input,select,textarea{font-size:16px!important}
 
 <script>
 
-function toggleSidebar(){
-  var sb  = document.getElementById('sidebar');
-  var ov  = document.getElementById('sidebar-overlay');
-  var open = sb.classList.toggle('open');
-  if(ov){ ov.classList.toggle('show', open); }
 }
 
 // Absolute base URL for API calls — fixes mobile network errors
@@ -303,6 +298,21 @@ function showSection(name,el){
   if(ov)ov.style.display='none';
   toggleSidebar && document.getElementById("sidebar").classList.contains("open") && toggleSidebar();
 }
+</script>
+<script>
+function toggleSidebar(){
+  var sb=document.getElementById('sidebar');
+  var ov=document.getElementById('sidebar-overlay');
+  if(!sb)return;
+  var open=sb.classList.toggle('open');
+  if(ov){ov.style.display=open?'block':'none';}
+}
+document.addEventListener('DOMContentLoaded',function(){
+  var btn=document.getElementById('menu-btn')||document.getElementById('menu-toggle');
+  if(btn)btn.addEventListener('click',function(e){e.stopPropagation();toggleSidebar();});
+  var ov=document.getElementById('sidebar-overlay');
+  if(ov)ov.addEventListener('click',function(){toggleSidebar();});
+});
 </script>
 </head>
 <body>
@@ -346,7 +356,7 @@ function showSection(name,el){
 <div class="main">
   <div class="topbar">
     <div style="display:flex;align-items:center;gap:1rem">
-      <button id="menu-btn" onclick="toggleSidebar()" aria-label="Menu">☰</button>
+      <button id="menu-btn" aria-label="Menu">☰</button>
       <div class="topbar-title" id="page-title">OVERVIEW</div>
     </div>
     <div style="display:flex;align-items:center;gap:1rem">

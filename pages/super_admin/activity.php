@@ -116,7 +116,22 @@ html,body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-seri
 #sidebar-overlay.show{display:block}
 input,select,textarea{font-size:16px!important}
 @media(min-width:769px){input,select,textarea{font-size:unset!important}}
-</style></head><body>
+</style><script>
+function toggleSidebar(){
+  var sb=document.getElementById('sidebar');
+  var ov=document.getElementById('sidebar-overlay');
+  if(!sb)return;
+  var open=sb.classList.toggle('open');
+  if(ov){ov.style.display=open?'block':'none';}
+}
+document.addEventListener('DOMContentLoaded',function(){
+  var btn=document.getElementById('menu-btn')||document.getElementById('menu-toggle');
+  if(btn)btn.addEventListener('click',function(e){e.stopPropagation();toggleSidebar();});
+  var ov=document.getElementById('sidebar-overlay');
+  if(ov)ov.addEventListener('click',function(){toggleSidebar();});
+});
+</script>
+</head><body>
 <div class="layout">
 <div id="sidebar-overlay" onclick="toggleSidebar()"></div>
 <aside class="sidebar">
@@ -211,11 +226,5 @@ input,select,textarea{font-size:16px!important}
 })();
 </script>
 <script>
-function toggleSidebar(){
-  var sb=document.getElementById('sidebar');
-  var ov=document.getElementById('sidebar-overlay');
-  var open=sb.classList.toggle('open');
-  if(ov)ov.classList.toggle('show',open);
-}
 </script>
 </body></html>

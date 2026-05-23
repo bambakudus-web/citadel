@@ -1,9 +1,8 @@
-const CACHE_NAME = 'citadel-v3';
+const CACHE_NAME = 'citadel-v4';
+
+// Only cache these static assets
 const STATIC_ASSETS = [
-  '/',
-  '/index.php',
-  '/register.php',
-  'https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap'
+  '/assets/chart.min.js',
 ];
 
 self.addEventListener('install', e => {
@@ -23,34 +22,29 @@ self.addEventListener('activate', e => {
 });
 
 self.addEventListener('fetch', e => {
-  if (e.request.url.includes('/api/')) {
+  // Always network-first for PHP pages and APIs
+  if (e.request.url.includes('.php') || e.request.url.includes('/api/')) {
+    e.respondWith(fetch(e.request).catch(() => new Response('Offline', {status: 503})));
+    return;
+  }
+  // Cache-first only for chart.min.js
+  if (e.request.url.includes('chart.min.js')) {
     e.respondWith(
-      fetch(e.request).catch(() =>
-        new Response(JSON.stringify({ error: 'You are offline' }), {
-          headers: { 'Content-Type': 'application/json' }
-        })
-      )
+      caches.match(e.request).then(cached => cached || fetch(e.request))
     );
     return;
   }
-  // Never cache login/auth pages
-  if (e.request.url.includes('login.php') || e.request.url.includes('logout.php')) {
-    e.respondWith(fetch(e.request));
-    return;
-  }
-  e.respondWith(
-    caches.match(e.request).then(cached => cached || fetch(e.request))
-  );
+  // Everything else: network first
+  e.respondWith(fetch(e.request).catch(() => caches.match(e.request)));
 });
 
 self.addEventListener('push', e => {
   const data = e.data?.json() || {};
   e.waitUntil(
     self.registration.showNotification(data.title || 'Citadel', {
-      body:    data.body    || 'You have a new notification',
-      icon:    '/assets/icon-192.png',
-      badge:   '/assets/icon-192.png',
-      data:    data.url || '/',
+      body: data.body || 'New notification',
+      icon: '/assets/icon-192.png',
+      data: data.url || '/',
       vibrate: [200, 100, 200],
     })
   );

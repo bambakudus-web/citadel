@@ -163,6 +163,21 @@ a{color:inherit;text-decoration:none}
 input,select,textarea{font-size:16px!important}
 @media(min-width:769px){input,select,textarea{font-size:unset!important}}
 </style>
+<script>
+function toggleSidebar(){
+  var sb=document.getElementById('sidebar');
+  var ov=document.getElementById('sidebar-overlay');
+  if(!sb)return;
+  var open=sb.classList.toggle('open');
+  if(ov){ov.style.display=open?'block':'none';}
+}
+document.addEventListener('DOMContentLoaded',function(){
+  var btn=document.getElementById('menu-btn')||document.getElementById('menu-toggle');
+  if(btn)btn.addEventListener('click',function(e){e.stopPropagation();toggleSidebar();});
+  var ov=document.getElementById('sidebar-overlay');
+  if(ov)ov.addEventListener('click',function(){toggleSidebar();});
+});
+</script>
 </head>
 <body>
 <div class="layout">
@@ -267,11 +282,5 @@ async function delSchool(id,name){
 })();
 </script>
 <script>
-function toggleSidebar(){
-  var sb=document.getElementById('sidebar');
-  var ov=document.getElementById('sidebar-overlay');
-  var open=sb.classList.toggle('open');
-  if(ov)ov.classList.toggle('show',open);
-}
 </script>
 </body></html>

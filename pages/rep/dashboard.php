@@ -316,7 +316,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;background:radial-gradi
 @media(max-width:768px){.sidebar{transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}.main{margin-left:0}.content{padding:1rem}.topbar{padding:.8rem 1rem}.stats-grid{grid-template-columns:repeat(2,1fr)}.code-number{font-size:2rem}.data-table{font-size:.72rem}.data-table th,.data-table td{padding:.4rem .5rem}.tt-item{flex-direction:column;gap:.3rem}.tt-time{min-width:unset}.two-col{grid-template-columns:1fr}.form-row{grid-template-columns:1fr}.topbar-title{font-size:.78rem}.stat-value{font-size:1.5rem}#menu-btn{display:block}.hide-mobile{display:none!important}}
 @media(min-width:769px){#menu-btn{display:none}}
 
-/* ── MOBILE OVERHAUL ── */
+
 @media(max-width:768px){
   :root{--sidebar-w:0px}
   .sidebar{width:280px;transform:translateX(-100%);z-index:200;box-shadow:4px 0 24px rgba(0,0,0,.5)}
@@ -362,7 +362,83 @@ body::before{content:'';position:fixed;inset:0;z-index:0;background:radial-gradi
 /* Sidebar overlay background */
 .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:199;backdrop-filter:blur(2px)}
 
-/* Safari zoom fix — inputs must be 16px */
+
+input,select,textarea{font-size:16px!important}
+@media(min-width:769px){input,select,textarea{font-size:inherit!important}}
+
+/* ════ MOBILE OVERHAUL ════ */
+@media(max-width:768px){
+  :root{--sidebar-w:0px}
+  .layout{display:flex;flex-direction:column}
+  .sidebar{
+    width:280px;position:fixed;top:0;left:0;height:100vh;
+    transform:translateX(-100%);transition:transform .3s ease;
+    z-index:300;box-shadow:4px 0 30px rgba(0,0,0,.7)
+  }
+  .sidebar.open{transform:translateX(0)}
+  .main{margin-left:0!important;width:100%;min-height:100vh}
+  .topbar{
+    position:sticky;top:0;z-index:200;
+    padding:.7rem 1rem!important;
+    background:var(--surface);border-bottom:1px solid var(--border)
+  }
+  #menu-btn{
+    display:flex!important;align-items:center;justify-content:center;
+    width:38px;height:38px;background:var(--surface2,var(--surface2));
+    border:1px solid var(--border);border-radius:4px;
+    color:var(--text);cursor:pointer;font-size:1.2rem;flex-shrink:0
+  }
+  .content{padding:.75rem!important;overflow-x:hidden}
+  .stats-grid{
+    display:grid!important;
+    grid-template-columns:repeat(2,1fr)!important;
+    gap:.6rem!important;margin-bottom:1rem!important
+  }
+  .stat-card{padding:.9rem 1rem!important}
+  .stat-value,.stat-num,.sn{font-size:1.5rem!important}
+  .stat-label,.stat-sub,.sl,.sb2{font-size:.65rem!important}
+  .two-col,.wrap2{grid-template-columns:1fr!important;gap:.75rem!important}
+  .form-row{grid-template-columns:1fr!important}
+  .card-head{padding:.75rem 1rem!important}
+  .card-body{padding:.85rem 1rem!important;overflow-x:auto}
+  .section-header{flex-direction:column!important;align-items:flex-start!important;gap:.5rem!important}
+  .section-title{font-size:.92rem!important}
+  .data-table{font-size:.73rem!important;min-width:460px}
+  .data-table th,.data-table td{padding:.4rem .5rem!important;white-space:nowrap}
+  .tbl{font-size:.73rem!important;min-width:460px}
+  .tbl th,.tbl td{padding:.4rem .5rem!important;white-space:nowrap}
+  .pill,.badge{font-size:.62rem!important;padding:.12rem .38rem!important}
+  .btn{padding:.6rem .85rem!important;font-size:.76rem!important}
+  .btn-sm{padding:.32rem .55rem!important;font-size:.68rem!important}
+  .modal,.modal-box{width:96vw!important;max-height:88vh;overflow-y:auto;margin:0!important}
+  .tt-item{flex-direction:column;gap:.25rem}
+  .tt-time{min-width:unset!important;font-size:.72rem}
+  .tt-course-name{font-size:.82rem}
+  .topbar-right .badge-admin,.topbar-right .hide-mobile{display:none!important}
+  .hide-mobile{display:none!important}
+  .page-section{padding:.5rem 0}
+  /* Fix blank sections */
+  .page-section.active{display:block!important;min-height:100px}
+  /* Code inputs */
+  .code-inputs input{width:40px!important;height:50px!important;font-size:1.2rem!important}
+  .code-inputs{gap:.4rem!important}
+  /* Camera */
+  .camera-wrap{max-width:100%!important}
+  .attend-zone{padding:0!important}
+  /* Charts */
+  #charts-card .card-body div{grid-template-columns:1fr!important;gap:1rem!important}
+}
+@media(max-width:400px){
+  .stats-grid{grid-template-columns:1fr!important}
+  .stat-value{font-size:1.8rem!important}
+  #menu-btn{width:34px!important;height:34px!important}
+}
+@media(min-width:769px){
+  #menu-btn{display:none!important}
+  .sidebar-overlay{display:none!important}
+}
+
+/* Safari zoom fix */
 input,select,textarea{font-size:16px!important}
 @media(min-width:769px){input,select,textarea{font-size:inherit!important}}
 </style>
@@ -498,7 +574,7 @@ function showSection(name,el){
       <div class="section-header"><div class="section-title">Class <span>Timetable</span></div></div>
       <?php foreach(['Monday','Tuesday','Wednesday','Thursday','Friday'] as $day):
         $cls=$pdo->prepare("SELECT t.*,u.full_name as lecturer_name FROM timetable t JOIN users u ON t.lecturer_id=u.id WHERE t.day_of_week=? AND u.institution_id=$inst_id AND (t.semester_id=? OR t.semester_id IS NULL) ORDER BY t.start_time");
-        $cls->execute([$day]); $cls=$cls->fetchAll(); if(empty($cls)) continue; ?>
+        $cls->execute([$day, $activeSemId]); $cls=$cls->fetchAll(); if(empty($cls)) continue; ?>
         <div style="margin-bottom:1.5rem">
           <div style="font-family:'Cinzel',serif;font-size:.78rem;color:var(--rep);letter-spacing:.15em;margin-bottom:.6rem;text-transform:uppercase"><?= $day ?></div>
           <div style="display:flex;flex-direction:column;gap:.5rem"><?php foreach($cls as $c): ?>

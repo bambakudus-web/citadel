@@ -127,44 +127,46 @@ a{color:inherit;text-decoration:none}
 #toast.show{transform:translateY(0);opacity:1}
 #toast.ok{background:rgba(76,175,130,.15);border:1px solid rgba(76,175,130,.4);color:var(--success)}
 #toast.err{background:rgba(224,92,92,.1);border:1px solid rgba(224,92,92,.3);color:var(--danger)}
-@media(max-width:900px){.sidebar{width:200px}.main{margin-left:200px}.wrap2{grid-template-columns:1fr}}
-@media(max-width:600px){.sidebar{display:none}.main{margin-left:0}}
 
-/* ── MOBILE ── */
+.menu-toggle{display:none;align-items:center;justify-content:center;width:36px;height:36px;background:var(--surface2,var(--surface));border:1px solid var(--border);border-radius:2px;color:var(--text);cursor:pointer;font-size:1.1rem;margin-bottom:1rem}
+
+/* Safari zoom fix — inputs must be 16px */
+
+/* ═══ MOBILE ═══ */
 @media(max-width:768px){
-  .sidebar{width:280px;position:fixed;transform:translateX(-100%);transition:transform .3s;z-index:200;box-shadow:4px 0 24px rgba(0,0,0,.5)}
-  .sidebar.open{transform:translateX(0)}
+  .sidebar{width:260px!important;position:fixed!important;top:0!important;left:0!important;height:100vh!important;z-index:500!important;transform:translateX(-100%)!important;transition:transform .25s ease!important;box-shadow:4px 0 20px rgba(0,0,0,.8)!important}
+  .sidebar.open{transform:translateX(0)!important}
   .main{margin-left:0!important;padding:1rem!important}
+  .menu-toggle{display:flex!important;align-items:center!important;justify-content:center!important;width:36px!important;height:36px!important;background:rgba(255,255,255,.08)!important;border:1px solid var(--border)!important;border-radius:4px!important;color:var(--text)!important;cursor:pointer!important;font-size:18px!important;flex-shrink:0!important;padding:0!important;margin-bottom:1rem!important}
   .ph{flex-direction:column!important;align-items:flex-start!important}
-  .toolbar{width:100%}
+  .toolbar{width:100%!important}
   .sbox{width:100%!important}
-  .stats,.stats-row{grid-template-columns:repeat(2,1fr)!important;gap:.6rem!important}
-  .sc,.stat-card{padding:1rem!important}
-  .sn,.stat-num{font-size:1.6rem!important}
+  .stats,.stats-row{grid-template-columns:1fr 1fr!important;gap:.5rem!important}
+  .sc,.stat-card{padding:.8rem!important}
+  .sn,.stat-num{font-size:1.5rem!important}
   .wrap2{grid-template-columns:1fr!important}
-  .tbl{font-size:.78rem;min-width:600px}
-  .tbl th,.tbl td{padding:.5rem .7rem!important}
-  .sec{overflow-x:auto}
+  .sec{overflow-x:auto!important}
+  .tbl{font-size:.72rem!important;min-width:420px!important}
+  .tbl th,.tbl td{padding:.38rem .45rem!important;white-space:nowrap!important}
   .drw,.drawer{width:100vw!important}
-  .menu-toggle{display:flex!important}
-  .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:199}
-  .sidebar-overlay.active{display:block}
+  .fi{grid-template-columns:1fr!important;gap:.3rem!important}
+  .thead{display:none!important}
 }
-@media(max-width:480px){
+@media(max-width:420px){
   .stats,.stats-row{grid-template-columns:1fr!important}
 }
 @media(min-width:769px){
   .menu-toggle{display:none!important}
 }
-.menu-toggle{display:none;align-items:center;justify-content:center;width:36px;height:36px;background:var(--surface2,var(--surface));border:1px solid var(--border);border-radius:2px;color:var(--text);cursor:pointer;font-size:1.1rem;margin-bottom:1rem}
-
-/* Safari zoom fix — inputs must be 16px */
+#sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:499;backdrop-filter:blur(2px)}
+#sidebar-overlay.show{display:block}
 input,select,textarea{font-size:16px!important}
-@media(min-width:769px){input,select,textarea{font-size:inherit!important}}
+@media(min-width:769px){input,select,textarea{font-size:unset!important}}
 </style>
 </head>
 <body>
 <div class="layout">
+<div id="sidebar-overlay" onclick="toggleSidebar()"></div>
 <aside class="sidebar">
   <div class="sb-brand">
     <div><div class="sb-logo">CITADEL</div><div class="sb-role">Super Admin</div></div>
@@ -263,5 +265,13 @@ async function delSchool(id,name){
     overlay.classList.remove('active');
   });
 })();
+</script>
+<script>
+function toggleSidebar(){
+  var sb=document.getElementById('sidebar');
+  var ov=document.getElementById('sidebar-overlay');
+  var open=sb.classList.toggle('open');
+  if(ov)ov.classList.toggle('show',open);
+}
 </script>
 </body></html>

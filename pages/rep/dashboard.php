@@ -221,7 +221,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;background:radial-gradi
 .nav-item:hover{color:var(--text);background:rgba(255,255,255,.03)}
 .nav-item.active{color:var(--rep);border-left-color:var(--rep);background:rgba(90,159,122,.06)}
 .nav-item svg{width:16px;height:16px;flex-shrink:0}
-.sidebar-user{padding:.6rem 1.4rem .6rem;border-top:1px solid var(--border)}
+.sidebar-user{padding:.5rem 1.4rem .5rem;border-top:1px solid var(--border);margin-top:-1rem}
 .u-name{font-size:.78rem;color:var(--text);font-weight:500;margin-bottom:.1rem}
 .u-index{font-size:.62rem;color:var(--muted);margin-bottom:.2rem}
 .sidebar-user a{color:var(--danger);text-decoration:none;font-size:.74rem;display:block;margin-top:.2rem}

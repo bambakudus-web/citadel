@@ -421,14 +421,9 @@ input,select,textarea{font-size:16px!important}
   .btn-sm{font-size:.68rem!important;padding:.3rem .5rem!important}
 }
 
-/* SIDEBAR SCROLL FIX */
-.sidebar{display:flex!important;flex-direction:column!important}
-.sidebar-nav,.sb-nav{flex:1!important;overflow-y:auto!important;min-height:0!important}
-.sidebar-user,.sidebar-footer,.sb-foot{flex-shrink:0!important}
 
-/* SIGNOUT ALWAYS VISIBLE */
-.sidebar{overflow-y:auto!important;overflow-x:hidden!important;-webkit-overflow-scrolling:touch!important;scrollbar-width:none!important}
-.sidebar::-webkit-scrollbar{display:none!important}
+
+
 
 
 </style>
@@ -482,7 +477,7 @@ document.addEventListener('DOMContentLoaded',function(){
             display: block !important;
             margin-top: 0.1rem !important;
         }
-(max-width:768px){.sidebar{overflow:hidden!important;display:flex!important;flex-direction:column!important}.sidebar-nav,.sb-nav{flex:1 1 0!important;overflow-y:auto!important;overflow-x:hidden!important;min-height:0!important}.sidebar-user,.sidebar-footer,.sb-foot{flex-shrink:0!important;overflow:visible!important}}
+@media(max-width:768px){.sidebar{overflow:hidden!important;display:flex!important;flex-direction:column!important}.sidebar-nav,.sb-nav{flex:1 1 0!important;overflow-y:auto!important;overflow-x:hidden!important;min-height:0!important}.sidebar-user,.sidebar-footer,.sb-foot{flex-shrink:0!important;overflow:visible!important}}
 </style>
 </head>
 

@@ -192,7 +192,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;background:radial-gradi
 .nav-item:hover{color:var(--text);background:rgba(255,255,255,.03)}
 .nav-item.active{color:var(--gold);border-left-color:var(--gold);background:rgba(201,168,76,.06)}
 .nav-item svg{width:16px;height:16px;flex-shrink:0}
-.sidebar-footer{padding:0.75rem 1rem max(1rem,env(safe-area-inset-bottom));border-top:1px solid var(--border);font-size:.75rem;color:var(--muted);margin:0 0.6rem 0.6rem;background:var(--surface2);border-radius:6px;border:1px solid var(--border)}
+.sidebar-footer{padding:0.75rem 1rem max(1rem,env(safe-area-inset-bottom));border-top:1px solid var(--border);font-size:.75rem;color:var(--muted);margin:0 0.6rem 0.6rem;background:var(--surface2);border-radius:6px;border:1px solid var(--border);display:flex;flex-direction:column;gap:0.5rem}
 .sidebar-footer a{color:var(--danger);text-decoration:none;font-size:.8rem}
 .sidebar-footer strong{color:var(--text);font-size:.78rem}
 @media(max-width:768px){.charts-grid{grid-template-columns:1fr!important}}
@@ -293,6 +293,8 @@ input,select,textarea{font-size:16px!important}
   .main{margin-left:0!important}
   .content{padding:.7rem!important}
   .topbar{padding:.65rem .9rem!important;gap:.5rem}
+  .hide-mobile{display:none!important}
+  .topbar-right{gap:.5rem!important}
   #menu-btn{
     display:flex!important;
     align-items:center!important;
@@ -593,9 +595,9 @@ document.addEventListener('DOMContentLoaded',function(){
     </div>
     <div class="topbar-right">
       <?php if($activeSemester): ?>
-      <span style="font-size:.7rem;color:var(--gold);border:1px solid var(--gold-dim);padding:.2rem .6rem;border-radius:2px"><?= htmlspecialchars($activeSemester['name']) ?></span>
+      <span class="hide-mobile" style="font-size:.7rem;color:var(--gold);border:1px solid var(--gold-dim);padding:.2rem .6rem;border-radius:2px;white-space:nowrap"><?= htmlspecialchars($activeSemester['name']) ?></span>
       <?php endif; ?>
-      <span style="font-size:.75rem;color:var(--muted)"><?= date('l, d M Y') ?></span>
+      <span class="hide-mobile" style="font-size:.75rem;color:var(--muted);white-space:nowrap"><?= date('l, d M Y') ?></span>
       <span class="badge-admin">Boss</span>
       <button id="theme-btn" onclick="toggleTheme()" style="background:none;border:1px solid var(--border);color:var(--muted);cursor:pointer;padding:.25rem .6rem;border-radius:2px;font-size:.75rem">🌙</button>
     </div>

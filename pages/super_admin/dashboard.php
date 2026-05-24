@@ -208,9 +208,10 @@ input,select,textarea{font-size:16px!important}
 .sidebar-user,.sidebar-footer,.sb-foot{flex-shrink:0!important;margin-top:auto!important}
 
 /* SIGNOUT ALWAYS VISIBLE */
-.sidebar{display:flex!important;flex-direction:column!important;overflow:hidden!important}
-.sidebar-nav,.sb-nav{flex:1 1 0!important;overflow-y:auto!important;overflow-x:hidden!important;min-height:0!important;max-height:calc(100vh - 160px)!important}
-.sidebar-user,.sidebar-footer,.sb-foot{flex-shrink:0!important;position:sticky!important;bottom:0!important;background:var(--surface)!important;border-top:1px solid var(--border)!important}
+.sidebar{overflow-y:auto!important;overflow-x:hidden!important;-webkit-overflow-scrolling:touch!important;scrollbar-width:none!important}
+.sidebar::-webkit-scrollbar{display:none!important}
+.sidebar-nav,.sb-nav{overflow:visible!important}
+.sidebar-user,.sidebar-footer,.sb-foot{padding-bottom:env(safe-area-inset-bottom,20px)!important}
 </style>
 <script>
 function toggleSidebar(){

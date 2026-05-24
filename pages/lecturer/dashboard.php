@@ -284,7 +284,7 @@ input,select,textarea{font-size:16px!important}
   .sidebar{
     width:260px!important;
     position:fixed!important;top:0!important;left:0!important;
-    height:100vh!important;z-index:500!important;
+    height:100vh!important;height:100dvh!important;z-index:500!important;
     transform:translateX(-100%)!important;
     transition:transform .25s ease!important;
     box-shadow:4px 0 20px rgba(0,0,0,.8)!important;

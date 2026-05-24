@@ -221,9 +221,9 @@ body::before{content:'';position:fixed;inset:0;z-index:0;background:radial-gradi
 .nav-item:hover{color:var(--text);background:rgba(255,255,255,.03)}
 .nav-item.active{color:var(--rep);border-left-color:var(--rep);background:rgba(90,159,122,.06)}
 .nav-item svg{width:16px;height:16px;flex-shrink:0}
-.sidebar-user{padding:1rem 1.4rem;border-top:1px solid var(--border)}
+.sidebar-user{padding:1rem 1.4rem 2rem;border-top:1px solid var(--border)}
 .u-name{font-size:.82rem;color:var(--text);font-weight:500}
-.u-index{font-size:.68rem;color:var(--muted);margin-bottom:.5rem}
+.u-index{font-size:.68rem;color:var(--muted);margin-bottom:.3rem}
 .sidebar-user a{color:var(--danger);text-decoration:none;font-size:.78rem}
 .main{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column;min-height:100vh}
 .topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:.9rem 2rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}

@@ -186,7 +186,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;background:radial-gradi
 .sidebar-brand svg{width:32px;height:32px;flex-shrink:0}
 .sidebar-brand-text .name{font-family:'Cinzel',serif;font-size:1rem;font-weight:700;color:var(--gold);letter-spacing:.12em}
 .sidebar-brand-text .role{font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
-.sidebar-nav{flex:1;padding:1rem 0;overflow-y:auto;scrollbar-width:none;-ms-overflow-style:none}
+.sidebar-nav{flex:1;padding:1rem 0;overflow-y:auto;scrollbar-width:none;-ms-overflow-style:none;min-height:0}
 .nav-section{font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);padding:.8rem 1.4rem .4rem}
 .nav-item{display:flex;align-items:center;gap:.75rem;padding:.65rem 1.4rem;color:var(--muted);text-decoration:none;font-size:.85rem;cursor:pointer;border-left:2px solid transparent;transition:all .2s}
 .nav-item:hover{color:var(--text);background:rgba(255,255,255,.03)}

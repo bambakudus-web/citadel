@@ -182,12 +182,12 @@ body.light::before{display:none}
 html,body{height:100%;background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;overflow-x:hidden}
 body::before{content:'';position:fixed;inset:0;z-index:0;background:radial-gradient(ellipse 60% 40% at 50% 0%,rgba(138,111,212,.1) 0%,transparent 60%);pointer-events:none}
 .layout{display:flex;min-height:100vh;position:relative;z-index:1}
-.sidebar{width:var(--sidebar-w);background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:500!important;transition:transform .3s}
+.sidebar{width:var(--sidebar-w);background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;position:fixed;top:0;left:0;bottom:0;z-index:500!important;transition:transform .3s}
 .sidebar-brand{padding:1.6rem 1.4rem 1.2rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:.8rem}
 .sidebar-brand svg{width:32px;height:32px;flex-shrink:0}
 .brand-name{font-family:'Cinzel',serif;font-size:1rem;font-weight:700;color:var(--gold);letter-spacing:.12em}
 .brand-role{font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;color:var(--lec)}
-.sidebar-nav{flex:1;padding:1rem 0;overflow-y:auto;scrollbar-width:none}
+.sidebar-nav{flex:1;min-height:0;padding:1rem 0;overflow-y:auto;scrollbar-width:none}
 .nav-section{font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);padding:.8rem 1.4rem .4rem}
 .nav-item{display:flex;align-items:center;gap:.75rem;padding:.65rem 1.4rem;color:var(--muted);text-decoration:none;font-size:.85rem;cursor:pointer;border-left:2px solid transparent;transition:all .2s}
 .nav-item:hover{color:var(--text);background:rgba(255,255,255,.03)}
@@ -288,7 +288,7 @@ input,select,textarea{font-size:16px!important}
     transform:translateX(-100%)!important;
     transition:transform .25s ease!important;
     box-shadow:4px 0 20px rgba(0,0,0,.8)!important;
-    overflow-y:auto!important
+    overflow:hidden!important
   }
   .sidebar.open{transform:translateX(0)!important}
   .main{margin-left:0!important}

@@ -181,7 +181,7 @@ body.light::before{display:none}
 html,body{height:100%;background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;overflow-x:hidden}
 body::before{content:'';position:fixed;inset:0;z-index:0;background:radial-gradient(ellipse 60% 40% at 20% 0%,rgba(74,111,165,.12) 0%,transparent 60%),radial-gradient(ellipse 40% 30% at 90% 90%,rgba(201,168,76,.06) 0%,transparent 60%);pointer-events:none}
 .layout{display:flex;min-height:100vh;position:relative;z-index:1}
-.sidebar{width:var(--sidebar-w);background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:500!important;transition:transform .3s ease}
+.sidebar{width:var(--sidebar-w);background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;position:fixed;top:0;left:0;bottom:0;z-index:500!important;transition:transform .3s ease}
 .sidebar-brand{padding:1.6rem 1.4rem 1.2rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:.8rem}
 .sidebar-brand svg{width:32px;height:32px;flex-shrink:0}
 .sidebar-brand-text .name{font-family:'Cinzel',serif;font-size:1rem;font-weight:700;color:var(--gold);letter-spacing:.12em}
@@ -285,7 +285,7 @@ input,select,textarea{font-size:16px!important}
     transform:translateX(-100%)!important;
     transition:transform .25s ease!important;
     box-shadow:4px 0 20px rgba(0,0,0,.8)!important;
-    overflow-y:auto!important
+    overflow:hidden!important
   }
   .sidebar.open{transform:translateX(0)!important}
   .main{margin-left:0!important}

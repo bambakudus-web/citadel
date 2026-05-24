@@ -483,7 +483,7 @@ document.addEventListener('DOMContentLoaded',function(){
             margin-top: 0.1rem !important;
         }
     </style>
-</head>
+<style>@media(max-width:768px){aside,.sidebar,[class*="sidebar"]{height:100vh!important;max-height:100vh!important;display:flex!important;flex-direction:column!important;justify-content:between!important;padding-bottom:max(4rem,env(safe-area-inset-bottom))!important;box-sizing:border-box!important;}.sidebar-user,[class*="user"],[class*="footer"]{padding-top:0.3rem!important;padding-bottom:0.3rem!important;margin-bottom:0!important;}.u-name{font-size:0.75rem!important;}.u-index,[class*="muted"]{font-size:0.58rem!important;margin-bottom:0.1rem!important;}.sidebar-user a,[class*="user"] a,[class*="footer"] a{font-size:0.68rem!important;display:block!important;margin-top:0.1rem!important;}}</style></head>
 
 <body>
 <div class="layout">

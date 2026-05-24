@@ -192,8 +192,10 @@ body::before{content:'';position:fixed;inset:0;z-index:0;background:radial-gradi
 .nav-item:hover{color:var(--text);background:rgba(255,255,255,.03)}
 .nav-item.active{color:var(--gold);border-left-color:var(--gold);background:rgba(201,168,76,.06)}
 .nav-item svg{width:16px;height:16px;flex-shrink:0}
-.sidebar-footer{padding:1rem 1.4rem;border-top:1px solid var(--border);font-size:.75rem;color:var(--muted)}
+.sidebar-footer{padding:0.75rem 1rem max(1rem,env(safe-area-inset-bottom));border-top:1px solid var(--border);font-size:.75rem;color:var(--muted);margin:0 0.6rem 0.6rem;background:var(--surface2);border-radius:6px;border:1px solid var(--border)}
 .sidebar-footer a{color:var(--danger);text-decoration:none;font-size:.8rem}
+.sidebar-footer strong{color:var(--text);font-size:.78rem}
+@media(max-width:768px){.charts-grid{grid-template-columns:1fr!important}}
 .main{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column;min-height:100vh}
 .topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:.9rem 2rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
 .topbar-title{font-family:'Cinzel',serif;font-size:.9rem;color:var(--gold);letter-spacing:.1em}
@@ -206,7 +208,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;background:radial-gradi
 .section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.8rem;flex-wrap:wrap;gap:1rem}
 .section-title{font-family:'Cinzel',serif;font-size:1.1rem;color:var(--text);letter-spacing:.08em}
 .section-title span{color:var(--gold)}
-.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin-bottom:2rem}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1rem;margin-bottom:2rem}
 .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:2px;padding:1.4rem 1.6rem;position:relative;overflow:hidden}
 .stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
 .stat-card.gold::before{background:linear-gradient(90deg,transparent,var(--gold),transparent)}
@@ -642,7 +644,7 @@ document.addEventListener('DOMContentLoaded',function(){
           </div>
         </div>
       </div>
-      <div class="card" style="margin-bottom:1.5rem" id="charts-card"><div class="card-head"><div class="card-head-title">Attendance <span>Analytics</span></div></div><div class="card-body"><div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem"><div><canvas id="chart-attendance-trend" height="200"></canvas></div><div><canvas id="chart-course-rates" height="200"></canvas></div></div></div></div>
+      <div class="card" style="margin-bottom:1.5rem" id="charts-card"><div class="card-head"><div class="card-head-title">Attendance <span>Analytics</span></div></div><div class="card-body"><div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem" class="charts-grid"><div><canvas id="chart-attendance-trend" height="200"></canvas></div><div><canvas id="chart-course-rates" height="200"></canvas></div></div></div></div>
     </div>
 
      <!-- ══ TIMETABLE ══ -->

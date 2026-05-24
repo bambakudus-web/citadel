@@ -714,18 +714,18 @@ $ttAll = $ttStmt->fetchAll();
       </div>
       <?php endif; ?>
       <div class="card"><div class="card-body" style="padding:0;overflow-x:auto">
-        <table class="data-table"><thead><tr><th>Semester</th><th>Academic Year</th><th class="hide-mobile">Dates</th><th class="hide-mobile">Courses</th><th>Status</th><th>Actions</th></tr></thead><tbody>
+        <table class="data-table"><thead><tr><th>Semester</th><th class="hide-mobile">Academic Year</th><th class="hide-mobile">Dates</th><th class="hide-mobile">Courses</th><th>Status</th><th>Actions</th></tr></thead><tbody>
         <?php foreach($allSemesters as $sem): ?>
         <tr>
-          <td><?= htmlspecialchars($sem['name']) ?></td>
-          <td style="color:var(--gold);font-size:.78rem"><?= $sem['academic_year'] ?> · Sem <?= $sem['semester_no'] ?></td>
+          <td style="max-width:120px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"><?= htmlspecialchars($sem['name']) ?></td>
+          <td class="hide-mobile" style="color:var(--gold);font-size:.78rem"><?= $sem['academic_year'] ?> · Sem <?= $sem['semester_no'] ?></td>
           <td class="hide-mobile" style="color:var(--muted);font-size:.75rem"><?= $sem['start_date'] ?> → <?= $sem['end_date'] ?></td>
           <td class="hide-mobile"><span class="pill pill-steel"><?= $sem['course_count'] ?> courses</span></td>
           <td><?= $sem['is_active'] ? '<span class="pill pill-green">Active</span>' : '<span class="pill pill-red">Inactive</span>' ?></td>
-          <td style="display:flex;gap:.4rem;flex-wrap:wrap">
+          <td><div style="display:flex;flex-direction:column;gap:.3rem">
             <?php if(!$sem['is_active']): ?><button class="btn btn-gold btn-sm" onclick="setActiveSemester(<?= $sem['id'] ?>,'<?= htmlspecialchars(addslashes($sem['name'])) ?>')">Set Active</button><?php endif; ?>
             <button class="btn btn-ghost btn-sm" onclick="editSemester(<?= $sem['id'] ?>,'<?= htmlspecialchars(addslashes($sem['name'])) ?>','<?= $sem['academic_year'] ?>',<?= $sem['semester_no'] ?>,'<?= $sem['start_date'] ?>','<?= $sem['end_date'] ?>')">Edit</button>
-          </td>
+          </div></td>
         </tr>
         <?php endforeach; if(empty($allSemesters)): ?><tr><td colspan="6" style="color:var(--muted)">No semesters yet.</td></tr><?php endif; ?>
         </tbody></table>

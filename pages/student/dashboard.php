@@ -357,7 +357,27 @@ document.addEventListener('DOMContentLoaded',function(){
   if(ov)ov.onclick=function(){toggleSidebar();};
 });
 </script>
+
+    <style>
+        .sidebar-user {
+            padding: 0.6rem 1.4rem max(1.5rem, env(safe-area-inset-bottom)) !important;
+        }
+        .u-name {
+            font-size: 0.78rem !important;
+            margin-bottom: 0.1rem !important;
+        }
+        .u-index {
+            font-size: 0.62rem !important;
+            margin-bottom: 0.1rem !important;
+        }
+        .sidebar-user a {
+            font-size: 0.72rem !important;
+            display: block !important;
+            margin-top: 0.1rem !important;
+        }
+    </style>
 </head>
+
 <body>
 <div class="layout">
 <div id="sidebar-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:400;backdrop-filter:blur(2px)"></div>

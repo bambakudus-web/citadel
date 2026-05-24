@@ -193,7 +193,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;background:radial-gradi
 .nav-item:hover{color:var(--text);background:rgba(255,255,255,.03)}
 .nav-item.active{color:var(--lec);border-left-color:var(--lec);background:rgba(138,111,212,.06)}
 .nav-item svg{width:16px;height:16px;flex-shrink:0}
-.sidebar-user{padding:.5rem 1.4rem .5rem;border-top:1px solid var(--border);margin-top:-1rem}
+.sidebar-user{padding:.5rem 1.4rem .8rem;border-top:1px solid var(--border)}
 .u-name{font-size:.78rem;color:var(--text);font-weight:500;margin-bottom:.1rem}
 .u-role{font-size:.68rem;color:var(--muted);margin-bottom:.5rem}
 .sidebar-user a{color:var(--danger);text-decoration:none;font-size:.74rem;display:block;margin-top:.2rem}
@@ -383,13 +383,13 @@ input,select,textarea{font-size:16px!important}
 /* SIDEBAR SCROLL FIX */
 .sidebar{display:flex!important;flex-direction:column!important}
 .sidebar-nav,.sb-nav{flex:1!important;overflow-y:auto!important;min-height:0!important}
-.sidebar-user,.sidebar-footer,.sb-foot{flex-shrink:0!important;margin-top:auto!important}
+.sidebar-user,.sidebar-footer,.sb-foot{flex-shrink:0!important}
 
 /* SIGNOUT ALWAYS VISIBLE */
 .sidebar{overflow-y:auto!important;overflow-x:hidden!important;-webkit-overflow-scrolling:touch!important;scrollbar-width:none!important}
 .sidebar::-webkit-scrollbar{display:none!important}
 .sidebar-nav,.sb-nav{overflow:visible!important}
-.sidebar-user,.sidebar-footer,.sb-foot{padding-bottom:env(safe-area-inset-bottom,20px)!important}
+
 </style>
 
 <script>
@@ -455,7 +455,7 @@ document.addEventListener('DOMContentLoaded',function(){
   <div class="sidebar-user">
     <div class="u-name"><?= htmlspecialchars($user['full_name'] ?? 'Lecturer') ?></div>
     <div class="u-role">Lecturer <?= $activeSem ? '· '.htmlspecialchars($activeSem['name']) : '' ?></div>
-    <a href="../../change_password.php" style="color:var(--muted);font-size:.78rem;display:block;margin-bottom:.4rem">Change Password</a>
+    <a href="../../change_password.php" style="color:var(--muted);font-size:.74rem;display:block;margin-bottom:.2rem">Change Password</a>
     <a href="../../logout.php">Sign out</a>
   </div>
 </aside>

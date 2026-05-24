@@ -380,13 +380,13 @@ input,select,textarea{font-size:16px!important}
 /* SIDEBAR SCROLL FIX */
 .sidebar{display:flex!important;flex-direction:column!important}
 .sidebar-nav,.sb-nav{flex:1!important;overflow-y:auto!important;min-height:0!important}
-.sidebar-user,.sidebar-footer,.sb-foot{flex-shrink:0!important;margin-top:auto!important}
+.sidebar-user,.sidebar-footer,.sb-foot{flex-shrink:0!important}
 
 /* SIGNOUT ALWAYS VISIBLE */
 .sidebar{overflow-y:auto!important;overflow-x:hidden!important;-webkit-overflow-scrolling:touch!important;scrollbar-width:none!important}
 .sidebar::-webkit-scrollbar{display:none!important}
 .sidebar-nav,.sb-nav{overflow:visible!important}
-.sidebar-user,.sidebar-footer,.sb-foot{padding-bottom:env(safe-area-inset-bottom,20px)!important}
+
 </style>
 <script src="/assets/chart.min.js">
 // Mobile handled in head script
@@ -521,7 +521,7 @@ document.addEventListener('DOMContentLoaded',function(){
   </nav>
   <div class="sidebar-footer">
     Logged in as <strong style="color:var(--text)"><?= htmlspecialchars($user['full_name'] ?? 'Admin') ?></strong><br>
-    <a href="../../change_password.php" style="color:var(--muted);font-size:.78rem;display:block;margin-bottom:.4rem">Change Password</a>
+    <a href="../../change_password.php" style="color:var(--muted);font-size:.74rem;display:block;margin-bottom:.2rem">Change Password</a>
     <a href="../../logout.php">Sign out</a>
   </div>
 </aside>

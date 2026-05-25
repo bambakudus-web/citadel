@@ -120,7 +120,7 @@ html,body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-seri
   .sn,.stat-num{font-size:1.5rem!important}
   .wrap2{grid-template-columns:1fr!important}
   .sec{overflow-x:auto!important}
-  .tbl{font-size:.72rem!important;min-width:420px!important}
+  .tbl{font-size:.72rem!important;min-width:0!important;width:100%!important}
   .tbl th,.tbl td{padding:.38rem .45rem!important;white-space:nowrap!important}
   .drw,.drawer{width:100vw!important}
   .fi{grid-template-columns:1fr!important;gap:.3rem!important}
@@ -182,9 +182,9 @@ input,select,textarea{font-size:16px!important}
 .sidebar-user,.sidebar-footer,.sb-foot{flex-shrink:0!important;margin-top:auto!important}
 
 /* SIGNOUT ALWAYS VISIBLE */
-.sidebar{overflow-y:auto!important;overflow-x:hidden!important;-webkit-overflow-scrolling:touch!important;scrollbar-width:none!important}
+.sidebar{overflow:hidden!important;-webkit-overflow-scrolling:touch!important;scrollbar-width:none!important}
 .sidebar::-webkit-scrollbar{display:none!important}
-.sidebar-nav,.sb-nav{overflow:visible!important}
+
 .sidebar-user,.sidebar-footer,.sb-foot{padding-bottom:env(safe-area-inset-bottom,20px)!important}
 </style><script>
 function toggleSidebar(){
@@ -240,16 +240,16 @@ document.addEventListener('DOMContentLoaded',function(){
   <div class="sec">
     <?php if($schools): ?>
     <div style="overflow-x:auto"><table class="tbl">
-      <thead><tr><th>Institution</th><th>Code</th><th>Plan</th><th>Students</th><th>Lecturers</th><th>Status</th><th>Active</th><th>Actions</th></tr></thead>
+      <thead><tr><th>Institution</th><th>Code</th><th class="hide-col-mobile">Plan</th><th class="hide-col-mobile">Students</th><th class="hide-col-mobile">Lecturers</th><th class="hide-col-mobile">Status</th><th>Active</th><th>Actions</th></tr></thead>
       <tbody>
       <?php foreach($schools as $s): ?>
       <tr id="row-<?php echo $s['id']; ?>">
         <td><div style="font-weight:500"><?php echo htmlspecialchars($s['name']); ?></div><div style="font-size:.7rem;color:var(--muted)"><?php echo htmlspecialchars($s['email']??''); ?></div></td>
         <td><span style="font-family:'Cinzel',serif;color:var(--gold);letter-spacing:.1em;font-size:.8rem"><?php echo strtoupper(htmlspecialchars($s['slug']??'')); ?></span></td>
-        <td><select class="psel" onchange="chPlan(<?php echo $s['id']; ?>,this.value)"><?php foreach(['free','pro','enterprise'] as $pp): ?><option value="<?php echo $pp; ?>" <?php echo ($s['plan']??'free')===$pp?'selected':''; ?>><?php echo ucfirst($pp); ?></option><?php endforeach; ?></select></td>
-        <td><?php echo number_format($s['student_count']); ?></td>
-        <td><?php echo number_format($s['lecturer_count']); ?></td>
-        <td><span class="badge <?php echo $s['is_active']?'ba':'bi'; ?>"><?php echo $s['is_active']?'Active':'Inactive'; ?></span></td>
+        <td class="hide-col-mobile"><select class="psel" onchange="chPlan(<?php echo $s['id']; ?>,this.value)"><?php foreach(['free','pro','enterprise'] as $pp): ?><option value="<?php echo $pp; ?>" <?php echo ($s['plan']??'free')===$pp?'selected':''; ?>><?php echo ucfirst($pp); ?></option><?php endforeach; ?></select></td>
+        <td class="hide-col-mobile"><?php echo number_format($s['student_count']); ?></td>
+        <td class="hide-col-mobile"><?php echo number_format($s['lecturer_count']); ?></td>
+        <td class="hide-col-mobile"><span class="badge <?php echo $s['is_active']?'ba':'bi'; ?>"><?php echo $s['is_active']?'Active':'Inactive'; ?></span></td>
         <td><label class="tog"><input type="checkbox" <?php echo $s['is_active']?'checked':''; ?> onchange="togSchool(<?php echo $s['id']; ?>,this.checked?1:0,this)"><span class="tsl"></span></label></td>
         <td style="white-space:nowrap">
           <button class="ab" onclick="openDrw(<?php echo htmlspecialchars(json_encode($s),ENT_QUOTES); ?>)">✏️</button>

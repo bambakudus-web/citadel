@@ -100,7 +100,7 @@ html,body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-seri
   .sn,.stat-num{font-size:1.5rem!important}
   .wrap2{grid-template-columns:1fr!important}
   .sec{overflow-x:auto!important}
-  .tbl{font-size:.72rem!important;min-width:420px!important}
+  .tbl{font-size:.72rem!important;min-width:0!important;width:100%!important}
   .tbl th,.tbl td{padding:.38rem .45rem!important;white-space:nowrap!important}
   .drw,.drawer{width:100vw!important}
   .fi{grid-template-columns:1fr!important;gap:.3rem!important}
@@ -162,9 +162,9 @@ input,select,textarea{font-size:16px!important}
 .sidebar-user,.sidebar-footer,.sb-foot{flex-shrink:0!important;margin-top:auto!important}
 
 /* SIGNOUT ALWAYS VISIBLE */
-.sidebar{overflow-y:auto!important;overflow-x:hidden!important;-webkit-overflow-scrolling:touch!important;scrollbar-width:none!important}
+.sidebar{overflow:hidden!important;-webkit-overflow-scrolling:touch!important;scrollbar-width:none!important}
 .sidebar::-webkit-scrollbar{display:none!important}
-.sidebar-nav,.sb-nav{overflow:visible!important}
+
 .sidebar-user,.sidebar-footer,.sb-foot{padding-bottom:env(safe-area-inset-bottom,20px)!important}
 </style><script>
 function toggleSidebar(){

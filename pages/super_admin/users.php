@@ -150,7 +150,7 @@ html,body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-seri
   .sn,.stat-num{font-size:1.5rem!important}
   .wrap2{grid-template-columns:1fr!important}
   .sec{overflow-x:auto!important}
-  .tbl{font-size:.72rem!important;min-width:420px!important}
+  .tbl{font-size:.72rem!important;min-width:0!important;width:100%!important}
   .tbl th,.tbl td{padding:.38rem .45rem!important;white-space:nowrap!important}
   .drw,.drawer{width:100vw!important}
   .fi{grid-template-columns:1fr!important;gap:.3rem!important}
@@ -212,9 +212,9 @@ input,select,textarea{font-size:16px!important}
 .sidebar-user,.sidebar-footer,.sb-foot{flex-shrink:0!important;margin-top:auto!important}
 
 /* SIGNOUT ALWAYS VISIBLE */
-.sidebar{overflow-y:auto!important;overflow-x:hidden!important;-webkit-overflow-scrolling:touch!important;scrollbar-width:none!important}
+.sidebar{overflow:hidden!important;-webkit-overflow-scrolling:touch!important;scrollbar-width:none!important}
 .sidebar::-webkit-scrollbar{display:none!important}
-.sidebar-nav,.sb-nav{overflow:visible!important}
+
 .sidebar-user,.sidebar-footer,.sb-foot{padding-bottom:env(safe-area-inset-bottom,20px)!important}
 </style><script>
 function toggleSidebar(){
@@ -277,7 +277,7 @@ document.addEventListener('DOMContentLoaded',function(){
   <div class="sec">
     <?php if($users): ?>
     <div style="overflow-x:auto"><table class="tbl">
-      <thead><tr><th>User</th><th>Index / Email</th><th>Role</th><th>School</th><th>Status</th><th>Active</th><th>Actions</th></tr></thead>
+      <thead><tr><th>User</th><th class="hide-col-mobile">Index / Email</th><th>Role</th><th class="hide-col-mobile">School</th><th class="hide-col-mobile">Status</th><th>Active</th><th>Actions</th></tr></thead>
       <tbody>
       <?php foreach($users as $u): ?>
       <?php
@@ -290,13 +290,13 @@ document.addEventListener('DOMContentLoaded',function(){
           <div style="font-weight:500"><?php echo htmlspecialchars($u['full_name']); ?></div>
           <div style="font-size:.7rem;color:var(--muted)"><?php echo htmlspecialchars($u['email']); ?></div>
         </td>
-        <td style="font-size:.78rem;color:var(--muted)"><?php echo htmlspecialchars($u['index_no']??'—'); ?></td>
+        <td class="hide-col-mobile" style="font-size:.78rem;color:var(--muted)"><?php echo htmlspecialchars($u['index_no']??'—'); ?></td>
         <td><span class="badge r-<?php echo $u['role']; ?>"><?php echo $u['role']; ?></span></td>
         <td style="font-size:.78rem">
           <span style="color:var(--gold);font-family:'Cinzel',serif;letter-spacing:.08em"><?php echo strtoupper(htmlspecialchars($u['inst_slug']??'')); ?></span>
           <div style="font-size:.68rem;color:var(--muted)"><?php echo htmlspecialchars($u['inst_name']??''); ?></div>
         </td>
-        <td><span class="badge <?php echo $statusClass; ?>"><?php echo $statusLabel; ?></span></td>
+        <td class="hide-col-mobile"><span class="badge <?php echo $statusClass; ?>"><?php echo $statusLabel; ?></span></td>
         <td>
           <label class="tog">
             <input type="checkbox" <?php echo $u['is_active']?'checked':''; ?> onchange="togUser(<?php echo $u['id']; ?>,this.checked?1:0,this)">

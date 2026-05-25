@@ -104,7 +104,7 @@ a{color:inherit;text-decoration:none}
 .be{background:rgba(201,168,76,.15);color:var(--gold)}
 .ba{background:rgba(76,175,130,.12);color:var(--success)}
 .bi{background:rgba(224,92,92,.12);color:var(--danger)}
-.psel{background:var(--bg);border:1px solid var(--border);color:var(--text);padding:.28rem .55rem;border-radius:2px;font-size:.76rem;cursor:pointer}
+.psel{background:var(--bg);border:1px solid var(--border);color:var(--text);padding:.28rem .55rem;border-radius:2px;font-size:.76rem;cursor:pointer;max-width:90px}
 .tog{position:relative;display:inline-block;width:34px;height:18px;cursor:pointer}
 .tog input{opacity:0;width:0;height:0}
 .tsl{position:absolute;inset:0;background:#1a2535;border-radius:18px;transition:.2s}
@@ -146,7 +146,7 @@ a{color:inherit;text-decoration:none}
   .sn,.stat-num{font-size:1.5rem!important}
   .wrap2{grid-template-columns:1fr!important}
   .sec{overflow-x:auto!important}
-  .tbl{font-size:.72rem!important;min-width:420px!important}
+  .tbl{font-size:.72rem!important;min-width:0!important;width:100%!important}
   .tbl th,.tbl td{padding:.38rem .45rem!important;white-space:nowrap!important}
   .drw,.drawer{width:100vw!important}
   .fi{grid-template-columns:1fr!important;gap:.3rem!important}
@@ -269,14 +269,14 @@ document.addEventListener('DOMContentLoaded',function(){
         <div class="sh"><div class="st">Institutions</div><a href="schools.php"><button class="sa">View All →</button></a></div>
         <?php if($schools): ?>
         <div style="overflow-x:auto"><table class="tbl">
-          <thead><tr><th>Name</th><th>Code</th><th>Plan</th><th>Students</th><th>Active</th><th>Actions</th></tr></thead>
+          <thead><tr><th>Name</th><th>Code</th><th class="hide-col-mobile">Plan</th><th class="hide-col-mobile">Students</th><th>Active</th><th>Actions</th></tr></thead>
           <tbody>
           <?php foreach($schools as $s): ?>
           <tr id="sr-<?php echo $s['id']; ?>">
             <td><div><?php echo htmlspecialchars($s['name']); ?></div><div style="font-size:.7rem;color:var(--muted)"><?php echo htmlspecialchars($s['email']??''); ?></div></td>
             <td><span style="font-family:'Cinzel',serif;color:var(--gold);letter-spacing:.1em;font-size:.8rem"><?php echo strtoupper(htmlspecialchars($s['slug']??'')); ?></span></td>
-            <td><select class="psel" onchange="chPlan(<?php echo $s['id']; ?>,this.value)"><?php foreach(['free','pro','enterprise'] as $p): ?><option value="<?php echo $p; ?>" <?php echo ($s['plan']??'free')===$p?'selected':''; ?>><?php echo ucfirst($p); ?></option><?php endforeach; ?></select></td>
-            <td><?php echo number_format($s['student_count']); ?></td>
+            <td class="hide-col-mobile"><select class="psel" onchange="chPlan(<?php echo $s['id']; ?>,this.value)"><?php foreach(['free','pro','enterprise'] as $p): ?><option value="<?php echo $p; ?>" <?php echo ($s['plan']??'free')===$p?'selected':''; ?>><?php echo ucfirst($p); ?></option><?php endforeach; ?></select></td>
+            <td class="hide-col-mobile"><?php echo number_format($s['student_count']); ?></td>
             <td><label class="tog"><input type="checkbox" <?php echo $s['is_active']?'checked':''; ?> onchange="togSchool(<?php echo $s['id']; ?>,this.checked?1:0)"><span class="tsl"></span></label></td>
             <td>
               <a href="schools.php?view=<?php echo $s['id']; ?>"><button class="ab" title="View">👁</button></a>

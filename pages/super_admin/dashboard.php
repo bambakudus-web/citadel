@@ -27,6 +27,28 @@ $recent = $pdo->query("
 
 $plans = $pdo->query("SELECT plan, COUNT(*) AS cnt FROM institutions GROUP BY plan")->fetchAll(PDO::FETCH_KEY_PAIR);
 
+// Growth data - last 6 months
+$growth = $pdo->query("
+    SELECT DATE_FORMAT(created_at,'%b') AS month,
+           COUNT(*) AS schools
+    FROM institutions
+    WHERE created_at >= DATE_SUB(NOW(), INTERVAL 6 MONTH)
+    GROUP BY DATE_FORMAT(created_at,'%Y-%m')
+    ORDER BY MIN(created_at)
+")->fetchAll();
+
+$userGrowth = $pdo->query("
+    SELECT DATE_FORMAT(created_at,'%b') AS month,
+           COUNT(*) AS users
+    FROM users
+    WHERE created_at >= DATE_SUB(NOW(), INTERVAL 6 MONTH)
+    AND role != 'super_admin'
+    GROUP BY DATE_FORMAT(created_at,'%Y-%m')
+    ORDER BY MIN(created_at)
+")->fetchAll();
+
+$pending_count = (int)$pdo->query("SELECT COUNT(*) FROM institutions WHERE is_active=0")->fetchColumn();
+
 if ($_SERVER['REQUEST_METHOD']==='POST') {
     header('Content-Type: application/json');
     $action=(string)($_POST['action']??''); $id=(int)($_POST['id']??0);
@@ -239,9 +261,12 @@ document.addEventListener('DOMContentLoaded',function(){
   <nav class="sb-nav">
     <div class="sb-sec">Platform</div>
     <a href="dashboard.php" class="sb-a on">📊 Overview</a>
-    <a href="schools.php"   class="sb-a">🏫 Schools</a>
-    <a href="users.php"     class="sb-a">👥 All Users</a>
+    <a href="schools.php" class="sb-a">🏫 Schools</a>
+    <a href="users.php" class="sb-a">👥 All Users</a>
+    <a href="activity.php" class="sb-a">📋 Activity Log</a>
     <div class="sb-sec">Tools</div>
+    <a href="announcements.php" class="sb-a">📣 Announcements</a>
+    <a href="export.php" class="sb-a">💾 Export Data</a>
     <a href="../../onboard.php" class="sb-a">➕ Add School</a>
   </nav>
   <div class="sb-foot">
@@ -259,7 +284,7 @@ document.addEventListener('DOMContentLoaded',function(){
     <div class="ps">Welcome back, <?php echo htmlspecialchars(explode(' ',$me['full_name'])[0]); ?>. Here's the platform at a glance.</div>
   </div>
   <div class="stats">
-    <div class="sc" style="--ac:var(--gold)"><div class="sl">Institutions</div><div class="sn"><?php echo number_format($stats['schools']); ?></div><div class="sb2">Active schools</div></div>
+    <div class="sc" style="--ac:var(--gold)"><div class="sl">Institutions</div><div class="sn"><?php echo number_format($stats['schools']); ?></div><div class="sb2">Active schools<?php if($pending_count): ?> · <a href="schools.php" style="color:var(--gold)"><?php echo $pending_count; ?> pending</a><?php endif; ?></div></div>
     <div class="sc" style="--ac:var(--steel)"><div class="sl">Total Users</div><div class="sn"><?php echo number_format($stats['users']); ?></div><div class="sb2"><?php echo number_format($stats['students']); ?> students</div></div>
     <div class="sc" style="--ac:var(--success)"><div class="sl">Live Sessions</div><div class="sn live"><?php echo $stats['live']; ?></div><div class="sb2">Right now</div></div>
     <div class="sc" style="--ac:#8a6fd4"><div class="sl">Attendance</div><div class="sn"><?php echo number_format($stats['attendance']); ?></div><div class="sb2">All time records</div></div>
@@ -301,6 +326,17 @@ document.addEventListener('DOMContentLoaded',function(){
       </div>
     </div>
   </div>
+  <!-- Growth Charts -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-top:1.5rem" class="charts-wrap">
+    <div class="sec" style="background:var(--surface);border:1px solid var(--border);border-radius:2px">
+      <div style="padding:.8rem 1.2rem;border-bottom:1px solid var(--border);font-size:.72rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted)">School Growth (6 months)</div>
+      <div style="padding:1.2rem"><canvas id="chart-schools" height="180"></canvas></div>
+    </div>
+    <div class="sec" style="background:var(--surface);border:1px solid var(--border);border-radius:2px">
+      <div style="padding:.8rem 1.2rem;border-bottom:1px solid var(--border);font-size:.72rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted)">User Growth (6 months)</div>
+      <div style="padding:1.2rem"><canvas id="chart-users" height="180"></canvas></div>
+    </div>
+  </div>
 </main>
 </div>
 <div id="toast"></div>
@@ -334,4 +370,15 @@ async function delSchool(id,name){
 </script>
 <script>
 </script>
+<script src="/assets/chart.min.js"></script>
+<script>
+const gd = <?php echo json_encode($growth); ?>;
+const ud = <?php echo json_encode($userGrowth); ?>;
+const labels1 = gd.map(r=>r.month);
+const labels2 = ud.map(r=>r.month);
+const cfg = (labels,data,color,label)=>({type:'bar',data:{labels,datasets:[{label,data,backgroundColor:color+'33',borderColor:color,borderWidth:1.5,borderRadius:3}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{grid:{color:'rgba(26,37,53,.5)'},ticks:{color:'#6b7a8d',font:{size:11}}},y:{grid:{color:'rgba(26,37,53,.5)'},ticks:{color:'#6b7a8d',font:{size:11},stepSize:1}}}}});
+if(document.getElementById('chart-schools')) new Chart(document.getElementById('chart-schools'),cfg(labels1,gd.map(r=>r.schools),'#c9a84c','Schools'));
+if(document.getElementById('chart-users')) new Chart(document.getElementById('chart-users'),cfg(labels2,ud.map(r=>r.users),'#4a6fa5','Users'));
+</script>
+@media(max-width:768px){.charts-wrap{grid-template-columns:1fr!important}}
 </body></html>

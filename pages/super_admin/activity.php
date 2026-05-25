@@ -193,7 +193,10 @@ document.addEventListener('DOMContentLoaded',function(){
     <a href="users.php"     class="sb-a">👥 All Users</a>
     <div class="sb-sec">Reports</div>
     <a href="activity.php"  class="sb-a on">📋 Activity Log</a>
+    <a href="activity.php" class="sb-a">📋 Activity Log</a>
     <div class="sb-sec">Tools</div>
+    <a href="announcements.php" class="sb-a">📣 Announcements</a>
+    <a href="export.php" class="sb-a">💾 Export Data</a>
     <a href="../../onboard.php" class="sb-a">➕ Add School</a>
   </nav>
   <div class="sb-foot">

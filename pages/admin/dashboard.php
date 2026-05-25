@@ -533,6 +533,9 @@ document.addEventListener('DOMContentLoaded',function(){
     <a class="nav-item" onclick="showSection('semesters',this)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="4" x2="9" y2="9"/><line x1="15" y1="4" x2="15" y2="9"/></svg>Semesters
     </a>
+    <a class="nav-item" onclick="showSection('programs',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>Programs
+    </a>
     <a class="nav-item" onclick="showSection('courses',this)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>Courses
     </a>
@@ -1583,6 +1586,43 @@ function importCSV() {
     }).catch(() => { result.style.color='var(--danger)'; result.textContent='Connection error'; });
 }
 </script>
+
+<!-- Add Department Modal -->
+<div class="modal-overlay" id="modal-add-dept">
+  <div class="modal">
+    <div class="modal-head"><div class="modal-title">ADD DEPARTMENT</div><button class="modal-close" onclick="closeModal('modal-add-dept')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-field"><label>Department Name</label><input type="text" id="dept-name" placeholder="e.g. Computer Science"></div>
+      <div class="form-field"><label>Code (optional)</label><input type="text" id="dept-code" placeholder="e.g. CS"></div>
+      <button class="btn btn-gold" style="width:100%" onclick="saveDept()">Save Department</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add/Edit Program Modal -->
+<div class="modal-overlay" id="modal-add-program">
+  <div class="modal">
+    <div class="modal-head"><div class="modal-title" id="prog-modal-title">ADD PROGRAM</div><button class="modal-close" onclick="closeModal('modal-add-program')">✕</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="prog-edit-id">
+      <div class="form-field">
+        <label>Department</label>
+        <select id="prog-dept" style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:.7rem 1rem;border-radius:2px">
+          <?php foreach($allDepartments as $d): ?>
+          <option value="<?= $d['id'] ?>"><?= htmlspecialchars($d['name']) ?></option>
+          <?php endforeach; ?>
+        </select>
+      </div>
+      <div class="form-field"><label>Program Name</label><input type="text" id="prog-name" placeholder="e.g. HND Computer Science"></div>
+      <div class="form-row">
+        <div class="form-field"><label>Code</label><input type="text" id="prog-code" placeholder="e.g. HND-CS"></div>
+        <div class="form-field"><label>Duration (years)</label><input type="number" id="prog-duration" value="2" min="1" max="6"></div>
+      </div>
+      <button class="btn btn-gold" style="width:100%;margin-top:.5rem" onclick="saveProgram()">Save Program</button>
+    </div>
+  </div>
+</div>
+
 <?php require_once '../../includes/toast.php'; ?>
 <script src="/admin_charts.js"></script>
 </body>

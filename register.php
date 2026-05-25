@@ -51,16 +51,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $check->execute([$indexNo, $email, $institution['id']]);
                 if ($check->fetch()) { $error = 'Index number or email already registered.'; $step = 2; }
                 else {
-                    // Get default program for this institution
-                    $prog = $pdo->prepare("SELECT p.id, p.department_id FROM programs p JOIN departments d ON d.id=p.department_id WHERE d.institution_id=? LIMIT 1");
-                    $prog->execute([$institution['id']]); $prog = $prog->fetch();
+                    // Get selected program
+                    $prog = $pdo->prepare("SELECT p.id, p.department_id FROM programs p JOIN departments d ON d.id=p.department_id WHERE p.id=? AND d.institution_id=?");
+                    $prog->execute([$programId, $institution['id']]); $prog = $prog->fetch();
+                    if (!$prog) { $error = 'Invalid program selected.'; $step = 2; }
 
                     $hash = password_hash($password, PASSWORD_DEFAULT);
                     try {
                         $pdo->prepare("
                             INSERT INTO users (full_name, index_no, email, password_hash, role, institution_id, department_id, program_id, level, device_fingerprint)
-                            VALUES (?,?,?,?,'student',?,?,?,2,?)
-                        ")->execute([$fullName, $indexNo, $email, $hash, $institution['id'], $prog['department_id'] ?? null, $prog['id'] ?? null, $fingerprint ?: null]);
+                            VALUES (?,?,?,?,'student',?,?,?,?,?)
+                        ")->execute([$fullName, $indexNo, $email, $hash, $institution['id'], $prog['department_id'] ?? null, $prog['id'] ?? null, $level, $fingerprint ?: null]);
 
                         $newId = $pdo->lastInsertId();
 
@@ -167,6 +168,26 @@ input,select,textarea{font-size:16px!important}
           <div class="field"><label>Index Number</label><input type="text" name="index_no" required placeholder="52430540001"></div>
         </div>
         <div class="field"><label>Email (optional)</label><input type="email" name="email" placeholder="auto-generated if blank"></div>
+        <div class="form-row">
+          <div class="field">
+            <label>Program</label>
+            <select name="program_id" required style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:.72rem 1rem;border-radius:2px;outline:none;font-family:'DM Sans',sans-serif">
+              <option value="">Select your program...</option>
+              <?php foreach($programs as $p): ?>
+              <option value="<?= $p['id'] ?>"><?= htmlspecialchars($p['name']) ?> <?= $p['code'] ? '('.$p['code'].')' : '' ?></option>
+              <?php endforeach; ?>
+            </select>
+          </div>
+          <div class="field">
+            <label>Year / Level</label>
+            <select name="level" required style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:.72rem 1rem;border-radius:2px;outline:none;font-family:'DM Sans',sans-serif">
+              <option value="1">Year 1</option>
+              <option value="2">Year 2</option>
+              <option value="3">Year 3</option>
+              <option value="4">Year 4</option>
+            </select>
+          </div>
+        </div>
         <div class="form-row">
           <div class="field"><label>Password</label><input type="password" name="password" required placeholder="Min. 8 characters"></div>
           <div class="field"><label>Confirm Password</label><input type="password" name="confirm" required placeholder="Repeat password"></div>

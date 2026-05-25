@@ -2,7 +2,9 @@
 require_once '../../includes/security.php';
 require_once '../../includes/db.php';
 require_once '../../includes/auth.php';
+require_once '../../includes/guard.php';
 requireRole('admin');
+$inst_id = (int)($_SESSION['institution_id'] ?? 1);
 
 // Handle POST actions
 if ($_SERVER["REQUEST_METHOD"] === "POST") {

@@ -134,7 +134,7 @@ a{color:inherit;text-decoration:none}
 
 /* ═══ MOBILE ═══ */
 @media(max-width:768px){
-  .sidebar{width:260px!important;position:fixed!important;top:0!important;left:0!important;height:100vh!important;z-index:500!important;transform:translateX(-100%)!important;transition:transform .25s ease!important;box-shadow:4px 0 20px rgba(0,0,0,.8)!important}
+  .sidebar{width:260px!important;position:fixed!important;top:0!important;left:0!important;height:100vh!important;height:100dvh!important;z-index:500!important;transform:translateX(-100%)!important;transition:transform .25s ease!important;box-shadow:4px 0 20px rgba(0,0,0,.8)!important}
   .sidebar.open{transform:translateX(0)!important}
   .main{margin-left:0!important;padding:1rem!important}
   .menu-toggle{display:flex!important;align-items:center!important;justify-content:center!important;width:36px!important;height:36px!important;background:rgba(255,255,255,.08)!important;border:1px solid var(--border)!important;border-radius:4px!important;color:var(--text)!important;cursor:pointer!important;font-size:18px!important;flex-shrink:0!important;padding:0!important;margin-bottom:1rem!important}
@@ -203,14 +203,13 @@ input,select,textarea{font-size:16px!important}
 }
 
 /* SIDEBAR SCROLL FIX */
-.sidebar{display:flex!important;flex-direction:column!important}
-.sidebar-nav,.sb-nav{flex:1!important;overflow-y:auto!important;min-height:0!important}
-.sidebar-user,.sidebar-footer,.sb-foot{flex-shrink:0!important;margin-top:auto!important}
+.sidebar{display:flex!important;flex-direction:column!important;overflow:hidden!important}
+.sidebar-nav,.sb-nav{flex:1 1 0!important;overflow-y:auto!important;min-height:0!important}
+.sidebar-user,.sidebar-footer,.sb-foot{flex-shrink:0!important}
 
 /* SIGNOUT ALWAYS VISIBLE */
-.sidebar{overflow-y:auto!important;overflow-x:hidden!important;-webkit-overflow-scrolling:touch!important;scrollbar-width:none!important}
+.sidebar{overflow:hidden!important;-webkit-overflow-scrolling:touch!important;scrollbar-width:none!important}
 .sidebar::-webkit-scrollbar{display:none!important}
-.sidebar-nav,.sb-nav{overflow:visible!important}
 .sidebar-user,.sidebar-footer,.sb-foot{padding-bottom:env(safe-area-inset-bottom,20px)!important}
 </style>
 <script>

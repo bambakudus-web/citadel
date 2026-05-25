@@ -1657,9 +1657,15 @@ function importCSV() {
       <div class="form-field"><label>Program Name</label><input type="text" id="prog-name" placeholder="e.g. HND Computer Science"></div>
       <div class="form-row">
         <div class="form-field"><label>Code</label><input type="text" id="prog-code" placeholder="e.g. HND-CS"></div>
-        <div class="form-field"><label>Duration (years)</label><input type="number" id="prog-duration" value="2" min="1" max="6"></div>
+        <div class="form-field"><label>Duration (years)</label><input type="number" id="prog-duration" value="3" min="1" max="6"></div>
       </div>
       <button class="btn btn-gold" style="width:100%;margin-top:.5rem" onclick="saveProgram()">Save Program</button>
+      <div style="margin-top:1.2rem;padding-top:1rem;border-top:1px solid var(--border)">
+        <div style="font-size:.68rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-bottom:.5rem">Or Upload CSV</div>
+        <div style="font-size:.72rem;color:var(--muted);margin-bottom:.5rem">Format: name,code,duration_yrs (one per line)</div>
+        <input type="file" id="prog-csv" accept=".csv" style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:.5rem;border-radius:2px;font-size:.8rem">
+        <button class="btn btn-steel" style="width:100%;margin-top:.5rem" onclick="uploadProgramCSV()">Upload CSV</button>
+      </div>
     </div>
   </div>
 </div>
@@ -1691,13 +1697,13 @@ async function saveProgram(){
   const code=document.getElementById('prog-code').value.trim();
   const dept=document.getElementById('prog-dept').value;
   const duration=document.getElementById('prog-duration').value;
-  if(!name||!code){showToast('Name and code required','error');return;}
+  if(!name||!code){toast('error','Name and code required');return;}
   const body={name,code,department_id:dept,duration_yrs:duration};
   if(id) body.id=id;
   const r=await fetch('/api/programs.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
   const d=await r.json();
-  if(d.ok){showToast(id?'Program updated':'Program added');closeModal('modal-add-program');setTimeout(()=>location.reload(),800);}
-  else showToast(d.error||'Error','error');
+  if(d.ok){toast('success',id?'Program updated':'Program added');closeModal('modal-add-program');setTimeout(()=>location.reload(),800);}
+  else toast('error',d.error||'Error');
 }
 async function deleteProgram(id,name){
   if(!confirm('Delete program "'+name+'"?
@@ -1705,8 +1711,8 @@ async function deleteProgram(id,name){
 Students assigned to this program will be unaffected.'))return;
   const r=await fetch('/api/programs.php',{method:'DELETE',headers:{'Content-Type':'application/json'},body:JSON.stringify({id})});
   const d=await r.json();
-  if(d.ok){showToast('Program deleted');setTimeout(()=>location.reload(),800);}
-  else showToast(d.error||'Error','error');
+  if(d.ok){toast('success','Program deleted');setTimeout(()=>location.reload(),800);}
+  else toast('error',d.error||'Error');
 }
 </script>
 </body>

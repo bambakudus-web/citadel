@@ -65,17 +65,7 @@ function _rootPath(): string {
     return str_repeat('../', $depth);
 }
 
-function csrfToken(): string {
-    if (empty($_SESSION['csrf_token']))
-        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
-    return $_SESSION['csrf_token'];
-}
 
-function verifyCsrf(): void {
-    $t = $_POST['_csrf'] ?? ($_SERVER['HTTP_X_CSRF_TOKEN'] ?? '');
-    if (!hash_equals($_SESSION['csrf_token'] ?? '', $t)) {
-        http_response_code(403); die(json_encode(['ok'=>false,'msg'=>'Invalid CSRF token.']));
-    }
 }
 
 function audit(string $action, string $type='', int $id=0, string $detail=''): void {

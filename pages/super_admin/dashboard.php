@@ -370,6 +370,7 @@ async function delSchool(id,name){
 </script>
 <script>
 </script>
+<style>@media(max-width:768px){.charts-wrap{grid-template-columns:1fr!important}}</style>
 <script src="/assets/chart.min.js"></script>
 <script>
 const gd = <?php echo json_encode($growth); ?>;
@@ -380,5 +381,4 @@ const cfg = (labels,data,color,label)=>({type:'bar',data:{labels,datasets:[{labe
 if(document.getElementById('chart-schools')) new Chart(document.getElementById('chart-schools'),cfg(labels1,gd.map(r=>r.schools),'#c9a84c','Schools'));
 if(document.getElementById('chart-users')) new Chart(document.getElementById('chart-users'),cfg(labels2,ud.map(r=>r.users),'#4a6fa5','Users'));
 </script>
-@media(max-width:768px){.charts-wrap{grid-template-columns:1fr!important}}
 </body></html>

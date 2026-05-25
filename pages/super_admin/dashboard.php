@@ -255,7 +255,7 @@ document.addEventListener('DOMContentLoaded',function(){
 </aside>
 <main class="main">
   <div style="display:flex;align-items:center;gap:.8rem;margin-bottom:.5rem">
-    <button id="menu-btn" onclick="toggleSidebar()" style="display:none;align-items:center;justify-content:center;width:36px;height:36px;background:rgba(255,255,255,.08);border:1px solid var(--border);border-radius:4px;color:var(--text);cursor:pointer;font-size:18px;flex-shrink:0;padding:0">☰</button>
+    <button id="menu-btn" onclick="toggleSidebar()" style="align-items:center;justify-content:center;width:36px;height:36px;background:rgba(255,255,255,.08);border:1px solid var(--border);border-radius:4px;color:var(--text);cursor:pointer;font-size:18px;flex-shrink:0;padding:0">☰</button>
     <div class="ph" style="flex:1;margin-bottom:0">
       <div class="pt">Platform Overview</div>
       <div class="ps">Welcome back, <?php echo htmlspecialchars(explode(' ',$me['full_name'])[0]); ?>. Here's the platform at a glance.</div>

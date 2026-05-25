@@ -233,7 +233,7 @@ document.addEventListener('DOMContentLoaded',function(){
 <body>
 <div class="layout">
 <div id="sidebar-overlay" onclick="toggleSidebar()"></div>
-<aside class="sidebar">
+<aside class="sidebar" id="sidebar">
   <div class="sb-brand">
     <div><div class="sb-logo">CITADEL</div><div class="sb-role">Super Admin</div></div>
   </div>

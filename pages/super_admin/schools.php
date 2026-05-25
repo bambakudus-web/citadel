@@ -37,6 +37,33 @@ if ($_SERVER['REQUEST_METHOD']==='POST') {
     if ($action==='change_plan'){$plan=$_POST['plan']??'free';if(!in_array($plan,['free','pro','enterprise'])){echo json_encode(['ok'=>false,'msg'=>'Bad plan']);exit;}$pdo->prepare("UPDATE institutions SET plan=? WHERE id=?")->execute([$plan,$id]);audit('CHANGE_PLAN','institution',$id,"plan=$plan");echo json_encode(['ok'=>true]);exit;}
     if ($action==='delete_school'){if($id===1){echo json_encode(['ok'=>false,'msg'=>'Cannot delete default.']);exit;}$pdo->prepare("DELETE FROM institutions WHERE id=?")->execute([$id]);audit('DELETE_SCHOOL','institution',$id);echo json_encode(['ok'=>true]);exit;}
     if ($action==='update_school'){$pdo->prepare("UPDATE institutions SET name=?,email=?,phone=?,address=? WHERE id=?")->execute([trim($_POST['name']??''),trim($_POST['email']??''),trim($_POST['phone']??''),trim($_POST['address']??''),$id]);audit('UPDATE_SCHOOL','institution',$id);echo json_encode(['ok'=>true]);exit;}
+    if ($action==='email_admin'){
+        $msg = trim($_POST['msg']??'');
+        $subj = trim($_POST['subj']??'Message from Citadel Platform');
+        if(!$msg){echo json_encode(['ok'=>false,'msg'=>'Message required']);exit;}
+        $adminRow=$pdo->prepare("SELECT u.email,u.full_name,i.name AS inst_name FROM users u JOIN institutions i ON i.id=u.institution_id WHERE u.institution_id=? AND u.role='admin' LIMIT 1");
+        $adminRow->execute([$id]);$admin=$adminRow->fetch();
+        if(!$admin){echo json_encode(['ok'=>false,'msg'=>'No admin found']);exit;}
+        $html="<div style='font-family:sans-serif;background:#060910;color:#e8eaf0;padding:2rem;border-radius:4px'><div style='font-family:Georgia,serif;font-size:1.2rem;color:#c9a84c;letter-spacing:4px;margin-bottom:1rem'>CITADEL</div><h2 style='color:#e8eaf0;margin-bottom:.8rem'>Message from Citadel</h2><p style='color:#6b7a8d'>Hi {$admin['full_name']},</p><div style='background:#0c1018;border:1px solid #1a2535;border-left:3px solid #c9a84c;padding:1rem 1.2rem;margin:1.2rem 0;border-radius:2px;color:#e8eaf0'>".nl2br(htmlspecialchars($msg))."</div><p style='color:#6b7a8d;font-size:.8rem'>— Citadel Platform Team</p></div>";
+        $r=sendBrevoEmail($admin['email'],$admin['full_name'],$subj,$html);
+        audit('EMAIL_ADMIN','institution',$id,"to={$admin['email']}");
+        echo json_encode(['ok'=>true]);exit;
+    }
+    if ($action==='impersonate'){
+        $instRow=$pdo->prepare("SELECT * FROM institutions WHERE id=? AND is_active=1 LIMIT 1");
+        $instRow->execute([$id]);$inst=$instRow->fetch();
+        if(!$inst){echo json_encode(['ok'=>false,'msg'=>'School not active']);exit;}
+        $adminRow=$pdo->prepare("SELECT * FROM users WHERE institution_id=? AND role='admin' AND is_active=1 LIMIT 1");
+        $adminRow->execute([$id]);$admin=$adminRow->fetch();
+        if(!$admin){echo json_encode(['ok'=>false,'msg'=>'No active admin found']);exit;}
+        $_SESSION['super_admin_origin']=$_SESSION['user'];
+        $_SESSION['user_id']=$admin['id'];
+        $_SESSION['role']=$admin['role'];
+        $_SESSION['institution_id']=$admin['institution_id'];
+        $_SESSION['user']=['id'=>$admin['id'],'full_name'=>$admin['full_name'],'index_no'=>$admin['index_no']??'','email'=>$admin['email'],'role'=>$admin['role'],'institution_id'=>$admin['institution_id']];
+        audit('IMPERSONATE','institution',$id,"as={$admin['email']}");
+        echo json_encode(['ok'=>true,'redirect'=>'../../pages/admin/dashboard.php']);exit;
+    }
     echo json_encode(['ok'=>false,'msg'=>'Unknown']); exit;
 }
 
@@ -51,6 +78,7 @@ $sql="SELECT i.*,
   FROM institutions i ".($w?"WHERE ".implode(" AND ",$w):"")." ORDER BY i.created_at DESC";
 $stmt=$pdo->prepare($sql);$stmt->execute($p);$schools=$stmt->fetchAll();
 $vs=null;if($viewId){$s2=$pdo->prepare("SELECT * FROM institutions WHERE id=?");$s2->execute([$viewId]);$vs=$s2->fetch();}
+$pending=$pdo->query("SELECT i.*,(SELECT u.full_name FROM users u WHERE u.institution_id=i.id AND u.role='admin' LIMIT 1) AS admin_name,(SELECT u.email FROM users u WHERE u.institution_id=i.id AND u.role='admin' LIMIT 1) AS admin_email FROM institutions i WHERE i.is_active=0 ORDER BY i.created_at DESC")->fetchAll();
 ?><!DOCTYPE html>
 <html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>Citadel — Schools</title>
@@ -237,6 +265,32 @@ document.addEventListener('DOMContentLoaded',function(){
       <a href="../../onboard.php" class="bg">+ Add School</a>
     </div>
   </div>
+  <?php if($pending): ?>
+  <div class="sec" style="margin-bottom:1.5rem;border-color:rgba(201,168,76,.3)">
+    <div style="padding:.8rem 1rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+      <span style="font-size:.72rem;letter-spacing:.15em;text-transform:uppercase;color:var(--gold)">⏳ Pending Approval (<?php echo count($pending); ?>)</span>
+    </div>
+    <div style="overflow-x:auto"><table class="tbl">
+      <thead><tr><th>Institution</th><th>Code</th><th>Admin</th><th>Registered</th><th>Actions</th></tr></thead>
+      <tbody>
+      <?php foreach($pending as $s): ?>
+      <tr id="prow-<?php echo $s['id']; ?>">
+        <td><div style="font-weight:500"><?php echo htmlspecialchars($s['name']); ?></div><div style="font-size:.7rem;color:var(--muted)"><?php echo htmlspecialchars($s['email']??''); ?></div></td>
+        <td><span style="font-family:'Cinzel',serif;color:var(--gold);letter-spacing:.1em;font-size:.8rem"><?php echo strtoupper(htmlspecialchars($s['slug']??'')); ?></span></td>
+        <td><div style="font-size:.8rem"><?php echo htmlspecialchars($s['admin_name']??'—'); ?></div><div style="font-size:.7rem;color:var(--muted)"><?php echo htmlspecialchars($s['admin_email']??''); ?></div></td>
+        <td style="font-size:.75rem;color:var(--muted)"><?php echo date('d M Y',strtotime($s['created_at'])); ?></td>
+        <td style="white-space:nowrap;display:flex;gap:.3rem;flex-wrap:wrap">
+          <button class="ab" style="background:rgba(76,175,130,.12);color:var(--success);border:1px solid rgba(76,175,130,.3);padding:.3rem .6rem;font-size:.72rem" onclick="approveSchool(<?php echo $s['id']; ?>,'<?php echo htmlspecialchars(addslashes($s['name'])); ?>')">✓ Approve</button>
+          <button class="ab" onclick="openEmail(<?php echo $s['id']; ?>,'<?php echo htmlspecialchars(addslashes($s['name'])); ?>')">✉️</button>
+          <button class="ab del" onclick="delSchool(<?php echo $s['id']; ?>,'<?php echo htmlspecialchars(addslashes($s['name'])); ?>')">🗑</button>
+        </td>
+      </tr>
+      <?php endforeach; ?>
+      </tbody>
+    </table></div>
+  </div>
+  <?php endif; ?>
+
   <div class="sec">
     <?php if($schools): ?>
     <div style="overflow-x:auto"><table class="tbl">
@@ -252,8 +306,10 @@ document.addEventListener('DOMContentLoaded',function(){
         <td class="hide-col-mobile"><span class="badge <?php echo $s['is_active']?'ba':'bi'; ?>"><?php echo $s['is_active']?'Active':'Inactive'; ?></span></td>
         <td><label class="tog"><input type="checkbox" <?php echo $s['is_active']?'checked':''; ?> onchange="togSchool(<?php echo $s['id']; ?>,this.checked?1:0,this)"><span class="tsl"></span></label></td>
         <td style="white-space:nowrap">
-          <button class="ab" onclick="openDrw(<?php echo htmlspecialchars(json_encode($s),ENT_QUOTES); ?>)">✏️</button>
-          <?php if($s['id']!=1): ?><button class="ab del" onclick="delSchool(<?php echo $s['id']; ?>,'<?php echo htmlspecialchars(addslashes($s['name'])); ?>')">🗑</button><?php endif; ?>
+          <button class="ab" onclick="openDrw(<?php echo htmlspecialchars(json_encode($s),ENT_QUOTES); ?>)" title="Edit">✏️</button>
+          <button class="ab" onclick="openEmail(<?php echo $s['id']; ?>,'<?php echo htmlspecialchars(addslashes($s['name'])); ?>')" title="Email Admin">✉️</button>
+          <button class="ab" onclick="impersonate(<?php echo $s['id']; ?>,'<?php echo htmlspecialchars(addslashes($s['name'])); ?>')" title="Login as Admin">👤</button>
+          <?php if($s['id']!=1): ?><button class="ab del" onclick="delSchool(<?php echo $s['id']; ?>,'<?php echo htmlspecialchars(addslashes($s['name'])); ?>')" title="Delete">🗑</button><?php endif; ?>
         </td>
       </tr>
       <?php endforeach; ?>
@@ -273,16 +329,31 @@ document.addEventListener('DOMContentLoaded',function(){
   <div class="df"><label>Address</label><textarea id="dAddr"></textarea></div>
   <button class="bg" style="width:100%;margin-top:.5rem" onclick="saveSchool()">Save Changes</button>
 </div>
+<!-- Email Modal -->
+<div class="dov" id="emov" onclick="closeEmail()"></div>
+<div class="drw" id="emdrw" style="width:380px">
+  <div class="dt">Email School Admin <button class="dc" onclick="closeEmail()">✕</button></div>
+  <input type="hidden" id="emId">
+  <div class="df"><label>Subject</label><input type="text" id="emSubj" value="Message from Citadel Platform"></div>
+  <div class="df"><label>Message</label><textarea id="emMsg" style="min-height:120px" placeholder="Write your message here..."></textarea></div>
+  <button class="bg" style="width:100%;margin-top:.5rem" onclick="sendEmail()">Send Email</button>
+</div>
+
 <div id="toast"></div>
 <script>
 function toast(m,t='ok'){const el=document.getElementById('toast');el.textContent=m;el.className='show '+t;setTimeout(()=>el.className='',3000)}
 async function post(d){return(await fetch('schools.php',{method:'POST',body:new URLSearchParams(d)})).json()}
 async function togSchool(id,val,el){const r=await post({action:'toggle_school',id,val});if(r.ok){const b=document.querySelector('#row-'+id+' .badge');if(b){b.className='badge '+(val?'ba':'bi');b.textContent=val?'Active':'Inactive';}toast(val?'Activated.':'Deactivated.');}else{toast(r.msg||'Error','err');el.checked=!el.checked;}}
 async function chPlan(id,plan){const r=await post({action:'change_plan',id,plan});r.ok?toast('Plan updated.'):toast(r.msg||'Error','err')}
-async function delSchool(id,name){if(!confirm('Delete "'+name+'"?\n\nRemoves ALL data. Cannot undo.'))return;const r=await post({action:'delete_school',id});if(r.ok){document.getElementById('row-'+id)?.remove();toast('Deleted.');}else toast(r.msg||'Error','err')}
+async function delSchool(id,name){if(!confirm('Delete "'+name+'"?\n\nRemoves ALL data. Cannot undo.'))return;const r=await post({action:'delete_school',id});if(r.ok){document.getElementById('row-'+id)?.remove();document.getElementById('prow-'+id)?.remove();toast('Deleted.');}else toast(r.msg||'Error','err')}
+async function approveSchool(id,name){if(!confirm('Approve "'+name+'"?'))return;const r=await post({action:'toggle_school',id,val:1});if(r.ok){document.getElementById('prow-'+id)?.remove();toast('Approved! Activation email sent.');setTimeout(()=>location.reload(),1200);}else toast(r.msg||'Error','err')}
 function openDrw(s){document.getElementById('dId').value=s.id;document.getElementById('dName').value=s.name||'';document.getElementById('dEmail').value=s.email||'';document.getElementById('dPhone').value=s.phone||'';document.getElementById('dAddr').value=s.address||'';document.getElementById('dov').classList.add('open');document.getElementById('drw').classList.add('open')}
 function closeDrw(){document.getElementById('dov').classList.remove('open');document.getElementById('drw').classList.remove('open')}
 async function saveSchool(){const r=await post({action:'update_school',id:document.getElementById('dId').value,name:document.getElementById('dName').value,email:document.getElementById('dEmail').value,phone:document.getElementById('dPhone').value,address:document.getElementById('dAddr').value});if(r.ok){toast('Saved.');closeDrw();setTimeout(()=>location.reload(),800);}else toast(r.msg||'Error','err')}
+function openEmail(id,name){document.getElementById('emId').value=id;document.getElementById('emMsg').value='';document.getElementById('emov').classList.add('open');document.getElementById('emdrw').classList.add('open')}
+function closeEmail(){document.getElementById('emov').classList.remove('open');document.getElementById('emdrw').classList.remove('open')}
+async function sendEmail(){const msg=document.getElementById('emMsg').value.trim();if(!msg){toast('Enter a message','err');return;}const r=await post({action:'email_admin',id:document.getElementById('emId').value,subj:document.getElementById('emSubj').value,msg});if(r.ok){toast('Email sent!');closeEmail();}else toast(r.msg||'Error','err')}
+async function impersonate(id,name){if(!confirm('Login as admin of "'+name+'"?\n\nYou will be redirected to their dashboard.'))return;const r=await post({action:'impersonate',id});if(r.ok){toast('Switching...');setTimeout(()=>window.location.href=r.redirect,800);}else toast(r.msg||'Error','err')}
 <?php if($vs): ?>openDrw(<?php echo json_encode($vs); ?>);<?php endif; ?>
 </script>
 <script>

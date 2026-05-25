@@ -234,7 +234,7 @@ document.addEventListener('DOMContentLoaded',function(){
 </head><body>
 <div class="layout">
 <div id="sidebar-overlay" onclick="toggleSidebar()"></div>
-<aside class="sidebar">
+<aside class="sidebar" id="sidebar">
   <div class="sb-brand"><div><div class="sb-logo">CITADEL</div><div class="sb-role">Super Admin</div></div></div>
   <nav class="sb-nav">
     <div class="sb-sec">Platform</div>
@@ -253,6 +253,7 @@ document.addEventListener('DOMContentLoaded',function(){
   </div>
 </aside>
 <main class="main">
+  <button class="menu-toggle" id="menu-toggle" onclick="toggleSidebar()">☰</button>
   <div class="ph">
     <div><div class="pt">All Users</div><div class="ps"><?php echo number_format($total); ?> user<?php echo $total!=1?'s':''; ?> found</div></div>
     <div class="toolbar">

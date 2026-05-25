@@ -134,6 +134,8 @@ a{color:inherit;text-decoration:none}
 
 /* ═══ MOBILE ═══ */
 @media(max-width:768px){
+  #menu-btn{display:flex!important}
+
   .sidebar{width:260px!important;position:fixed!important;top:0!important;left:0!important;height:100vh!important;height:100dvh!important;z-index:500!important;transform:translateX(-100%)!important;transition:transform .25s ease!important;box-shadow:4px 0 20px rgba(0,0,0,.8)!important}
   .sidebar.open{transform:translateX(0)!important}
   .main{margin-left:0!important;padding:1rem!important}
@@ -252,9 +254,12 @@ document.addEventListener('DOMContentLoaded',function(){
   </div>
 </aside>
 <main class="main">
-  <div class="ph">
-    <div class="pt">Platform Overview</div>
-    <div class="ps">Welcome back, <?php echo htmlspecialchars(explode(' ',$me['full_name'])[0]); ?>. Here's the platform at a glance.</div>
+  <div style="display:flex;align-items:center;gap:.8rem;margin-bottom:.5rem">
+    <button id="menu-btn" onclick="toggleSidebar()" style="display:none;align-items:center;justify-content:center;width:36px;height:36px;background:rgba(255,255,255,.08);border:1px solid var(--border);border-radius:4px;color:var(--text);cursor:pointer;font-size:18px;flex-shrink:0;padding:0">☰</button>
+    <div class="ph" style="flex:1;margin-bottom:0">
+      <div class="pt">Platform Overview</div>
+      <div class="ps">Welcome back, <?php echo htmlspecialchars(explode(' ',$me['full_name'])[0]); ?>. Here's the platform at a glance.</div>
+    </div>
   </div>
   <div class="stats">
     <div class="sc" style="--ac:var(--gold)"><div class="sl">Institutions</div><div class="sn"><?php echo number_format($stats['schools']); ?></div><div class="sb2">Active schools</div></div>

@@ -292,7 +292,7 @@ document.addEventListener('DOMContentLoaded',function(){
         </td>
         <td class="hide-col-mobile" style="font-size:.78rem;color:var(--muted)"><?php echo htmlspecialchars($u['index_no']??'—'); ?></td>
         <td><span class="badge r-<?php echo $u['role']; ?>"><?php echo $u['role']; ?></span></td>
-        <td style="font-size:.78rem">
+        <td class="hide-col-mobile" style="font-size:.78rem">
           <span style="color:var(--gold);font-family:'Cinzel',serif;letter-spacing:.08em"><?php echo strtoupper(htmlspecialchars($u['inst_slug']??'')); ?></span>
           <div style="font-size:.68rem;color:var(--muted)"><?php echo htmlspecialchars($u['inst_name']??''); ?></div>
         </td>

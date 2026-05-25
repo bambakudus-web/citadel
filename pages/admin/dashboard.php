@@ -735,6 +735,37 @@ $ttAll = $ttStmt->fetchAll();
       </div></div>
     </div>
 
+    <!-- ══ PROGRAMS ══ -->
+    <div class="page-section" id="sec-programs">
+      <div class="section-header">
+        <div class="section-title">Program <span>Management</span></div>
+        <button class="btn btn-gold" onclick="openAddProgram()">+ Add Program</button>
+      </div>
+      <div class="card"><div class="card-body" style="padding:0;overflow-x:auto">
+        <table class="data-table"><thead><tr><th>Program Name</th><th>Code</th><th class="hide-mobile">Department</th><th class="hide-mobile">Duration</th><th class="hide-mobile">Students</th><th>Actions</th></tr></thead><tbody>
+        <?php foreach($allPrograms as $p): ?>
+        <?php
+          $pStudents = $pdo->prepare("SELECT COUNT(*) FROM users WHERE program_id=? AND role='student'");
+          $pStudents->execute([$p['id']]); $pCount = $pStudents->fetchColumn();
+          $pDept = $pdo->prepare("SELECT name FROM departments WHERE id=?");
+          $pDept->execute([$p['department_id']]); $pDeptName = $pDept->fetchColumn();
+        ?>
+        <tr>
+          <td style="font-weight:500"><?= htmlspecialchars($p['name']) ?></td>
+          <td style="color:var(--gold);font-size:.82rem"><?= htmlspecialchars($p['code']) ?></td>
+          <td class="hide-mobile" style="color:var(--muted)"><?= htmlspecialchars($pDeptName ?? '—') ?></td>
+          <td class="hide-mobile" style="color:var(--muted)"><?= $p['duration_yrs'] ?> yr<?= $p['duration_yrs']>1?'s':'' ?></td>
+          <td class="hide-mobile"><span class="pill pill-steel"><?= $pCount ?> students</span></td>
+          <td style="display:flex;gap:.4rem;flex-wrap:wrap">
+            <button class="btn btn-ghost btn-sm" onclick="editProgram(<?= $p['id'] ?>,'<?= htmlspecialchars(addslashes($p['name'])) ?>','<?= htmlspecialchars(addslashes($p['code'])) ?>',<?= $p['department_id'] ?>,<?= $p['duration_yrs'] ?>)">Edit</button>
+            <button class="btn btn-danger btn-sm" onclick="deleteProgram(<?= $p['id'] ?>,'<?= htmlspecialchars(addslashes($p['name'])) ?>')">Delete</button>
+          </td>
+        </tr>
+        <?php endforeach; if(empty($allPrograms)): ?><tr><td colspan="6" style="color:var(--muted)">No programs yet. Add one to get started.</td></tr><?php endif; ?>
+        </tbody></table>
+      </div></div>
+    </div>
+
     <!-- ══ COURSES ══ -->
     <div class="page-section" id="sec-courses">
       <div class="section-header">
@@ -1055,6 +1086,14 @@ $ttAll = $ttStmt->fetchAll();
           <div class="form-field"><label>Full Name</label><input type="text" name="full_name" required placeholder="Surname, Firstname"></div>
           <div class="form-field"><label>Index Number</label><input type="text" name="index_no" required placeholder="52430540000"></div>
         </div>
+        <div class="form-field"><label>Program</label>
+          <select name="program_id" required>
+            <option value="">-- Select Program --</option>
+            <?php foreach($allPrograms as $p): ?>
+            <option value="<?= $p['id'] ?>"><?= htmlspecialchars($p['name']) ?> (<?= htmlspecialchars($p['code']) ?>)</option>
+            <?php endforeach; ?>
+          </select>
+        </div>
         <div class="form-row">
           <div class="form-field"><label>Level</label><select name="level"><option value="1">Level 100</option><option value="2" selected>Level 200</option><option value="3">Level 300</option><option value="4">Level 400</option></select></div>
           <div class="form-field"><label>Role</label><select name="role"><option value="student">Student</option><option value="rep">Course Rep</option></select></div>
@@ -1267,7 +1306,7 @@ function saveCourse() {
     name: document.getElementById('course-name').value.trim(),
     credit_hrs: parseInt(document.getElementById('course-credits').value),
     lecturer_id: document.getElementById('course-lecturer').value || null,
-    program_id: 1, semester_id: semId,
+    program_id: null, semester_id: semId,
     enroll_all: document.getElementById('course-enroll-all').checked ? 1 : 0,
   };
   if (!body.code || !body.name) { alert('Code and name required'); return; }
@@ -1625,5 +1664,48 @@ function importCSV() {
 
 <?php require_once '../../includes/toast.php'; ?>
 <script src="/admin_charts.js"></script>
+<script>
+// ── PROGRAMS ──
+function openAddProgram(){
+  document.getElementById('prog-edit-id').value='';
+  document.getElementById('prog-modal-title').textContent='ADD PROGRAM';
+  document.getElementById('prog-name').value='';
+  document.getElementById('prog-code').value='';
+  document.getElementById('prog-duration').value='2';
+  document.getElementById('modal-add-program').classList.add('open');
+}
+function editProgram(id,name,code,deptId,duration){
+  document.getElementById('prog-edit-id').value=id;
+  document.getElementById('prog-modal-title').textContent='EDIT PROGRAM';
+  document.getElementById('prog-name').value=name;
+  document.getElementById('prog-code').value=code;
+  document.getElementById('prog-dept').value=deptId;
+  document.getElementById('prog-duration').value=duration;
+  document.getElementById('modal-add-program').classList.add('open');
+}
+async function saveProgram(){
+  const id=document.getElementById('prog-edit-id').value;
+  const name=document.getElementById('prog-name').value.trim();
+  const code=document.getElementById('prog-code').value.trim();
+  const dept=document.getElementById('prog-dept').value;
+  const duration=document.getElementById('prog-duration').value;
+  if(!name||!code){showToast('Name and code required','error');return;}
+  const body={name,code,department_id:dept,duration_yrs:duration};
+  if(id) body.id=id;
+  const r=await fetch('/api/programs.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  const d=await r.json();
+  if(d.ok){showToast(id?'Program updated':'Program added');closeModal('modal-add-program');setTimeout(()=>location.reload(),800);}
+  else showToast(d.error||'Error','error');
+}
+async function deleteProgram(id,name){
+  if(!confirm('Delete program "'+name+'"?
+
+Students assigned to this program will be unaffected.'))return;
+  const r=await fetch('/api/programs.php',{method:'DELETE',headers:{'Content-Type':'application/json'},body:JSON.stringify({id})});
+  const d=await r.json();
+  if(d.ok){showToast('Program deleted');setTimeout(()=>location.reload(),800);}
+  else showToast(d.error||'Error','error');
+}
+</script>
 </body>
 </html>

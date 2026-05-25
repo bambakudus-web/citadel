@@ -65,9 +65,6 @@ function _rootPath(): string {
     return str_repeat('../', $depth);
 }
 
-
-}
-
 function audit(string $action, string $type='', int $id=0, string $detail=''): void {
     global $pdo, $me;
     try {

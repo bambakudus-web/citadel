@@ -1706,9 +1706,7 @@ async function saveProgram(){
   else toast('error',d.error||'Error');
 }
 async function deleteProgram(id,name){
-  if(!confirm('Delete program "'+name+'"?
-
-Students assigned to this program will be unaffected.'))return;
+  if(!confirm('Delete program "'+name+'"?\n\nStudents assigned to this program will be unaffected.'))return;
   const r=await fetch('/api/programs.php',{method:'DELETE',headers:{'Content-Type':'application/json'},body:JSON.stringify({id})});
   const d=await r.json();
   if(d.ok){toast('success','Program deleted');setTimeout(()=>location.reload(),800);}

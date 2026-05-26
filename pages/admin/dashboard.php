@@ -742,7 +742,7 @@ $ttAll = $ttStmt->fetchAll();
     <!-- ══ PROGRAMS ══ -->
     <div class="page-section" id="sec-programs">
       <div class="section-header">
-        <div class="section-title"><?= terms('program', \$instType) ?> <span>Management</span></div>
+        <div class="section-title"><?= terms('program', $instType) ?> <span>Management</span></div>
         <button class="btn btn-gold" onclick="openAddProgram()">+ Add Program</button>
       </div>
       <div class="card"><div class="card-body" style="padding:0;overflow-x:auto">
@@ -773,7 +773,7 @@ $ttAll = $ttStmt->fetchAll();
     <!-- ══ COURSES ══ -->
     <div class="page-section" id="sec-courses">
       <div class="section-header">
-        <div class="section-title"><?= terms('course', \$instType) ?> <span>Management</span><?php if($activeSemester): ?><span style="font-size:.65rem;color:var(--muted);font-family:'DM Sans',sans-serif;letter-spacing:.1em;margin-left:.8rem"><?= htmlspecialchars($activeSemester['name']) ?></span><?php endif; ?></div>
+        <div class="section-title"><?= terms('course', $instType) ?> <span>Management</span><?php if($activeSemester): ?><span style="font-size:.65rem;color:var(--muted);font-family:'DM Sans',sans-serif;letter-spacing:.1em;margin-left:.8rem"><?= htmlspecialchars($activeSemester['name']) ?></span><?php endif; ?></div>
         <button class="btn btn-gold" onclick="openAddCourse()">+ Add Course</button>
       </div>
       <div class="card"><div class="card-body" style="padding:0;overflow-x:auto">
@@ -798,7 +798,7 @@ $ttAll = $ttStmt->fetchAll();
     <!-- ══ LECTURERS ══ -->
     <div class="page-section" id="sec-lecturers">
       <div class="section-header">
-        <div class="section-title"><?= terms('lecturer', \$instType) ?> <span>Registry</span></div>
+        <div class="section-title"><?= terms('lecturer', $instType) ?> <span>Registry</span></div>
         <button class="btn btn-gold" onclick="openAddLecturer()">+ Add Lecturer</button>
       </div>
       <div class="card"><div class="card-body" style="padding:0;overflow-x:auto">

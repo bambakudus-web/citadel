@@ -11,6 +11,7 @@ if (!empty($_SESSION['user_id'])) {
 $error = ''; $success = '';
 $step  = 1;
 $institution = null;
+$programs = [];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
@@ -24,7 +25,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $inst->execute([$schoolCode]);
             $institution = $inst->fetch();
             if (!$institution) { $error = 'School code "'.strtoupper($schoolCode).'" not found.'; }
-            else { $step = 2; }
+            else { $step = 2;
+                $programs = $pdo->query("SELECT p.* FROM programs p JOIN departments d ON d.id=p.department_id WHERE d.institution_id={$institution['id']} ORDER BY p.name")->fetchAll();
+            }
         }
     }
 
@@ -36,6 +39,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if (!$institution) { $error = 'Invalid school code.'; $step = 1; }
         else {
+            $programs = $pdo->prepare("SELECT p.* FROM programs p JOIN departments d ON d.id=p.department_id WHERE d.institution_id=? ORDER BY p.name");
+            $programs->execute([$institution['id']]);
+            $programs = $programs->fetchAll();
             $fullName    = trim($_POST['full_name'] ?? '');
             $indexNo     = trim($_POST['index_no']  ?? '');
             $email       = trim($_POST['email']      ?? '') ?: ($indexNo.'@'.strtolower($institution['slug']).'.edu.gh');

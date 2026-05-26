@@ -3,6 +3,8 @@ require_once '../../includes/security.php';
 require_once '../../includes/db.php';
 require_once '../../includes/auth.php';
 require_once '../../includes/guard.php';
+require_once '../../includes/terminology.php';
+$instType = $institution['inst_type'] ?? 'university';
 requireRole('admin');
 $inst_id = (int)($_SESSION['institution_id'] ?? 1);
 
@@ -536,13 +538,13 @@ document.addEventListener('DOMContentLoaded',function(){
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="4" x2="9" y2="9"/><line x1="15" y1="4" x2="15" y2="9"/></svg>Semesters
     </a>
     <a class="nav-item" onclick="showSection('programs',this)">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>Programs
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg><?= terms('programs', $instType) ?>
     </a>
     <a class="nav-item" onclick="showSection('courses',this)">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>Courses
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg><?= terms('courses', $instType) ?>
     </a>
     <a class="nav-item" onclick="showSection('lecturers',this)">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Lecturers
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><?= terms('lecturers', $instType) ?>
     </a>
     <a class="nav-item" onclick="showSection('students',this)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Students
@@ -740,7 +742,7 @@ $ttAll = $ttStmt->fetchAll();
     <!-- ══ PROGRAMS ══ -->
     <div class="page-section" id="sec-programs">
       <div class="section-header">
-        <div class="section-title">Program <span>Management</span></div>
+        <div class="section-title"><?= terms('program', \$instType) ?> <span>Management</span></div>
         <button class="btn btn-gold" onclick="openAddProgram()">+ Add Program</button>
       </div>
       <div class="card"><div class="card-body" style="padding:0;overflow-x:auto">
@@ -771,7 +773,7 @@ $ttAll = $ttStmt->fetchAll();
     <!-- ══ COURSES ══ -->
     <div class="page-section" id="sec-courses">
       <div class="section-header">
-        <div class="section-title">Course <span>Management</span><?php if($activeSemester): ?><span style="font-size:.65rem;color:var(--muted);font-family:'DM Sans',sans-serif;letter-spacing:.1em;margin-left:.8rem"><?= htmlspecialchars($activeSemester['name']) ?></span><?php endif; ?></div>
+        <div class="section-title"><?= terms('course', \$instType) ?> <span>Management</span><?php if($activeSemester): ?><span style="font-size:.65rem;color:var(--muted);font-family:'DM Sans',sans-serif;letter-spacing:.1em;margin-left:.8rem"><?= htmlspecialchars($activeSemester['name']) ?></span><?php endif; ?></div>
         <button class="btn btn-gold" onclick="openAddCourse()">+ Add Course</button>
       </div>
       <div class="card"><div class="card-body" style="padding:0;overflow-x:auto">
@@ -796,7 +798,7 @@ $ttAll = $ttStmt->fetchAll();
     <!-- ══ LECTURERS ══ -->
     <div class="page-section" id="sec-lecturers">
       <div class="section-header">
-        <div class="section-title">Lecturer <span>Registry</span></div>
+        <div class="section-title"><?= terms('lecturer', \$instType) ?> <span>Registry</span></div>
         <button class="btn btn-gold" onclick="openAddLecturer()">+ Add Lecturer</button>
       </div>
       <div class="card"><div class="card-body" style="padding:0;overflow-x:auto">

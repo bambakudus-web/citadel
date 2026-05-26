@@ -74,6 +74,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['_action'] ?? '') === 'logi
     $_SESSION['user_id']        = $user['id'];
     $_SESSION['role']           = $user['role'];
     $_SESSION['institution_id'] = $user['institution_id'] ?? 1;
+    // Store institution type for terminology
+    if ($institution) $_SESSION['inst_type'] = $institution['inst_type'] ?? 'university';
     $_SESSION['user'] = [
         'id'=>$user['id'],'full_name'=>$user['full_name'],
         'index_no'=>$user['index_no'],'email'=>$user['email'],

@@ -861,7 +861,7 @@ function loadApprovals(){
         <td style="font-weight:500">${r.full_name}</td>
         <td class="hide-mobile" style="color:var(--gold);font-size:.78rem">${r.index_no}</td>
         <td style="display:flex;gap:.4rem">
-          <img src="../../${r.selfie_url}" class="selfie-thumb" onclick="viewSelfie('../../${r.selfie_url}','${r.full_name} — Face')" title="Face photo">
+          <img src="${r.selfie_url}" class="selfie-thumb" onclick="viewSelfie('${r.selfie_url}','${r.full_name} — Face')" title="Face photo">
           ${r.classroom_url?`<img src="../../${r.classroom_url}" class="selfie-thumb" onclick="viewSelfie('../../${r.classroom_url}','${r.full_name} — Classroom')" title="Classroom" style="border-color:var(--steel)">`:'<span style="color:var(--muted);font-size:.7rem">No classroom</span>'}
         </td>
         <td class="hide-mobile" style="color:var(--muted);font-size:.72rem">${r.submitted_at||r.time||''}</td>

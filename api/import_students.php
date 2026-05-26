@@ -20,12 +20,10 @@ if (empty($_FILES['csv']['tmp_name'])) {
     exit;
 }
 
-// Active semester for auto-enrollment
-$semId     = $activeSem['id'] ?? null;
-
 // Scope to logged-in admin's institution
 $inst_id       = (int)($_SESSION['institution_id'] ?? 1);
-$activeSem = $pdo->prepare("SELECT id FROM semesters WHERE is_active=1 AND institution_id=$inst_id LIMIT 1"); $activeSem->execute(); $activeSem = $activeSem->fetch();
+$activeSem = $pdo->prepare("SELECT id FROM semesters WHERE is_active=1 AND institution_id=?"); $activeSem->execute([$inst_id]); $activeSem = $activeSem->fetch();
+$semId = $activeSem['id'] ?? null;
 $institutionId = $inst_id;
 
 // Get default program/dept for this institution

@@ -64,29 +64,9 @@ if ($existing) {
     exit;
 }
 
-// Save selfie image
-$selfieUrl = '';
-if (!empty($selfieB64)) {
-    $selfieB64  = preg_replace('/^data:image\/\w+;base64,/', '', $selfieB64);
-    $selfieData = base64_decode($selfieB64);
-    $selfieDir  = '../uploads/selfies/';
-    if (!is_dir($selfieDir)) mkdir($selfieDir, 0755, true);
-    $selfieFile = $selfieDir . $userId . '_' . $sessionId . '_' . time() . '.jpg';
-    file_put_contents($selfieFile, $selfieData);
-    $selfieUrl  = 'uploads/selfies/' . basename($selfieFile);
-}
-
-// Save classroom image
-$classroomUrl = '';
-if (!empty($classroomB64)) {
-    $classroomB64  = preg_replace('/^data:image\/\w+;base64,/', '', $classroomB64);
-    $classroomData = base64_decode($classroomB64);
-    $classroomDir  = '../uploads/selfies/';
-    if (!is_dir($classroomDir)) mkdir($classroomDir, 0755, true);
-    $classroomFile = $classroomDir . $userId . '_' . $sessionId . '_class_' . time() . '.jpg';
-    file_put_contents($classroomFile, $classroomData);
-    $classroomUrl  = 'uploads/selfies/' . basename($classroomFile);
-}
+// Store base64 images directly in DB (Railway has no persistent filesystem)
+$selfieUrl    = !empty($selfieB64)    ? $selfieB64    : '';
+$classroomUrl = !empty($classroomB64) ? $classroomB64 : '';
 
 // Check if attendance table has classroom_url column, insert accordingly
 try {
@@ -114,7 +94,7 @@ echo json_encode([
     'success'      => true,
     'status'       => 'pending',
     'message'      => 'Selfie submitted! Waiting for Rep approval.',
-    'selfie_url'   => $selfieUrl,
+    'selfie_url'   => !empty($selfieUrl) ? 'data:image/jpeg;base64,' . $selfieUrl : '',
     'course_code'  => $session['course_code'] ?? null,
     'course_name'  => $session['course_name'] ?? null,
 ]);

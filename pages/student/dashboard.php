@@ -8,7 +8,8 @@ $user   = currentUser();
 $userId = $_SESSION['user_id'];
 
 // Active semester
-$inst_id = (int)($_SESSION['institution_id'] ?? 1);
+$inst_id   = (int)($_SESSION['institution_id'] ?? 1);
+$programId = (int)($_SESSION['user']['program_id'] ?? 0);
 $activeSem = $pdo->query("SELECT * FROM semesters WHERE is_active=1 AND institution_id=$inst_id LIMIT 1")->fetch();
 $semId     = $activeSem['id'] ?? null;
 $activeSemId = (int)($activeSem['id'] ?? 0);
@@ -68,12 +69,21 @@ if (empty($todayClasses)) {
 
 // Active session — only if student is enrolled in that course
 $activeSession = null;
-$rawActive = $pdo->query("SELECT s.* FROM sessions s JOIN users u ON u.id=s.lecturer_id WHERE s.active_status=1 AND u.institution_id=$inst_id ORDER BY s.start_time DESC LIMIT 1")->fetch();
+// Find active session for student's program
+$sessionQuery = $pdo->prepare("
+    SELECT s.* FROM sessions s 
+    JOIN users u ON u.id=s.lecturer_id 
+    WHERE s.active_status=1 AND u.institution_id=?
+    AND (s.program_id=? OR s.program_id IS NULL)
+    ORDER BY s.start_time DESC LIMIT 1
+");
+$sessionQuery->execute([$inst_id, $programId ?: null]);
+$rawActive = $sessionQuery->fetch();
 if ($rawActive) {
     if ($rawActive['course_id'] && !empty($enrolledCourseIds) && in_array($rawActive['course_id'], $enrolledCourseIds)) {
         $activeSession = $rawActive;
     } elseif (!$rawActive['course_id']) {
-        $activeSession = $rawActive; // legacy session without course_id
+        $activeSession = $rawActive;
     }
 }
 

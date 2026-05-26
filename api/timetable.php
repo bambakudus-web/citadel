@@ -45,9 +45,16 @@ switch ($method) {
             echo json_encode(['error' => 'Invalid day']);
             exit;
         }
+        // Get program_id from course if available
+        $progId = null;
+        if (!empty($data['course_id'])) {
+            $pr = $pdo->prepare("SELECT program_id FROM courses WHERE id=?");
+            $pr->execute([$data['course_id']]); $pr = $pr->fetch();
+            $progId = $pr['program_id'] ?? null;
+        }
         $stmt = $pdo->prepare("
-            INSERT INTO timetable (course_code, course_name, day_of_week, start_time, end_time, room, lecturer_id, course_id, semester_id)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO timetable (course_code, course_name, day_of_week, start_time, end_time, room, lecturer_id, course_id, semester_id, program_id)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ");
         $stmt->execute([
             strtoupper(trim($data['course_code'])),

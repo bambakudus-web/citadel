@@ -33,10 +33,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $pdo->beginTransaction();
 
                 // Create institution
+                $instType = in_array($_POST['inst_type']??'university', ['university','shs','jhs','primary','other']) ? $_POST['inst_type'] : 'university';
                 $pdo->prepare("
-                    INSERT INTO institutions (name, slug, email, phone, is_active, plan)
-                    VALUES (?, ?, ?, ?, 0, 'free')
-                ")->execute([$schoolName, $schoolCode, $adminEmail, $phone ?: null]);
+                    INSERT INTO institutions (name, slug, email, phone, is_active, plan, inst_type)
+                    VALUES (?, ?, ?, ?, 0, 'free', ?)
+                ")->execute([$schoolName, $schoolCode, $adminEmail, $phone ?: null, $instType]);
                 $instId = $pdo->lastInsertId();
 
                 // Create default department

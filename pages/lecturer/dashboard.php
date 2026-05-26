@@ -18,15 +18,23 @@ $activeSemId = (int)($activeSem['id'] ?? 0);
 $myCourses = [];
 if ($semId) {
     $stmt = $pdo->prepare("
-        SELECT c.*, COUNT(DISTINCT ce.student_id) AS enrolled_count
+        SELECT c.*, p.name AS program_name, p.code AS program_code,
+               COUNT(DISTINCT ce.student_id) AS enrolled_count
         FROM course_assignments ca
         JOIN courses c ON c.id = ca.course_id
+        LEFT JOIN programs p ON p.id = c.program_id
         LEFT JOIN course_enrollments ce ON ce.course_id = c.id AND ce.status = 'active'
         WHERE ca.lecturer_id = ? AND ca.semester_id = ?
-        GROUP BY c.id ORDER BY c.code ASC
+        GROUP BY c.id ORDER BY p.name ASC, c.code ASC
     ");
     $stmt->execute([$userId, $semId]);
     $myCourses = $stmt->fetchAll();
+    // Group by program
+    $coursesByProgram = [];
+    foreach ($myCourses as $c) {
+        $key = $c['program_name'] ?? 'General';
+        $coursesByProgram[$key][] = $c;
+    }
 }
 
 // Today's timetable for this lecturer
@@ -38,13 +46,13 @@ $todayClasses = $pdo->prepare("
     WHERE t.lecturer_id = ? AND t.day_of_week = ?
     ORDER BY t.start_time
 ");
-$todayClasses->execute([$userId, $today, $activeSemId]);
+$todayClasses->execute([$userId, $today]);
 $todayClasses = $todayClasses->fetchAll();
 
 // Fallback: if timetable has no course_id yet, use old columns
 if (empty($todayClasses)) {
     $todayClasses = $pdo->prepare("SELECT * FROM timetable WHERE lecturer_id=? AND day_of_week=? ORDER BY start_time");
-    $todayClasses->execute([$userId, $today, $activeSemId]);
+    $todayClasses->execute([$userId, $today]);
     $todayClasses = $todayClasses->fetchAll();
 }
 
@@ -88,7 +96,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'start
     }
 
     $pdo->prepare("UPDATE sessions SET active_status=0, end_time=NOW() WHERE lecturer_id=? AND active_status=1")->execute([$userId]);
-    $ins = $pdo->prepare("INSERT INTO sessions (course_code, course_name, course_id, semester_id, lecturer_id, secret_key, start_time, active_status) VALUES (?,?,?,?,?,?,NOW(),1)");
+    $progId = null;
+    if ($cId) {
+        $progRow = $pdo->prepare("SELECT program_id FROM courses WHERE id=?");
+        $progRow->execute([$cId]); $progRow = $progRow->fetch();
+        $progId = $progRow['program_id'] ?? null;
+    }
+    $ins = $pdo->prepare("INSERT INTO sessions (course_code, course_name, course_id, semester_id, lecturer_id, secret_key, start_time, active_status, program_id) VALUES (?,?,?,?,?,?,NOW(),1,?)");
     $ins->execute([$courseCode, $courseName, $courseId ?: null, $semId, $userId, $secretKey]);
     $newSessionId = $pdo->lastInsertId();
 

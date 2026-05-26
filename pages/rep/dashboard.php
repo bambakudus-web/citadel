@@ -2,6 +2,8 @@
 require_once '../../includes/security.php';
 require_once '../../includes/db.php';
 require_once '../../includes/auth.php';
+require_once '../../includes/terminology.php';
+$instType = $institution['inst_type'] ?? 'university';
 requireRole('rep', 'admin');
 
 $user   = currentUser();
@@ -524,7 +526,7 @@ document.addEventListener('DOMContentLoaded',function(){
 <aside class="sidebar" id="sidebar">
   <div class="sidebar-brand">
     <svg viewBox="0 0 52 52" fill="none"><polygon points="26,2 50,14 50,38 26,50 2,38 2,14" fill="none" stroke="#c9a84c" stroke-width="1.5"/><polygon points="26,9 43,18 43,34 26,43 9,34 9,18" fill="none" stroke="#c9a84c" stroke-width="0.8" opacity="0.5"/><rect x="20" y="20" width="12" height="14" rx="1" fill="none" stroke="#5a9f7a" stroke-width="1.5"/><circle cx="26" cy="25" r="2" fill="#c9a84c"/><line x1="26" y1="27" x2="26" y2="31" stroke="#5a9f7a" stroke-width="1.5"/></svg>
-    <div><div class="brand-name">CITADEL</div><div class="brand-role">Course Rep</div></div>
+    <div><div class="brand-name">CITADEL</div><div class="brand-role"><?= terms('rep', $instType) ?></div></div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section">Overview</div>
@@ -572,7 +574,7 @@ document.addEventListener('DOMContentLoaded',function(){
     </div>
     <div style="display:flex;align-items:center;gap:1rem">
       <span style="font-size:.75rem;color:var(--muted)"><?= date('l, d M Y') ?></span>
-      <span class="badge-rep">Rep</span>
+      <span class="badge-rep"><?= terms('rep', $instType) ?></span>
       <button id="theme-btn" onclick="toggleTheme()" style="background:none;border:1px solid var(--border);color:var(--muted);cursor:pointer;padding:.25rem .6rem;border-radius:2px;font-size:.75rem">🌙</button>
     </div>
   </div>

@@ -2,6 +2,8 @@
 require_once '../../includes/security.php';
 require_once '../../includes/db.php';
 require_once '../../includes/auth.php';
+require_once '../../includes/terminology.php';
+$instType = $institution['inst_type'] ?? 'university';
 requireRole('student', 'rep');
 
 $user   = currentUser();
@@ -439,7 +441,7 @@ document.addEventListener('DOMContentLoaded',function(){
       Mark Attendance<?= $activeSession ? ' 🟢' : '' ?>
     </a>
     <a class="nav-item" onclick="showSection('courses',this)">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>My Courses
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg><?= terms('courses', $instType) ?>
     </a>
     <a class="nav-item" onclick="showSection('timetable',this)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Timetable
@@ -498,7 +500,7 @@ document.addEventListener('DOMContentLoaded',function(){
         <div class="card">
           <div class="card-head"><div class="card-head-title">Recent Records</div></div>
           <div class="card-body" style="padding:0">
-            <table class="data-table"><thead><tr><th>Course</th><th>Status</th><th>Date</th></tr></thead><tbody>
+            <table class="data-table"><thead><tr><th><?= terms('course', $instType) ?></th><th>Status</th><th>Date</th></tr></thead><tbody>
             <?php if(empty($recentAtt)): ?><tr><td colspan="3" style="color:var(--muted)">No records yet.</td></tr>
             <?php else: foreach($recentAtt as $r): ?>
               <tr><td><?= htmlspecialchars($r['course_code']) ?></td><td><span class="pill pill-<?= $r['status']==='present'?'green':($r['status']==='late'?'gold':($r['status']==='pending'?'pending':'red')) ?>"><?= $r['status'] ?></span></td><td style="color:var(--muted);font-size:.72rem"><?= date('d M',strtotime($r['timestamp'])) ?></td></tr>

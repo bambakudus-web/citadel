@@ -3,6 +3,8 @@ require_once '../../includes/security.php';
 require_once '../../includes/db.php';
 require_once '../../includes/auth.php';
 require_once '../../includes/brevo_mail.php';
+require_once '../../includes/terminology.php';
+$instType = $institution['inst_type'] ?? 'university';
 requireRole('lecturer');
 
 $user   = currentUser();
@@ -497,7 +499,7 @@ document.addEventListener('DOMContentLoaded',function(){
 <aside class="sidebar" id="sidebar">
   <div class="sidebar-brand">
     <svg viewBox="0 0 52 52" fill="none"><polygon points="26,2 50,14 50,38 26,50 2,38 2,14" fill="none" stroke="#c9a84c" stroke-width="1.5"/><polygon points="26,9 43,18 43,34 26,43 9,34 9,18" fill="none" stroke="#c9a84c" stroke-width="0.8" opacity="0.5"/><rect x="20" y="20" width="12" height="14" rx="1" fill="none" stroke="#8a6fd4" stroke-width="1.5"/><circle cx="26" cy="25" r="2" fill="#c9a84c"/><line x1="26" y1="27" x2="26" y2="31" stroke="#8a6fd4" stroke-width="1.5"/></svg>
-    <div><div class="brand-name">CITADEL</div><div class="brand-role">Lecturer</div></div>
+    <div><div class="brand-name">CITADEL</div><div class="brand-role"><?= terms('lecturer', $instType) ?></div></div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section">Sessions</div>
@@ -521,7 +523,7 @@ document.addEventListener('DOMContentLoaded',function(){
   </nav>
   <div class="sidebar-user">
     <div class="u-name"><?= htmlspecialchars($user['full_name'] ?? 'Lecturer') ?></div>
-    <div class="u-role">Lecturer <?= $activeSem ? '· '.htmlspecialchars($activeSem['name']) : '' ?></div>
+    <div class="u-role"><?= terms('lecturer', $instType) ?> <?= $activeSem ? '· '.htmlspecialchars($activeSem['name']) : '' ?></div>
     <div class="sidebar-user-actions"><a href="../../change_password.php" class="btn-pwd">🔑 Password</a><a href="../../logout.php" class="btn-out">Sign Out</a></div>
   </div>
 </aside>
@@ -534,7 +536,7 @@ document.addEventListener('DOMContentLoaded',function(){
     </div>
     <div style="display:flex;align-items:center;gap:1rem">
       <span style="font-size:.75rem;color:var(--muted)"><?= date('l, d M Y') ?></span>
-      <span class="badge-lec">Lecturer</span>
+      <span class="badge-lec"><?= terms('lecturer', $instType) ?></span>
       <button id="theme-btn" onclick="toggleTheme()" style="background:none;border:1px solid var(--border);color:var(--muted);cursor:pointer;padding:.25rem .6rem;border-radius:2px;font-size:.75rem">🌙</button>
     </div>
   </div>
@@ -568,11 +570,16 @@ document.addEventListener('DOMContentLoaded',function(){
               <div class="counter-item"><div class="counter-value"><?= $enrolledCount ?></div><div class="counter-label">Enrolled</div></div>
               <div class="counter-item"><div class="counter-value" style="color:var(--danger)"><?= max(0, $enrolledCount - count($liveAttendance)) ?></div><div class="counter-label">Absent</div></div>
             </div>
+            <?php if ($instType !== 'university'): ?>
+            <div style="margin-top:1rem">
+              <button class="btn btn-lec" style="width:100%" onclick="loadTeacherMarkPanel()">📋 Mark Attendance from List</button>
+            </div>
+            <?php endif; ?>
           </div>
           <div class="card">
             <div class="card-head"><div class="card-head-title">Live Attendance</div><span class="pill pill-green" id="live-pill"><?= count($liveAttendance) ?> present</span></div>
             <div class="card-body" style="padding:0;max-height:420px;overflow-y:auto">
-              <table class="data-table"><thead><tr><th>Student</th><th>Index</th><th>Status</th><th>Time</th></tr></thead>
+              <table class="data-table"><thead><tr><th>Student</th><th><?= terms('index_no', $instType) ?></th><th>Status</th><th>Time</th></tr></thead>
               <tbody id="live-tbody">
                 <?php if(empty($liveAttendance)): ?><tr id="empty-row"><td colspan="4" style="color:var(--muted)">Waiting for students...</td></tr>
                 <?php else: foreach($liveAttendance as $a): ?>
@@ -606,7 +613,7 @@ document.addEventListener('DOMContentLoaded',function(){
             <input type="hidden" name="action" value="start_session">
             <div class="form-row">
               <div class="form-field">
-                <label>Course</label>
+                <label><?= terms('course', $instType) ?></label>
                 <select name="course_id" id="course-sel" onchange="fillCourseName()">
                   <?php foreach ($myCourses as $mc): ?>
                     <option value="<?= $mc['id'] ?>" data-code="<?= htmlspecialchars($mc['code']) ?>" data-name="<?= htmlspecialchars($mc['name']) ?>">
@@ -617,7 +624,7 @@ document.addEventListener('DOMContentLoaded',function(){
                 </select>
               </div>
               <div class="form-field">
-                <label>Course Name (auto)</label>
+                <label><?= terms('course', $instType) ?> Name (auto)</label>
                 <input type="text" name="course_name" id="course-name" value="<?= htmlspecialchars($myCourses[0]['name'] ?? '') ?>" readonly>
               </div>
             </div>
@@ -745,6 +752,111 @@ window.fetch=function(url,options={}){options.headers=options.headers||{};option
 // Mobile handled in head script
 
 </script>
+<!-- Teacher Mark Panel -->
+<div class="modal-overlay" id="teacher-mark-modal">
+  <div class="modal" style="max-width:600px">
+    <div class="modal-head">
+      <div class="modal-title">MARK ATTENDANCE</div>
+      <div style="display:flex;gap:.5rem;align-items:center">
+        <button class="btn btn-ghost btn-sm" onclick="markAllAbsent()">Mark Absent: Unmarked</button>
+        <button class="modal-close" onclick="closeModal('teacher-mark-modal')">✕</button>
+      </div>
+    </div>
+    <div class="modal-body" style="padding:0">
+      <div id="teacher-mark-list" style="max-height:60vh;overflow-y:auto">
+        <div style="padding:2rem;text-align:center;color:var(--muted)">Loading students...</div>
+      </div>
+    </div>
+    <div style="padding:1rem;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+      <span id="mark-summary" style="font-size:.8rem;color:var(--muted)"></span>
+      <button class="btn btn-lec" onclick="closeModal('teacher-mark-modal')">Done</button>
+    </div>
+  </div>
+</div>
+
 <?php require_once '../../includes/toast.php'; ?>
+<script>
+// ── TEACHER MARK ATTENDANCE ──
+const SESSION_ID = <?= $activeSession ? $activeSession['id'] : 'null' ?>;
+const INST_TYPE  = '<?= $instType ?>';
+
+async function loadTeacherMarkPanel() {
+  if (!SESSION_ID) { toast('error', 'No active session'); return; }
+  openModal('teacher-mark-modal');
+  const r = await fetch(API + '/teacher_mark.php', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({action:'get_students', session_id: SESSION_ID})
+  });
+  const d = await r.json();
+  if (!d.ok) { toast('error', d.msg || 'Error'); return; }
+  
+  const list = document.getElementById('teacher-mark-list');
+  if (!d.students.length) {
+    list.innerHTML = '<div style="padding:2rem;text-align:center;color:var(--muted)">No students enrolled in this course.</div>';
+    return;
+  }
+  
+  let html = '<table class="data-table" style="min-width:0"><thead><tr><th>Name</th><th>ID</th><th>Status</th></tr></thead><tbody>';
+  d.students.forEach(s => {
+    const status = s.status || 'none';
+    const colors = {present:'pill-green', late:'pill-gold', absent:'pill-red', none:''};
+    html += `<tr id="mrow-${s.id}">
+      <td>${s.full_name}</td>
+      <td style="color:var(--gold);font-size:.78rem">${s.index_no||'—'}</td>
+      <td>
+        <div style="display:flex;gap:.3rem;flex-wrap:wrap">
+          <button class="btn btn-sm ${status==='present'?'btn-lec':'btn-ghost'}" onclick="markStudent(${s.id},'present')">✓</button>
+          <button class="btn btn-sm ${status==='late'?'btn-gold':'btn-ghost'}" onclick="markStudent(${s.id},'late')">Late</button>
+          <button class="btn btn-sm ${status==='absent'?'btn-danger':'btn-ghost'}" onclick="markStudent(${s.id},'absent')">✗</button>
+        </div>
+      </td>
+    </tr>`;
+  });
+  html += '</tbody></table>';
+  list.innerHTML = html;
+  updateMarkSummary(d.students);
+}
+
+async function markStudent(studentId, status) {
+  const r = await fetch(API + '/teacher_mark.php', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({action:'mark', session_id:SESSION_ID, student_id:studentId, status})
+  });
+  const d = await r.json();
+  if (d.ok) {
+    // Update button styles
+    const row = document.getElementById('mrow-'+studentId);
+    if (row) {
+      const btns = row.querySelectorAll('button');
+      btns[0].className = 'btn btn-sm ' + (status==='present'?'btn-lec':'btn-ghost');
+      btns[1].className = 'btn btn-sm ' + (status==='late'?'btn-gold':'btn-ghost');
+      btns[2].className = 'btn btn-sm ' + (status==='absent'?'btn-danger':'btn-ghost');
+    }
+  } else toast('error', d.msg || 'Error');
+}
+
+async function markAllAbsent() {
+  if (!confirm('Mark all unmarked students as absent?')) return;
+  const r = await fetch(API + '/teacher_mark.php', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({action:'mark_all', session_id:SESSION_ID})
+  });
+  const d = await r.json();
+  if (d.ok) {
+    toast('success', `${d.marked} students marked absent`);
+    loadTeacherMarkPanel();
+  } else toast('error', d.msg || 'Error');
+}
+
+function updateMarkSummary(students) {
+  const marked = students.filter(s => s.status && s.status !== 'none').length;
+  const total = students.length;
+  const el = document.getElementById('mark-summary');
+  if (el) el.textContent = `${marked} of ${total} marked`;
+}
+</script>
 </body>
 </html>

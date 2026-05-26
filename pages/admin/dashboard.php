@@ -784,7 +784,7 @@ $ttAll = $ttStmt->fetchAll();
           <td class="hide-mobile"><span class="pill pill-steel"><?= $c['enrolled_count'] ?> students</span></td>
           <td class="hide-mobile" style="color:var(--muted)"><?= $c['credit_hrs'] ?> cr</td>
           <td style="display:flex;gap:.4rem;flex-wrap:wrap">
-            <button class="btn btn-ghost btn-sm" onclick="editCourse(<?= $c['id'] ?>,'<?= htmlspecialchars(addslashes($c['code'])) ?>','<?= htmlspecialchars(addslashes($c['name'])) ?>',<?= $c['lecturer_id'] ?? 'null' ?>,<?= $c['credit_hrs'] ?>)">Edit</button>
+            <button class="btn btn-ghost btn-sm" onclick="editCourse(<?= $c['id'] ?>,'<?= htmlspecialchars(addslashes($c['code'])) ?>','<?= htmlspecialchars(addslashes($c['name'])) ?>',<?= $c['lecturer_id'] ?? 'null' ?>,<?= $c['credit_hrs'] ?>,<?= $c['program_id'] ?? 'null' ?>)">Edit</button>
             <button class="btn btn-danger btn-sm" onclick="deleteCourse(<?= $c['id'] ?>,'<?= htmlspecialchars(addslashes($c['code'])) ?>')">Delete</button>
           </td>
         </tr>
@@ -1163,13 +1163,21 @@ $ttAll = $ttStmt->fetchAll();
     <div class="modal-head"><div class="modal-title" id="course-modal-title">ADD COURSE</div><button class="modal-close" onclick="closeModal('modal-add-course')">✕</button></div>
     <div class="modal-body">
       <input type="hidden" id="course-edit-id">
+      <div class="form-field"><label>Program</label>
+        <select id="course-program" required>
+          <option value="">— Select Program —</option>
+          <?php foreach($allPrograms as $p): ?>
+          <option value="<?= $p['id'] ?>"><?= htmlspecialchars($p['name']) ?> (<?= htmlspecialchars($p['code']) ?>)</option>
+          <?php endforeach; ?>
+        </select>
+      </div>
       <div class="form-row">
         <div class="form-field"><label>Course Code</label><input type="text" id="course-code" placeholder="e.g. CSH221"></div>
         <div class="form-field"><label>Credit Hours</label><select id="course-credits"><option value="1">1</option><option value="2">2</option><option value="3" selected>3</option><option value="4">4</option></select></div>
       </div>
       <div class="form-field"><label>Course Name</label><input type="text" id="course-name" placeholder="e.g. Systems Analysis and Design"></div>
       <div class="form-field"><label>Assign Lecturer</label><select id="course-lecturer"><option value="">— Select Lecturer —</option><?php foreach($allLecturers as $l): ?><option value="<?= $l['id'] ?>"><?= htmlspecialchars($l['full_name']) ?></option><?php endforeach; ?></select></div>
-      <div class="form-field" style="display:flex;align-items:center;gap:.6rem;margin-top:.4rem"><input type="checkbox" id="course-enroll-all" style="width:auto"><label for="course-enroll-all" style="font-size:.8rem;color:var(--muted)">Auto-enroll all active students</label></div>
+      <div class="form-field" style="display:flex;align-items:center;gap:.6rem;margin-top:.4rem"><input type="checkbox" id="course-enroll-all" style="width:auto"><label for="course-enroll-all" style="font-size:.8rem;color:var(--muted)">Auto-enroll all students in selected program</label></div>
       <button class="btn btn-gold" style="width:100%;margin-top:1rem" onclick="saveCourse()">Save Course</button>
     </div>
   </div>
@@ -1290,12 +1298,13 @@ function openAddCourse() {
   openModal('modal-add-course');
 }
 
-function editCourse(id, code, name, lecturerId, credits) {
+function editCourse(id, code, name, lecturerId, credits, programId) {
   document.getElementById('course-edit-id').value = id;
   document.getElementById('course-code').value    = code;
   document.getElementById('course-name').value    = name;
   document.getElementById('course-credits').value = credits;
   if (lecturerId) document.getElementById('course-lecturer').value = lecturerId;
+  if (programId) document.getElementById('course-program').value = programId;
   document.getElementById('course-modal-title').textContent = 'EDIT COURSE';
   openModal('modal-add-course');
 }
@@ -1308,7 +1317,7 @@ function saveCourse() {
     name: document.getElementById('course-name').value.trim(),
     credit_hrs: parseInt(document.getElementById('course-credits').value),
     lecturer_id: document.getElementById('course-lecturer').value || null,
-    program_id: null, semester_id: semId,
+    program_id: document.getElementById('course-program').value || null, semester_id: semId,
     enroll_all: document.getElementById('course-enroll-all').checked ? 1 : 0,
   };
   if (!body.code || !body.name) { alert('Code and name required'); return; }

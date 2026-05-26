@@ -381,5 +381,13 @@ async function mSubmit(){
   }catch(e){showAlert('Network error. Try again.');btn.disabled=false;btn.textContent='Enter Citadel';}
 }
 </script>
+<script>
+if(window.location.hash==='#login'){
+  document.addEventListener('DOMContentLoaded',function(){
+    var m=document.getElementById('loginModal');
+    if(m) m.classList.add('open');
+  });
+}
+</script>
 </body>
 </html>

@@ -151,7 +151,7 @@ input,select,textarea{font-size:16px!important}
 
     <?php if ($success): ?>
       <div class="alert-success">✓ Account created! You can now sign in with school code <strong><?= strtoupper(htmlspecialchars($_POST['school_code'])) ?></strong>.</div>
-      <a href="login.php" class="btn" style="display:block;text-align:center;text-decoration:none">Go to Login</a>
+      <a href="login.php#login" class="btn" style="display:block;text-align:center;text-decoration:none">Go to Login</a>
 
     <?php elseif ($step === 1): ?>
       <form method="POST">
@@ -202,7 +202,7 @@ input,select,textarea{font-size:16px!important}
       </form>
     <?php endif; ?>
 
-    <div class="footer">Already have an account? <a href="login.php">Sign in here</a></div>
+    <div class="footer">Already have an account? <a href="login.php#login">Sign in here</a></div>
   </div>
 </div>
 <script>

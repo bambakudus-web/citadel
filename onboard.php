@@ -174,7 +174,7 @@ input,select,textarea{font-size:16px!important}
           Your school code is: <strong><?= strtoupper(htmlspecialchars($schoolCode)) ?></strong><br>
           Share this code with your students and staff so they can log in.
         </div>
-        <a href="login.php" class="btn" style="display:block;text-align:center;text-decoration:none">Go to Login →</a>
+        <a href="login.php#login" class="btn" style="display:block;text-align:center;text-decoration:none">Go to Login →</a>
       <?php else: ?>
 
       <div class="preview" id="code-preview" style="display:none">
@@ -230,7 +230,7 @@ input,select,textarea{font-size:16px!important}
 
       <?php endif; ?>
 
-      <div class="footer-link">Already registered? <a href="login.php">Sign in here</a></div>
+      <div class="footer-link">Already registered? <a href="login.php#login">Sign in here</a></div>
     </div>
   </div>
 </div>

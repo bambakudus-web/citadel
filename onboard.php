@@ -184,6 +184,16 @@ input,select,textarea{font-size:16px!important}
 
       <form method="POST">
         <div class="section-label">Institution Details</div>
+        <div class="field" style="margin-bottom:1rem">
+          <label>Institution Type</label>
+          <select name="inst_type" required style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:.72rem 1rem;font-family:'DM Sans',sans-serif;font-size:.88rem;border-radius:2px;outline:none">
+            <option value="university" <?= ($_POST['inst_type']??'university')==='university'?'selected':'' ?>>University / Polytechnic / College</option>
+            <option value="shs" <?= ($_POST['inst_type']??'')==='shs'?'selected':'' ?>>Senior High School (SHS)</option>
+            <option value="jhs" <?= ($_POST['inst_type']??'')==='jhs'?'selected':'' ?>>Junior High School (JHS)</option>
+            <option value="primary" <?= ($_POST['inst_type']??'')==='primary'?'selected':'' ?>>Primary School</option>
+            <option value="other" <?= ($_POST['inst_type']??'')==='other'?'selected':'' ?>>Other</option>
+          </select>
+        </div>
         <div class="form-row">
           <div class="field">
             <label>Institution Name</label>

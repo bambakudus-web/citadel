@@ -625,7 +625,7 @@ document.addEventListener('DOMContentLoaded',function(){
     <div class="page-section active" id="sec-overview">
       <div class="stats-grid">
         <div class="stat-card gold"><div class="stat-label">Total Students</div><div class="stat-value"><?= $totalStudents ?></div><div class="stat-sub">Active in system</div></div>
-        <div class="stat-card steel"><div class="stat-label">Lecturers</div><div class="stat-value"><?= $totalLecturers ?></div><div class="stat-sub">Active faculty</div></div>
+        <div class="stat-card steel"><div class="stat-label"><?= terms('lecturers', $instType) ?></div><div class="stat-value"><?= $totalLecturers ?></div><div class="stat-sub">Active <?= terms('lecturers', $instType) ?></div></div>
         <div class="stat-card green"><div class="stat-label">Total Sessions</div><div class="stat-value"><?= $totalSessions ?></div><div class="stat-sub">All time</div></div>
         <div class="stat-card red"><div class="stat-label">Today's Records</div><div class="stat-value"><?= $todayAttendance ?></div><div class="stat-sub"><?= date('d M Y') ?></div></div>
       </div>

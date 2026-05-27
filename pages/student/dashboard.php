@@ -521,9 +521,9 @@ document.addEventListener('DOMContentLoaded',function(){
         <?php if ($myPending): ?>
           <div class="pending-card">
             <div class="pending-icon">⏳</div>
-            <div class="pending-title">Awaiting Rep Approval</div>
-            <div class="pending-sub">Your selfie has been submitted for <strong><?= htmlspecialchars($activeSession['course_code'] ?? '') ?></strong>.<br>The Course Rep will review shortly.</div>
-            <?php if($myPending['selfie_url']): ?><img src="../../<?= htmlspecialchars($myPending['selfie_url']) ?>" style="width:80px;height:80px;object-fit:cover;border-radius:50%;border:2px solid var(--warning);margin:1.2rem auto 0;display:block"><?php endif; ?>
+            <div class="pending-title">Awaiting Approval</div>
+            <div class="pending-sub">Your attendance for <strong><?= htmlspecialchars($activeSession['course_code'] ?? '') ?></strong> is pending.<br><?= $instType==='university' ? 'The Course Rep will review shortly.' : 'Your teacher will mark you shortly.' ?></div>
+            <?php if($myPending['selfie_url']): ?><img src="<?= strpos($myPending['selfie_url'],'data:')===0 ? htmlspecialchars($myPending['selfie_url']) : '../../'.htmlspecialchars($myPending['selfie_url']) ?>" style="width:80px;height:80px;object-fit:cover;border-radius:50%;border:2px solid var(--warning);margin:1.2rem auto 0;display:block"><?php endif; ?>
           </div>
         <?php elseif ($myRecord && $myRecord['status'] !== 'pending'): ?>
           <div class="pending-card" style="border-color:rgba(76,175,130,.3)">
@@ -539,6 +539,13 @@ document.addEventListener('DOMContentLoaded',function(){
               <div style="font-size:.9rem;color:var(--text);font-weight:500"><?= htmlspecialchars($activeSession['course_code']) ?> · <?= htmlspecialchars($activeSession['course_name'] ?? '') ?></div>
             </div>
           </div>
+          <?php if($instType !== 'university'): ?>
+          <div class="pending-card" style="border-color:rgba(76,175,130,.3);margin-top:1rem">
+            <div class="pending-icon">📋</div>
+            <div class="pending-title" style="color:var(--success)">Class in Progress</div>
+            <div class="pending-sub">Your teacher is marking attendance. You will be marked automatically.</div>
+          </div>
+          <?php else: ?>
           <div class="step-indicator">
             <div class="step-dot active" id="dot-code"></div>
             <div class="step-dot" id="dot-selfie" style="margin-left:.3rem"></div>
@@ -572,6 +579,7 @@ document.addEventListener('DOMContentLoaded',function(){
             </div>
             <div id="submit-error" style="color:var(--danger);font-size:.78rem;margin-top:.6rem;text-align:center;display:none"></div>
           </div>
+          <?php endif; ?>
         <?php else: ?>
           <div class="no-session-card">
             <div style="font-size:2rem;margin-bottom:1rem">🔒</div>

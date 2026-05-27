@@ -338,11 +338,6 @@ input,select,textarea{font-size:16px!important}
 }
 input,select,textarea{font-size:16px!important}
 @media(min-width:769px){input,select,textarea{font-size:unset!important}}
-<?php if($instType!=='university'): ?>
-<style>
-#sec-programs,#sec-override,#sec-approvals,#sec-devices{display:none!important}
-</style>
-<?php endif; ?>
 
 #sidebar-overlay{
   display:none;position:fixed;inset:0;
@@ -509,6 +504,7 @@ document.addEventListener('DOMContentLoaded',function(){
         }
 @media(max-width:768px){.sidebar{overflow:hidden!important;display:flex!important;flex-direction:column!important}.sidebar-nav,.sb-nav{flex:1 1 0!important;overflow-y:auto!important;overflow-x:hidden!important;min-height:0!important}.sidebar-user,.sidebar-footer,.sb-foot{flex-shrink:0!important;overflow:visible!important}}
 </style>
+<?php if($instType!=="university"): ?><style>#sec-programs,#sec-override,#sec-approvals,#sec-devices{display:none!important}</style><?php endif; ?>
 </head>
 
 <body>

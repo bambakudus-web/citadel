@@ -369,7 +369,7 @@ async function mStep1Next(){
 
   // Fetch institution type and adapt labels
   try {
-    const r = await fetch('api/inst_info.php?code='+encodeURIComponent(code));
+    const r = await fetch('/api/inst_info.php?code='+encodeURIComponent(code));
     const d = await r.json();
     if (d.inst_type) {
       const t = instTerms[d.inst_type] || instTerms.university;

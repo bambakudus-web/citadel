@@ -226,15 +226,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;background:radial-gradi
 .footer-link{text-align:center;margin-top:1.2rem;font-size:.8rem;color:var(--muted)}
 .footer-link a{color:var(--gold);text-decoration:none}
 
-/* Type selector cards */
-.type-grid{display:grid;grid-template-columns:1fr 1fr;gap:.7rem;margin-bottom:1.5rem}
-.type-card{background:var(--bg);border:2px solid var(--border);border-radius:4px;padding:1rem;cursor:pointer;transition:all .2s;position:relative}
-.type-card:hover{border-color:var(--muted)}
-.type-card.selected{border-color:var(--type-color,var(--gold));background:rgba(201,168,76,.04)}
-.type-card input[type=radio]{position:absolute;opacity:0;width:0;height:0}
-.type-card-icon{font-size:1.5rem;margin-bottom:.4rem}
-.type-card-label{font-family:'Cinzel',serif;font-size:.75rem;color:var(--text);letter-spacing:.06em}
-.type-card-desc{font-size:.68rem;color:var(--muted);margin-top:.25rem;line-height:1.4}
+
 .type-features{background:rgba(74,111,165,.06);border:1px solid rgba(74,111,165,.2);border-radius:2px;padding:.8rem 1rem;margin-bottom:1.2rem;display:none}
 .type-features.show{display:block}
 .type-features-title{font-size:.65rem;letter-spacing:.15em;text-transform:uppercase;color:var(--steel);margin-bottom:.5rem}
@@ -287,15 +279,15 @@ input,select,textarea{font-size:16px!important}
 
         <!-- STEP 1: Choose institution type -->
         <div class="section-label">Step 1 — Institution Type</div>
-        <div class="type-grid">
-          <?php foreach($typeInfo as $val => $info): ?>
-          <label class="type-card <?= $selectedType===$val?'selected':'' ?>" style="--type-color:<?= $info['color'] ?>" onclick="selectType('<?= $val ?>')">
-            <input type="radio" name="inst_type" value="<?= $val ?>" <?= $selectedType===$val?'checked':'' ?>>
-            <div class="type-card-icon"><?= match($val){'university'=>'🎓','shs'=>'🏫','jhs'=>'📚','primary'=>'✏️',default=>'🏢'} ?></div>
-            <div class="type-card-label"><?= $val==='university'?'University':''.($val==='shs'?'Senior High':''.($val==='jhs'?'Junior High':''.($val==='primary'?'Primary':'Other'))) ?></div>
-            <div class="type-card-desc"><?= $val==='university'?'Tertiary institution':''.($val==='shs'?'SHS streams':''.($val==='jhs'?'JHS 1–3':''.($val==='primary'?'Primary 1–6':'Any other'))) ?></div>
-          </label>
-          <?php endforeach; ?>
+        <div class="field">
+          <label>What type of institution are you registering?</label>
+          <select name="inst_type" id="inst-type-select" onchange="selectType(this.value)" required>
+            <option value="university" <?= $selectedType==='university'?'selected':'' ?>>🎓 University / Polytechnic / College</option>
+            <option value="shs" <?= $selectedType==='shs'?'selected':'' ?>>🏫 Senior High School (SHS)</option>
+            <option value="jhs" <?= $selectedType==='jhs'?'selected':'' ?>>📚 Junior High School (JHS)</option>
+            <option value="primary" <?= $selectedType==='primary'?'selected':'' ?>>✏️ Primary School</option>
+            <option value="other" <?= $selectedType==='other'?'selected':'' ?>>🏢 Other Institution</option>
+          </select>
         </div>
 
         <!-- Features preview per type -->

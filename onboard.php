@@ -3,7 +3,7 @@ session_start();
 require_once 'includes/db.php';
 require_once 'includes/brevo_mail.php';
 
-$error = ''; $success = '';
+$error = ''; $success = ''; $schoolCode = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $schoolName  = trim($_POST['school_name']  ?? '');
@@ -13,6 +13,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $adminPass   = $_POST['admin_password']    ?? '';
     $confirm     = $_POST['confirm_password']  ?? '';
     $phone       = trim($_POST['phone']        ?? '');
+    $instType    = in_array($_POST['inst_type']??'university', ['university','shs','jhs','primary','other']) ? $_POST['inst_type'] : 'university';
 
     if (!$schoolName || !$schoolCode || !$adminName || !$adminEmail || !$adminPass) {
         $error = 'All fields are required.';
@@ -23,7 +24,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif ($adminPass !== $confirm) {
         $error = 'Passwords do not match.';
     } else {
-        // Check slug uniqueness
         $check = $pdo->prepare("SELECT id FROM institutions WHERE slug=?");
         $check->execute([$schoolCode]);
         if ($check->fetch()) {
@@ -31,46 +31,70 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             try {
                 $pdo->beginTransaction();
-
-                // Create institution
-                $instType = in_array($_POST['inst_type']??'university', ['university','shs','jhs','primary','other']) ? $_POST['inst_type'] : 'university';
-                $pdo->prepare("
-                    INSERT INTO institutions (name, slug, email, phone, is_active, plan, inst_type)
-                    VALUES (?, ?, ?, ?, 0, 'free', ?)
-                ")->execute([$schoolName, $schoolCode, $adminEmail, $phone ?: null, $instType]);
+                $pdo->prepare("INSERT INTO institutions (name, slug, email, phone, is_active, plan, inst_type) VALUES (?, ?, ?, ?, 0, 'free', ?)")
+                    ->execute([$schoolName, $schoolCode, $adminEmail, $phone ?: null, $instType]);
                 $instId = $pdo->lastInsertId();
 
-                // Create default department
+                // Create default department based on type
+                $deptName = match($instType) {
+                    'shs'     => 'General',
+                    'jhs'     => 'General',
+                    'primary' => 'General',
+                    default   => 'General'
+                };
                 $pdo->prepare("INSERT INTO departments (institution_id, name, code) VALUES (?, ?, ?)")
-                    ->execute([$instId, 'General', 'GEN']);
+                    ->execute([$instId, $deptName, 'GEN']);
                 $deptId = $pdo->lastInsertId();
 
-                // Create default program
-                $pdo->prepare("INSERT INTO programs (department_id, name, code, duration_yrs) VALUES (?, ?, ?, 2)")
-                    ->execute([$deptId, 'General Program', 'GEN-P']);
-                $progId = $pdo->lastInsertId();
+                // Create default streams/programs based on type
+                if ($instType === 'shs') {
+                    $streams = [
+                        ['General Science', 'SCI', 3],
+                        ['General Arts', 'ARTS', 3],
+                        ['Business', 'BUS', 3],
+                        ['Home Economics', 'HEC', 3],
+                        ['Visual Arts', 'VIS', 3],
+                    ];
+                    foreach ($streams as $s) {
+                        $pdo->prepare("INSERT INTO programs (department_id, name, code, duration_yrs) VALUES (?, ?, ?, ?)")
+                            ->execute([$deptId, $s[0], $s[1], $s[2]]);
+                    }
+                } elseif ($instType === 'jhs') {
+                    foreach (['JHS 1','JHS 2','JHS 3'] as $cls) {
+                        $code = str_replace(' ','',$cls);
+                        $pdo->prepare("INSERT INTO programs (department_id, name, code, duration_yrs) VALUES (?, ?, ?, 1)")
+                            ->execute([$deptId, $cls, $code]);
+                    }
+                } elseif ($instType === 'primary') {
+                    foreach (['Primary 1','Primary 2','Primary 3','Primary 4','Primary 5','Primary 6'] as $cls) {
+                        $code = str_replace(' ','',str_replace('Primary','P',$cls));
+                        $pdo->prepare("INSERT INTO programs (department_id, name, code, duration_yrs) VALUES (?, ?, ?, 1)")
+                            ->execute([$deptId, $cls, $code]);
+                    }
+                } else {
+                    $pdo->prepare("INSERT INTO programs (department_id, name, code, duration_yrs) VALUES (?, ?, ?, 2)")
+                        ->execute([$deptId, 'General Program', 'GEN-P']);
+                }
 
                 // Create admin user
                 $hash = password_hash($adminPass, PASSWORD_DEFAULT);
-                $pdo->prepare("
-                    INSERT INTO users (full_name, email, password_hash, role, institution_id, department_id, is_active)
-                    VALUES (?, ?, ?, 'admin', ?, ?, 1)
-                ")->execute([$adminName, $adminEmail, $hash, $instId, $deptId]);
-
+                $pdo->prepare("INSERT INTO users (full_name, email, password_hash, role, institution_id, department_id, is_active) VALUES (?, ?, ?, 'admin', ?, ?, 1)")
+                    ->execute([$adminName, $adminEmail, $hash, $instId, $deptId]);
                 $pdo->commit();
                 $success = true;
-                // Notify super admin of new registration
+
+                // Notify super admins
                 try {
                     $superAdmins = $pdo->query("SELECT email, full_name FROM users WHERE role='super_admin' AND is_active=1 LIMIT 5")->fetchAll();
                     foreach ($superAdmins as $sa) {
                         if (!filter_var($sa['email'], FILTER_VALIDATE_EMAIL)) continue;
-                        $html = "
-                        <div style='font-family:sans-serif;background:#060910;color:#e8eaf0;padding:2rem;border-radius:4px'>
+                        $typeLabel = ['university'=>'University','shs'=>'Senior High School','jhs'=>'Junior High School','primary'=>'Primary School','other'=>'Other'][$instType] ?? $instType;
+                        $html = "<div style='font-family:sans-serif;background:#060910;color:#e8eaf0;padding:2rem;border-radius:4px'>
                             <div style='font-family:Georgia,serif;font-size:1.2rem;color:#c9a84c;letter-spacing:4px;margin-bottom:1rem'>CITADEL</div>
                             <h2 style='color:#e8eaf0;margin-bottom:.8rem'>New School Registration</h2>
-                            <p style='color:#6b7a8d'>A new institution has registered and is awaiting approval:</p>
                             <table style='margin:1rem 0;width:100%'>
                                 <tr><td style='color:#6b7a8d;padding:.3rem 0'>School:</td><td style='color:#e8eaf0'><strong>$schoolName</strong></td></tr>
+                                <tr><td style='color:#6b7a8d;padding:.3rem 0'>Type:</td><td style='color:#c9a84c'>$typeLabel</td></tr>
                                 <tr><td style='color:#6b7a8d;padding:.3rem 0'>Code:</td><td style='color:#c9a84c'><strong>" . strtoupper($schoolCode) . "</strong></td></tr>
                                 <tr><td style='color:#6b7a8d;padding:.3rem 0'>Admin:</td><td style='color:#e8eaf0'>$adminName ($adminEmail)</td></tr>
                             </table>
@@ -78,20 +102,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </div>";
                         sendBrevoEmail($sa['email'], $sa['full_name'], "New School Registration: $schoolName", $html);
                     }
-                    // Also send pending email to new admin
-                    $pendingHtml = "
-                    <div style='font-family:sans-serif;background:#060910;color:#e8eaf0;padding:2rem;border-radius:4px'>
+                    $pendingHtml = "<div style='font-family:sans-serif;background:#060910;color:#e8eaf0;padding:2rem;border-radius:4px'>
                         <div style='font-family:Georgia,serif;font-size:1.2rem;color:#c9a84c;letter-spacing:4px;margin-bottom:1rem'>CITADEL</div>
                         <h2 style='color:#e8eaf0;margin-bottom:.8rem'>Registration Received</h2>
-                        <p style='color:#6b7a8d'>Hi $adminName, your registration for <strong style='color:#e8eaf0'>$schoolName</strong> has been received.</p>
-                        <p style='color:#6b7a8d;margin-top:.8rem'>Your account is pending approval. You will receive another email once your institution is activated — usually within 24 hours.</p>
+                        <p style='color:#6b7a8d'>Hi $adminName, your registration for <strong style='color:#e8eaf0'>$schoolName</strong> has been received and is pending approval.</p>
                         <div style='background:#0c1018;border:1px solid #1a2535;border-left:3px solid #c9a84c;padding:1rem;margin-top:1.2rem;border-radius:2px'>
                             <div style='color:#6b7a8d;font-size:.8rem'>School Code</div>
                             <div style='color:#c9a84c;font-size:1.4rem;font-family:Georgia,serif;letter-spacing:4px'>" . strtoupper($schoolCode) . "</div>
                         </div>
                     </div>";
                     sendBrevoEmail($adminEmail, $adminName, 'Citadel Registration Pending Approval', $pendingHtml);
-                } catch(Exception $e) { /* non-fatal */ }
+                } catch(Exception $e) {}
             } catch (Exception $e) {
                 $pdo->rollBack();
                 $error = 'Registration failed. Please try again.';
@@ -99,13 +120,77 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 }
+
+// Type labels and descriptions
+$typeInfo = [
+    'university' => [
+        'label' => 'University / Polytechnic / College',
+        'desc'  => 'For universities, polytechnics, technical colleges and other tertiary institutions.',
+        'color' => '#4a6fa5',
+        'details' => [
+            'Programs & Departments',
+            'Semester-based system',
+            'Index number for students',
+            'Course Rep role',
+            'Code + Selfie attendance verification',
+        ]
+    ],
+    'shs' => [
+        'label' => 'Senior High School (SHS)',
+        'desc'  => 'For SHS schools with Science, Arts, Business and other streams.',
+        'color' => '#5a9f7a',
+        'details' => [
+            'Streams (Science, Arts, Business etc.)',
+            'Term-based system',
+            'Student ID number',
+            'Class Prefect role',
+            'Teacher marks attendance from list',
+        ]
+    ],
+    'jhs' => [
+        'label' => 'Junior High School (JHS)',
+        'desc'  => 'For JHS 1, 2 and 3 classes.',
+        'color' => '#8a6fd4',
+        'details' => [
+            'Classes (JHS 1, JHS 2, JHS 3)',
+            'Term-based system',
+            'Student ID number',
+            'Class Prefect role',
+            'Teacher marks attendance from list',
+        ]
+    ],
+    'primary' => [
+        'label' => 'Primary School',
+        'desc'  => 'For Primary 1 through 6.',
+        'color' => '#c9a84c',
+        'details' => [
+            'Classes (Primary 1-6)',
+            'Term-based system',
+            'Student ID number',
+            'Class Captain role',
+            'Teacher marks attendance from list',
+        ]
+    ],
+    'other' => [
+        'label' => 'Other Institution',
+        'desc'  => 'For any other type of educational institution.',
+        'color' => '#6b7a8d',
+        'details' => [
+            'Flexible structure',
+            'Customizable terminology',
+            'Standard attendance system',
+        ]
+    ],
+];
+
+$selectedType = $_POST['inst_type'] ?? 'university';
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-<title>Citadel — Register Your School</title>
+<title>Citadel — Register Your Institution</title>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -113,22 +198,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif}
 body::before{content:'';position:fixed;inset:0;z-index:0;background:radial-gradient(ellipse 80% 60% at 50% -10%,rgba(74,111,165,.15) 0%,transparent 70%);pointer-events:none}
 .page{position:relative;z-index:1;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:2rem 1rem}
-.card{width:100%;max-width:520px;background:var(--surface);border:1px solid var(--border);border-radius:2px;position:relative;animation:fadeUp .7s ease both}
+.card{width:100%;max-width:580px;background:var(--surface);border:1px solid var(--border);border-radius:2px;position:relative;animation:fadeUp .7s ease both}
 .card::before,.card::after{content:'';position:absolute;width:16px;height:16px;border-color:var(--gold);border-style:solid}
 .card::before{top:-1px;left:-1px;border-width:2px 0 0 2px}
 .card::after{bottom:-1px;right:-1px;border-width:0 2px 2px 0}
 @keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
 .card-head{padding:2rem 2.4rem 1.5rem;border-bottom:1px solid var(--border);text-align:center}
 .brand{display:flex;align-items:center;justify-content:center;gap:.8rem;margin-bottom:.8rem}
-.brand svg{width:36px;height:36px}
 .brand-name{font-family:'Cinzel',serif;font-size:1.2rem;font-weight:700;color:var(--gold);letter-spacing:.15em}
 .card-title{font-family:'Cinzel',serif;font-size:.9rem;color:var(--muted);letter-spacing:.1em}
 .card-body{padding:2rem 2.4rem}
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
 .field{margin-bottom:1rem}
 .field label{display:block;font-size:.68rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-bottom:.4rem}
-.field input{width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:.7rem .9rem;font-family:'DM Sans',sans-serif;font-size:.88rem;border-radius:2px;outline:none;transition:border-color .2s}
-.field input:focus{border-color:var(--steel)}
+.field input,.field select{width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:.7rem .9rem;font-family:'DM Sans',sans-serif;font-size:.88rem;border-radius:2px;outline:none;transition:border-color .2s}
+.field input:focus,.field select:focus{border-color:var(--steel)}
 .field input.code-input{text-transform:uppercase;font-family:'Cinzel',serif;letter-spacing:.2em}
 .field-hint{font-size:.68rem;color:var(--muted);margin-top:.3rem}
 .section-label{font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin:1.5rem 0 1rem;padding-bottom:.5rem;border-bottom:1px solid var(--border)}
@@ -141,9 +225,32 @@ body::before{content:'';position:fixed;inset:0;z-index:0;background:radial-gradi
 .preview strong{color:var(--gold)}
 .footer-link{text-align:center;margin-top:1.2rem;font-size:.8rem;color:var(--muted)}
 .footer-link a{color:var(--gold);text-decoration:none}
-@media(max-width:540px){.form-row{grid-template-columns:1fr}.card-body{padding:1.5rem}}
 
-/* Safari zoom fix — inputs must be 16px */
+/* Type selector cards */
+.type-grid{display:grid;grid-template-columns:1fr 1fr;gap:.7rem;margin-bottom:1.5rem}
+.type-card{background:var(--bg);border:2px solid var(--border);border-radius:4px;padding:1rem;cursor:pointer;transition:all .2s;position:relative}
+.type-card:hover{border-color:var(--muted)}
+.type-card.selected{border-color:var(--type-color,var(--gold));background:rgba(201,168,76,.04)}
+.type-card input[type=radio]{position:absolute;opacity:0;width:0;height:0}
+.type-card-icon{font-size:1.5rem;margin-bottom:.4rem}
+.type-card-label{font-family:'Cinzel',serif;font-size:.75rem;color:var(--text);letter-spacing:.06em}
+.type-card-desc{font-size:.68rem;color:var(--muted);margin-top:.25rem;line-height:1.4}
+.type-features{background:rgba(74,111,165,.06);border:1px solid rgba(74,111,165,.2);border-radius:2px;padding:.8rem 1rem;margin-bottom:1.2rem;display:none}
+.type-features.show{display:block}
+.type-features-title{font-size:.65rem;letter-spacing:.15em;text-transform:uppercase;color:var(--steel);margin-bottom:.5rem}
+.type-features ul{list-style:none;padding:0}
+.type-features ul li{font-size:.75rem;color:var(--muted);padding:.2rem 0;display:flex;align-items:center;gap:.4rem}
+.type-features ul li::before{content:'✓';color:var(--success);font-size:.7rem}
+
+/* Form sections that show/hide per type */
+.form-section{display:none}
+.form-section.show{display:block}
+
+@media(max-width:540px){
+  .form-row{grid-template-columns:1fr}
+  .card-body{padding:1.5rem}
+  .type-grid{grid-template-columns:1fr 1fr}
+}
 input,select,textarea{font-size:16px!important}
 @media(min-width:769px){input,select,textarea{font-size:inherit!important}}
 </style>
@@ -153,7 +260,7 @@ input,select,textarea{font-size:16px!important}
   <div class="card">
     <div class="card-head">
       <div class="brand">
-        <svg viewBox="0 0 52 52" fill="none">
+        <svg viewBox="0 0 52 52" fill="none" width="36" height="36">
           <polygon points="26,2 50,14 50,38 26,50 2,38 2,14" fill="none" stroke="#c9a84c" stroke-width="1.5"/>
           <polygon points="26,9 43,18 43,34 26,43 9,34 9,18" fill="none" stroke="#c9a84c" stroke-width="0.8" opacity="0.5"/>
           <rect x="20" y="20" width="12" height="14" rx="1" fill="none" stroke="#4a6fa5" stroke-width="1.5"/>
@@ -168,50 +275,57 @@ input,select,textarea{font-size:16px!important}
       <?php if ($error): ?>
         <div class="alert alert-error"><?= htmlspecialchars($error) ?></div>
       <?php endif; ?>
-
       <?php if ($success): ?>
         <div class="alert alert-success">
-          ✓ Registration submitted! Your school is pending approval. You will receive an email once activated.<br><br>
+          ✓ Registration submitted! Your institution is pending approval.<br><br>
           Your school code is: <strong><?= strtoupper(htmlspecialchars($schoolCode)) ?></strong><br>
-          Share this code with your students and staff so they can log in.
+          Share this with your staff and students to log in.
         </div>
         <a href="login.php#login" class="btn" style="display:block;text-align:center;text-decoration:none">Go to Login →</a>
       <?php else: ?>
+      <form method="POST" id="onboard-form">
 
-      <div class="preview" id="code-preview" style="display:none">
-        Students will log in with school code: <strong id="preview-code"></strong>
-      </div>
-
-      <form method="POST">
-        <div class="section-label">Institution Details</div>
-        <div class="field" style="margin-bottom:1rem">
-          <label>Institution Type</label>
-          <select name="inst_type" required style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:.72rem 1rem;font-family:'DM Sans',sans-serif;font-size:.88rem;border-radius:2px;outline:none">
-            <option value="university" <?= ($_POST['inst_type']??'university')==='university'?'selected':'' ?>>University / Polytechnic / College</option>
-            <option value="shs" <?= ($_POST['inst_type']??'')==='shs'?'selected':'' ?>>Senior High School (SHS)</option>
-            <option value="jhs" <?= ($_POST['inst_type']??'')==='jhs'?'selected':'' ?>>Junior High School (JHS)</option>
-            <option value="primary" <?= ($_POST['inst_type']??'')==='primary'?'selected':'' ?>>Primary School</option>
-            <option value="other" <?= ($_POST['inst_type']??'')==='other'?'selected':'' ?>>Other</option>
-          </select>
+        <!-- STEP 1: Choose institution type -->
+        <div class="section-label">Step 1 — Institution Type</div>
+        <div class="type-grid">
+          <?php foreach($typeInfo as $val => $info): ?>
+          <label class="type-card <?= $selectedType===$val?'selected':'' ?>" style="--type-color:<?= $info['color'] ?>" onclick="selectType('<?= $val ?>')">
+            <input type="radio" name="inst_type" value="<?= $val ?>" <?= $selectedType===$val?'checked':'' ?>>
+            <div class="type-card-icon"><?= match($val){'university'=>'🎓','shs'=>'🏫','jhs'=>'📚','primary'=>'✏️',default=>'🏢'} ?></div>
+            <div class="type-card-label"><?= $val==='university'?'University':''.($val==='shs'?'Senior High':''.($val==='jhs'?'Junior High':''.($val==='primary'?'Primary':'Other'))) ?></div>
+            <div class="type-card-desc"><?= $val==='university'?'Tertiary institution':''.($val==='shs'?'SHS streams':''.($val==='jhs'?'JHS 1–3':''.($val==='primary'?'Primary 1–6':'Any other'))) ?></div>
+          </label>
+          <?php endforeach; ?>
         </div>
+
+        <!-- Features preview per type -->
+        <?php foreach($typeInfo as $val => $info): ?>
+        <div class="type-features <?= $selectedType===$val?'show':'' ?>" id="feat-<?= $val ?>" style="border-color:<?= $info['color'] ?>33;background:<?= $info['color'] ?>11">
+          <div class="type-features-title" style="color:<?= $info['color'] ?>"><?= $info['label'] ?> — What you get:</div>
+          <ul><?php foreach($info['details'] as $d): ?><li><?= $d ?></li><?php endforeach; ?></ul>
+        </div>
+        <?php endforeach; ?>
+
+        <!-- STEP 2: Institution details -->
+        <div class="section-label">Step 2 — Institution Details</div>
         <div class="form-row">
           <div class="field">
-            <label>Institution Name</label>
-            <input type="text" name="school_name" placeholder="e.g. Kumasi Technical University" required
-              value="<?= htmlspecialchars($_POST['school_name'] ?? '') ?>">
+            <label id="lbl-name">Institution Name</label>
+            <input type="text" name="school_name" id="inp-school-name" placeholder="e.g. Kumasi Technical University" required value="<?= htmlspecialchars($_POST['school_name'] ?? '') ?>">
           </div>
           <div class="field">
             <label>School Code</label>
-            <input type="text" name="school_code" id="school-code" class="code-input" placeholder="e.g. KTU" maxlength="10" required
-              oninput="updatePreview(this.value)" value="<?= htmlspecialchars($_POST['school_code'] ?? '') ?>">
-            <div class="field-hint">2-10 characters, letters & numbers only</div>
+            <input type="text" name="school_code" id="school-code" class="code-input" placeholder="e.g. KTU" maxlength="10" required oninput="updatePreview(this.value)" value="<?= htmlspecialchars($_POST['school_code'] ?? '') ?>">
+            <div class="field-hint">2–10 characters, letters & numbers only</div>
           </div>
+        </div>
+        <div id="preview-wrap" style="display:none" class="preview">
+          Staff & students will log in with school code: <strong id="preview-code"></strong>
         </div>
         <div class="form-row">
           <div class="field">
-            <label>Institution Email</label>
-            <input type="email" name="admin_email" placeholder="admin@yourschool.edu" required
-              value="<?= htmlspecialchars($_POST['admin_email'] ?? '') ?>">
+            <label id="lbl-email">Admin Email</label>
+            <input type="email" name="admin_email" id="inp-email" placeholder="admin@yourschool.edu" required value="<?= htmlspecialchars($_POST['admin_email'] ?? '') ?>">
           </div>
           <div class="field">
             <label>Phone (optional)</label>
@@ -219,15 +333,15 @@ input,select,textarea{font-size:16px!important}
           </div>
         </div>
 
-        <div class="section-label">Admin Account</div>
+        <!-- STEP 3: Admin account -->
+        <div class="section-label">Step 3 — Admin Account</div>
         <div class="form-row">
           <div class="field">
-            <label>Admin Full Name</label>
-            <input type="text" name="admin_name" placeholder="Your full name" required
-              value="<?= htmlspecialchars($_POST['admin_name'] ?? '') ?>">
+            <label id="lbl-admin">Your Full Name</label>
+            <input type="text" name="admin_name" id="inp-admin" placeholder="Your full name" required value="<?= htmlspecialchars($_POST['admin_name'] ?? '') ?>">
           </div>
           <div class="field">
-            <label>Admin Password</label>
+            <label>Password</label>
             <input type="password" name="admin_password" placeholder="Min. 8 characters" required>
           </div>
         </div>
@@ -236,29 +350,57 @@ input,select,textarea{font-size:16px!important}
           <input type="password" name="confirm_password" placeholder="Repeat password" required>
         </div>
 
-        <button type="submit" class="btn">Register Institution</button>
+        <button type="submit" class="btn" id="submit-btn">Register Institution →</button>
       </form>
-
-      <?php endif; ?>
-
       <div class="footer-link">Already registered? <a href="login.php#login">Sign in here</a></div>
+      <?php endif; ?>
     </div>
   </div>
 </div>
 <script>
-function updatePreview(val) {
-  const preview = document.getElementById('code-preview');
-  const text    = document.getElementById('preview-code');
-  if (val.trim()) {
-    preview.style.display = 'block';
-    text.textContent = val.toUpperCase();
-  } else {
-    preview.style.display = 'none';
-  }
+const typeLabels = {
+  university: {name:'Institution Name', email:'Admin Email', admin:'Your Full Name', btn:'Register Institution →'},
+  shs:        {name:'School Name', email:'Principal\'s Email', admin:'Principal\'s Full Name', btn:'Register School →'},
+  jhs:        {name:'School Name', email:'Headmaster\'s Email', admin:'Headmaster\'s Full Name', btn:'Register School →'},
+  primary:    {name:'School Name', email:'Headmaster\'s Email', admin:'Headmaster\'s Full Name', btn:'Register School →'},
+  other:      {name:'Institution Name', email:'Admin Email', admin:'Your Full Name', btn:'Register →'},
+};
+
+function selectType(val) {
+  // Update radio
+  document.querySelectorAll('input[name=inst_type]').forEach(r => r.checked = r.value === val);
+  // Update card styles
+  document.querySelectorAll('.type-card').forEach(c => c.classList.remove('selected'));
+  event.currentTarget.classList.add('selected');
+  // Show features
+  document.querySelectorAll('.type-features').forEach(f => f.classList.remove('show'));
+  document.getElementById('feat-'+val)?.classList.add('show');
+  // Update labels
+  const t = typeLabels[val] || typeLabels.university;
+  document.getElementById('lbl-name').textContent = t.name;
+  document.getElementById('lbl-email').textContent = t.email;
+  document.getElementById('lbl-admin').textContent = t.admin;
+  document.getElementById('submit-btn').textContent = t.btn;
+  // Update placeholder
+  const placeholders = {
+    university: 'e.g. Kumasi Technical University',
+    shs: 'e.g. Prempeh College',
+    jhs: 'e.g. Roman Hill JHS',
+    primary: 'e.g. St. Francis Primary School',
+    other: 'e.g. My Institution',
+  };
+  document.getElementById('inp-school-name').placeholder = placeholders[val] || placeholders.university;
 }
-// Run on load if value exists
-const codeInput = document.getElementById('school-code');
-if (codeInput && codeInput.value) updatePreview(codeInput.value);
+
+function updatePreview(v) {
+  const wrap = document.getElementById('preview-wrap');
+  const code = document.getElementById('preview-code');
+  if (v.length >= 2) { wrap.style.display='block'; code.textContent=v.toUpperCase(); }
+  else wrap.style.display='none';
+}
+
+// Init on load
+selectType('<?= $selectedType ?>');
 </script>
 </body>
 </html>

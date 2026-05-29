@@ -318,9 +318,9 @@ input,select,textarea{font-size:16px!important}
         <span id="mBadgeText"></span>
         <button onclick="mGoBack()">Change</button>
       </div>
-      <div class="divider"><span></span><em>Secure Sign In</em><span></span></div>
+      <div class="divider"><span></span><em id="mSignInLabel">Secure Sign In</em><span></span></div>
       <div class="m-field">
-        <label>Index Number / Email</label>
+        <label id="mIdentifierLabel">Index Number / Email</label>
         <input type="text" id="mIdentifier" placeholder="e.g. 52430540001" autocomplete="off">
       </div>
       <div class="m-field">
@@ -329,7 +329,7 @@ input,select,textarea{font-size:16px!important}
       </div>
       <button class="m-btn" id="mSubmitBtn" onclick="mSubmit()">Enter Citadel</button>
       <a href="reset_password.php" class="forgot">Forgot password?</a>
-      <div class="m-footer">New student? <a href="register.php">Register here</a></div>
+      <div class="m-footer" id="mRegisterLink">New student? <a href="register.php">Register here</a></div>
     </div>
   </div>
 </div>
@@ -349,7 +349,15 @@ function overlayClose(e){if(e.target===document.getElementById('loginModal'))clo
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
 function showAlert(msg,type='err'){const el=document.getElementById('m-alert');el.className='m-alert '+type;el.textContent=msg;el.style.display='block'}
 function hideAlert(){document.getElementById('m-alert').style.display='none'}
-function mStep1Next(){
+const instTerms = {
+  university: {id:'Index Number / Email', placeholder:'e.g. 52430540001', signin:'Secure Sign In', btn:'Enter Citadel', reg:'New student? <a href="register.php">Register here</a>'},
+  shs:        {id:'Student ID / Email',   placeholder:'e.g. STU0001',      signin:'SHS Sign In',     btn:'Sign In',      reg:'New student? <a href="register.php">Register here</a>'},
+  jhs:        {id:'Student ID / Email',   placeholder:'e.g. STU0001',      signin:'JHS Sign In',     btn:'Sign In',      reg:'New student? <a href="register.php">Register here</a>'},
+  primary:    {id:'Student ID / Email',   placeholder:'e.g. STU0001',      signin:'Primary Sign In', btn:'Sign In',      reg:'New student? <a href="register.php">Register here</a>'},
+  other:      {id:'ID / Email',           placeholder:'Your ID or email',   signin:'Secure Sign In',  btn:'Sign In',      reg:''},
+};
+
+async function mStep1Next(){
   const code=document.getElementById('mSchoolCode').value.trim();
   if(!code){showAlert('Please enter your school code.');return}
   hideAlert();
@@ -358,6 +366,22 @@ function mStep1Next(){
   document.getElementById('mStep1').classList.remove('active');
   document.getElementById('mStep2').classList.add('active');
   setTimeout(()=>document.getElementById('mIdentifier').focus(),100);
+
+  // Fetch institution type and adapt labels
+  try {
+    const r = await fetch('api/inst_info.php?code='+encodeURIComponent(code));
+    const d = await r.json();
+    if (d.inst_type) {
+      const t = instTerms[d.inst_type] || instTerms.university;
+      document.getElementById('mIdentifierLabel').textContent = t.id;
+      document.getElementById('mIdentifier').placeholder = t.placeholder;
+      document.getElementById('mSignInLabel').textContent = t.signin;
+      document.getElementById('mSubmitBtn').textContent = t.btn;
+      document.getElementById('mRegisterLink').innerHTML = t.reg;
+      // Update badge with school name
+      if (d.name) document.getElementById('mBadgeText').textContent = d.name;
+    }
+  } catch(e){}
 }
 function mGoBack(){
   hideAlert();

@@ -4,7 +4,7 @@ require_once '../../includes/db.php';
 require_once '../../includes/auth.php';
 require_once '../../includes/guard.php';
 require_once '../../includes/terminology.php';
-$instType = $institution['inst_type'] ?? 'university';
+$instType = 'university'; // Always university on this dashboard
 requireRole('admin');
 $inst_id = (int)($_SESSION['institution_id'] ?? 1);
 
@@ -504,7 +504,7 @@ document.addEventListener('DOMContentLoaded',function(){
         }
 @media(max-width:768px){.sidebar{overflow:hidden!important;display:flex!important;flex-direction:column!important}.sidebar-nav,.sb-nav{flex:1 1 0!important;overflow-y:auto!important;overflow-x:hidden!important;min-height:0!important}.sidebar-user,.sidebar-footer,.sb-foot{flex-shrink:0!important;overflow:visible!important}}
 </style>
-<?php if($instType!=="university"): ?><style>#sec-programs,#sec-override,#sec-approvals,#sec-devices{display:none!important}</style><?php endif; ?>
+
 </head>
 
 <body>
@@ -538,11 +538,9 @@ document.addEventListener('DOMContentLoaded',function(){
     <a class="nav-item" onclick="showSection('semesters',this)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="4" x2="9" y2="9"/><line x1="15" y1="4" x2="15" y2="9"/></svg>Semesters
     </a>
-    <?php if($instType==='university'): ?>
     <a class="nav-item" onclick="showSection('programs',this)">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg><?= terms('programs', $instType) ?>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>Programs
     </a>
-    <?php endif; ?>
     <a class="nav-item" onclick="showSection('courses',this)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg><?= terms('courses', $instType) ?>
     </a>
@@ -558,21 +556,17 @@ document.addEventListener('DOMContentLoaded',function(){
     <a class="nav-item" onclick="showSection('attendance',this)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Attendance
     </a>
-    <?php if($instType==='university'): ?>
     <a class="nav-item" onclick="showSection('override',this)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Override
     </a>
-    <?php endif; ?>
     <div class="nav-section">System</div>
     <a class="nav-item" onclick="showSection('audit',this)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Audit Log
     </a>
-    <?php if($instType==='university'): ?>
     <a class="nav-item" onclick="showSection('approvals',this)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
       Approvals<span id="pending-badge" style="background:var(--warning);color:#060910;font-size:.6rem;font-weight:700;padding:.15rem .45rem;border-radius:2px;margin-left:.4rem;display:none">0</span>
     </a>
-    <?php endif; ?>
     <a class="nav-item" onclick="showSection('history',this)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/></svg>Session History
     </a>
@@ -586,11 +580,9 @@ document.addEventListener('DOMContentLoaded',function(){
     <a class="nav-item" onclick="showSection('locked',this)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Locked Accounts<?php if(!empty($lockedUsers)): ?> <span style="background:var(--danger);color:#fff;font-size:.6rem;padding:.1rem .35rem;border-radius:2px;margin-left:auto"><?= count($lockedUsers) ?></span><?php endif ?>
     </a>
-    <?php if($instType==='university'): ?>
     <a class="nav-item" onclick="showSection('devices',this)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>Device Control
     </a>
-    <?php endif; ?>
   </nav>
   <div class="sidebar-footer">
     Logged in as <strong style="color:var(--text)"><?= htmlspecialchars($user['full_name'] ?? 'Admin') ?></strong><br>

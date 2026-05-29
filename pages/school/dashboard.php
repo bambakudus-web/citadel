@@ -907,35 +907,6 @@ $ttAll = $ttStmt->fetchAll();
       </div></div>
     </div>
 
-    <!-- ══ OVERRIDE ══ -->
-    <div class="page-section" id="sec-override">
-      <div class="section-header"><div class="section-title">Attendance <span>Override</span></div></div>
-      <div class="override-banner"><strong>⚠ Boss Override Zone.</strong> Changes made here are logged and irreversible without a second override. Use with caution.</div>
-      <div class="card" style="margin-bottom:1.5rem;border-color:rgba(224,92,92,.3)"><div class="card-head" style="border-color:rgba(224,92,92,.2)"><div class="card-head-title" style="color:var(--danger)">🔴 SYSTEM RESET</div></div><div class="card-body"><p style="font-size:.83rem;color:var(--muted);margin-bottom:1.2rem">Clears ALL attendance records and sessions. Students and lecturers remain.</p><form method="POST" onsubmit="return confirm('RESET ALL ATTENDANCE DATA? This cannot be undone!')"><input type="hidden" name="csrf_token" value="<?= csrfToken() ?>"><input type="hidden" name="action" value="reset_system"><button type="submit" class="btn" style="background:rgba(224,92,92,.15);color:var(--danger);border:1px solid rgba(224,92,92,.3);padding:.7rem 1.5rem">🗑 Reset All Attendance & Sessions</button></form></div></div>
-      <div class="card"><div class="card-head"><div class="card-head-title">Manual Attendance Adjustment</div></div><div class="card-body">
-        <div class="form-row">
-          <div class="form-field"><label>Student Index No.</label><input type="text" placeholder="e.g. 52430540001"></div>
-          <div class="form-field"><label>Course Code</label><select><option value="">Select Course</option><?php foreach($activeCourses as $c): ?><option value="<?= $c['code'] ?>"><?= htmlspecialchars($c['code']) ?> — <?= htmlspecialchars($c['name']) ?></option><?php endforeach; ?></select></div>
-        </div>
-        <div class="form-row">
-          <div class="form-field"><label>Set Status</label><select><option value="present">Present</option><option value="absent">Absent</option><option value="late">Late</option></select></div>
-          <div class="form-field"><label>Reason / Note</label><input type="text" placeholder="Reason for override"></div>
-        </div>
-        <button class="btn btn-gold">Apply Override</button>
-      </div></div>
-      <div class="card" style="margin-top:1.5rem"><div class="card-head"><div class="card-head-title">Device Fingerprint Ban</div></div><div class="card-body">
-        <form method="POST"><input type="hidden" name="csrf_token" value="<?= csrfToken() ?>">
-          <div class="form-row">
-            <div class="form-field"><label>Student Index No.</label><input type="text" name="index_no" placeholder="e.g. 52430540001" required></div>
-            <div class="form-field" style="display:flex;align-items:flex-end;gap:.6rem">
-              <button type="submit" name="action" value="ban_device" class="btn btn-danger" style="width:100%">Ban Device</button>
-              <button type="submit" name="action" value="unban_device" class="btn btn-ghost" style="width:100%">Unban</button>
-            </div>
-          </div>
-        </form>
-      </div></div>
-    </div>
-
     <!-- ══ AUDIT LOG ══ -->
     <div class="page-section" id="sec-audit">
       <div class="section-header"><div class="section-title">System <span>Audit Log</span></div></div>
@@ -948,56 +919,6 @@ $ttAll = $ttStmt->fetchAll();
             <div class="audit-text"><strong><?= htmlspecialchars($log['actor_name']) ?></strong> — <?= htmlspecialchars($log['action']) ?><?= $log['target_type'] ? ' <em>('.$log['target_type'].' #'.$log['target_id'].')</em>' : '' ?></div>
           </div>
         <?php endforeach; endif; ?>
-      </div></div>
-    </div>
-
-    <!-- ══ DEVICES ══ -->
-    <div class="page-section" id="sec-locked">
-      <div class="section-header">
-        <div class="section-title">Locked <span>Accounts</span></div>
-      </div>
-      <?php if(empty($lockedUsers)): ?>
-        <div class="card"><div class="card-body" style="text-align:center;color:var(--muted);padding:3rem">No locked accounts</div></div>
-      <?php else: ?>
-      <div class="card"><div class="card-body" style="padding:0;overflow-x:auto">
-        <table class="data-table">
-          <thead><tr><th>Name</th><th>Index</th><th>Role</th><th>Attempts</th><th>Action</th></tr></thead>
-          <tbody>
-          <?php foreach($lockedUsers as $lu): ?>
-          <tr>
-            <td><?= htmlspecialchars($lu["full_name"]) ?></td>
-            <td style="color:var(--muted)"><?= htmlspecialchars($lu["index_no"] ?? "N/A") ?></td>
-            <td><span class="pill pill-red"><?= $lu["role"] ?></span></td>
-            <td style="color:var(--danger)"><?= $lu["login_attempts"] ?></td>
-            <td>
-              <form method="POST" style="display:inline">
-                <input type="hidden" name="csrf_token" value="<?= csrfToken() ?>">
-                <input type="hidden" name="action" value="unlock_account">
-                <input type="hidden" name="user_id" value="<?= $lu["id"] ?>">
-                <button type="submit" class="btn btn-sm" style="background:rgba(76,175,130,.15);color:var(--success);border:1px solid rgba(76,175,130,.3)">Unlock</button>
-              </form>
-            </td>
-          </tr>
-          <?php endforeach ?>
-          </tbody>
-        </table>
-      </div></div>
-      <?php endif ?>
-    </div>
-    <div class="page-section" id="sec-devices">
-      <div class="section-header"><div class="section-title">Device <span>Control</span></div></div>
-      <div class="card"><div class="card-body" style="padding:0;overflow-x:auto">
-        <table class="data-table"><thead><tr><th>Name</th><th class="hide-mobile">Index No.</th><th class="hide-mobile">Device</th><th>Login Status</th><th>Actions</th></tr></thead><tbody>
-        <?php foreach($devs as $d): ?>
-          <tr>
-            <td><?= htmlspecialchars($d['full_name']) ?></td>
-            <td class="hide-mobile" style="color:var(--gold);font-size:.78rem"><?= $d['index_no'] ?></td>
-            <td class="hide-mobile" style="color:var(--muted);font-size:.72rem;max-width:160px;overflow:hidden;text-overflow:ellipsis"><?= $d['device_fingerprint']?:'— not registered —' ?></td>
-            <td><?= $d['is_locked']?'<span class="pill pill-red">🔒 Locked ('.$d["login_attempts"].' attempts)</span>':'<span class="pill pill-green">Active</span>' ?></td>
-            <td><button class="btn btn-ghost btn-sm" onclick="manageDevice(<?= $d['id'] ?>,'<?= htmlspecialchars(addslashes($d['full_name'])) ?>',<?= $d['is_locked'] ?>)">Manage</button></td>
-          </tr>
-        <?php endforeach; ?>
-        </tbody></table>
       </div></div>
     </div>
 
@@ -1023,16 +944,6 @@ $ttAll = $ttStmt->fetchAll();
       <?php else: ?>
         <div class="card"><div class="card-body" style="color:var(--muted);text-align:center;padding:2rem">No active session right now.</div></div>
       <?php endif; ?>
-    </div>
-
-    <!-- ══ APPROVALS ══ -->
-    <div class="page-section" id="sec-approvals">
-      <div class="section-header"><div class="section-title">Pending <span>Approvals</span></div><span id="pending-count-badge" style="background:var(--warning);color:#060910;padding:.2rem .7rem;border-radius:2px;font-size:.75rem;font-weight:700"><?= $pendingCount ?> PENDING</span></div>
-      <div class="card"><div class="card-body" style="padding:0;overflow-x:auto">
-        <table class="data-table" id="approvals-table"><thead><tr><th>Student</th><th>Index</th><th>Photos</th><th>Submitted</th><th>Actions</th></tr></thead>
-        <tbody id="approvals-tbody"><tr><td colspan="5" style="color:var(--muted);text-align:center">Loading...</td></tr></tbody>
-        </table>
-      </div></div>
     </div>
 
     <!-- ══ SESSION HISTORY ══ -->
@@ -1375,18 +1286,6 @@ function toggleUser(id, isActive) {
 }
 
 // ── Approvals ──
-function loadApprovalsAdmin() {
-  fetch(API + '/pending_approvals.php').then(r => r.json()).then(data => {
-    const tbody = document.getElementById('approvals-tbody');
-    const badge = document.getElementById('pending-badge');
-    const countBadge = document.getElementById('pending-count-badge');
-    if (!tbody) return;
-    if (!data.rows || !data.rows.length) {
-      tbody.innerHTML = '<tr><td colspan="5" style="color:var(--muted);text-align:center">No pending approvals.</td></tr>';
-      if (badge) badge.style.display = 'none';
-      if (countBadge) countBadge.textContent = '0 PENDING';
-      return;
-    }
     if (badge) { badge.style.display = 'inline'; badge.textContent = data.rows.length; }
     if (countBadge) countBadge.textContent = data.rows.length + ' PENDING';
     tbody.innerHTML = data.rows.map(r => `
@@ -1419,7 +1318,7 @@ function viewImg(src, title) {
 }
 
 function manageDevice(id, name, locked) {
-  alert('Device management for ' + name + ' — use the Override section to ban/unban devices.');
+
 }
 
 function toggleTheme() {
@@ -1429,8 +1328,7 @@ function toggleTheme() {
 }
 (function(){ if(localStorage.getItem('theme')==='light'){ document.body.classList.add('light'); const btn=document.getElementById('theme-btn'); if(btn) btn.textContent='☀️'; } })();
 
-loadApprovalsAdmin();
-setInterval(loadApprovalsAdmin, 15000);
+
 
 // CSRF injection
 const csrfToken = "<?= csrfToken() ?>";

@@ -10,7 +10,9 @@ require_once 'includes/db.php';
 if (!empty($_SESSION['user_id'])) {
     $role = $_SESSION['role'] ?? 'student';
     $map = ['super_admin'=>'super_admin','admin'=>'admin','lecturer'=>'lecturer','rep'=>'rep','student'=>'student'];
-    header('Location: pages/' . ($map[$role] ?? 'student') . '/dashboard.php');
+    $instType2 = $_SESSION['inst_type'] ?? 'university';
+    $adminDash2 = ($role === 'admin' && $instType2 !== 'university') ? 'school' : ($map[$role] ?? 'student');
+    header('Location: pages/' . $adminDash2 . '/dashboard.php');
     exit;
 }
 
@@ -84,7 +86,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['_action'] ?? '') === 'logi
     ];
 
     $map = ['super_admin'=>'super_admin','admin'=>'admin','lecturer'=>'lecturer','rep'=>'rep','student'=>'student'];
-    echo json_encode(['ok'=>true,'redirect'=>'pages/'.($map[$user['role']] ?? 'student').'/dashboard.php']);
+    // Route to correct dashboard
+    $instType2 = $institution['inst_type'] ?? 'university';
+    $adminDash = ($user['role'] === 'admin' && $instType2 !== 'university') ? 'school' : ($map[$user['role']] ?? 'student');
+    echo json_encode(['ok'=>true,'redirect'=>'pages/'.$adminDash.'/dashboard.php']);
     exit;
 }
 ?>

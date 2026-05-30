@@ -115,7 +115,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 } catch(Exception $e) {}
             } catch (Exception $e) {
                 $pdo->rollBack();
-                $error = 'Registration failed. Please try again.';
+                $error = 'Registration failed: ' . $e->getMessage();
             }
         }
     }

@@ -38,7 +38,9 @@ function guardRole(array $allowed): void {
     if ($me['role'] === 'super_admin') return;
     if (!in_array($me['role'], $allowed, true)) {
         $map = ['admin'=>'admin','lecturer'=>'lecturer','rep'=>'rep','student'=>'student'];
-        header('Location: ' . _rootPath() . 'pages/' . ($map[$me['role']] ?? 'student') . '/dashboard.php');
+        $instType4 = $institution['inst_type'] ?? 'university';
+        $adminDash4 = ($me['role'] === 'admin' && $instType4 !== 'university') ? 'school' : ($map[$me['role']] ?? 'student');
+        header('Location: ' . _rootPath() . 'pages/' . $adminDash4 . '/dashboard.php');
         exit;
     }
 }

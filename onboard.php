@@ -361,9 +361,6 @@ const typeLabels = {
 function selectType(val) {
   // Update radio
   document.querySelectorAll('input[name=inst_type]').forEach(r => r.checked = r.value === val);
-  // Update card styles
-  document.querySelectorAll('.type-card').forEach(c => c.classList.remove('selected'));
-  event.currentTarget.classList.add('selected');
   // Show features
   document.querySelectorAll('.type-features').forEach(f => f.classList.remove('show'));
   document.getElementById('feat-'+val)?.classList.add('show');

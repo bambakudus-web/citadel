@@ -279,10 +279,10 @@ input,select,textarea{font-size:16px!important}
   <section class="roles">
     <div class="roles-title">Sign In As</div>
     <div class="roles-grid">
-      <button class="role-card admin" onclick="openModal()"><div class="role-icon">👑</div><div class="role-name">ADMIN</div><div class="role-desc">Full control — manage semesters, courses, users and settings</div></button>
-      <button class="role-card lecturer" onclick="openModal()"><div class="role-icon">🎓</div><div class="role-name">LECTURER</div><div class="role-desc">Start sessions, view attendance and track course performance</div></button>
-      <button class="role-card rep" onclick="openModal()"><div class="role-icon">📋</div><div class="role-name">COURSE REP</div><div class="role-desc">Approve selfies, manage class records and post announcements</div></button>
-      <button class="role-card student" onclick="openModal()"><div class="role-icon">📚</div><div class="role-name">STUDENT</div><div class="role-desc">Mark attendance, track your rate and download certificates</div></button>
+      <button class="role-card admin" onclick="openModal()"><div class="role-icon"></div><div class="role-name">ADMIN</div><div class="role-desc">Full control — manage semesters, courses, users and settings</div></button>
+      <button class="role-card lecturer" onclick="openModal()"><div class="role-icon"></div><div class="role-name">LECTURER</div><div class="role-desc">Start sessions, view attendance and track course performance</div></button>
+      <button class="role-card rep" onclick="openModal()"><div class="role-icon"></div><div class="role-name">COURSE REP</div><div class="role-desc">Approve selfies, manage class records and post announcements</div></button>
+      <button class="role-card student" onclick="openModal()"><div class="role-icon"></div><div class="role-name">STUDENT</div><div class="role-desc">Mark attendance, track your rate and download certificates</div></button>
     </div>
   </section>
 
@@ -299,7 +299,7 @@ input,select,textarea{font-size:16px!important}
 <!-- LOGIN MODAL -->
 <div class="modal-overlay" id="loginModal" onclick="overlayClose(event)">
   <div class="modal" role="dialog" aria-modal="true">
-    <button class="modal-close" onclick="closeModal()">✕</button>
+    <button class="modal-close" onclick="closeModal()"></button>
     <div class="modal-brand">
       <div class="modal-brand-name">CITADEL</div>
       <div class="modal-brand-sub">Secure Sign In</div>
@@ -407,7 +407,7 @@ async function mSubmit(){
   try{
     const res=await fetch('index.php',{method:'POST',body:new URLSearchParams({_action:'login',school_code:code,identifier:id,password:pass,device_fingerprint:_fp})});
     const data=await res.json();
-    if(data.ok){btn.textContent='✓ Redirecting…';window.location.href=data.redirect;}
+    if(data.ok){btn.textContent=' Redirecting…';window.location.href=data.redirect;}
     else{showAlert(data.msg||'Login failed.');btn.disabled=false;btn.textContent='Enter Citadel';}
   }catch(e){showAlert('Network error. Try again.');btn.disabled=false;btn.textContent='Enter Citadel';}
 }

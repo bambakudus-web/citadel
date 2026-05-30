@@ -1,7 +1,7 @@
 <?php
 // includes/security.php - Security helpers
 
-// ── SESSION TIMEOUT (30 min inactivity) ──
+//  SESSION TIMEOUT (30 min inactivity) 
 function checkSessionTimeout(int $minutes = 30): void {
     if (isset($_SESSION['last_activity'])) {
         if (time() - $_SESSION['last_activity'] > $minutes * 60) {
@@ -23,7 +23,7 @@ function checkSessionTimeout(int $minutes = 30): void {
     $_SESSION['last_activity'] = time();
 }
 
-// ── CSRF TOKEN ──
+//  CSRF TOKEN 
 function csrfToken(): string {
     if (empty($_SESSION['csrf_token'])) {
         $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
@@ -46,7 +46,7 @@ function verifyCsrf(): void {
     }
 }
 
-// ── RATE LIMITING via DB ──
+//  RATE LIMITING via DB 
 function checkRateLimit(string $key, int $maxAttempts = 5, int $windowSeconds = 300): bool {
     global $pdo;
     if (!isset($pdo)) return true;
@@ -87,7 +87,7 @@ function getRateLimitRemaining(string $key, int $windowSeconds = 300): int {
     } catch (Exception $e) { return 0; }
 }
 
-// ── XSS PROTECTION ──
+//  XSS PROTECTION 
 function clean(string $input): string {
     return htmlspecialchars(strip_tags(trim($input)), ENT_QUOTES, 'UTF-8');
 }

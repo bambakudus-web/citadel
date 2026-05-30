@@ -154,7 +154,7 @@ a{color:inherit;text-decoration:none}
 
 /* Safari zoom fix — inputs must be 16px */
 
-/* ═══ MOBILE ═══ */
+/*  MOBILE  */
 @media(max-width:768px){
 
   .sidebar{width:260px!important;position:fixed!important;top:0!important;left:0!important;height:100vh!important;height:100dvh!important;z-index:500!important;transform:translateX(-100%)!important;transition:transform .25s ease!important;box-shadow:4px 0 20px rgba(0,0,0,.8)!important}
@@ -260,14 +260,14 @@ document.addEventListener('DOMContentLoaded',function(){
   </div>
   <nav class="sb-nav">
     <div class="sb-sec">Platform</div>
-    <a href="dashboard.php" class="sb-a on">📊 Overview</a>
-    <a href="schools.php" class="sb-a">🏫 Schools</a>
-    <a href="users.php" class="sb-a">👥 All Users</a>
-    <a href="activity.php" class="sb-a">📋 Activity Log</a>
+    <a href="dashboard.php" class="sb-a on"> Overview</a>
+    <a href="schools.php" class="sb-a"> Schools</a>
+    <a href="users.php" class="sb-a"> All Users</a>
+    <a href="activity.php" class="sb-a"> Activity Log</a>
     <div class="sb-sec">Tools</div>
-    <a href="announcements.php" class="sb-a">📣 Announcements</a>
-    <a href="export.php" class="sb-a">💾 Export Data</a>
-    <a href="../../onboard.php" class="sb-a">➕ Add School</a>
+    <a href="announcements.php" class="sb-a"> Announcements</a>
+    <a href="export.php" class="sb-a"> Export Data</a>
+    <a href="../../onboard.php" class="sb-a"> Add School</a>
   </nav>
   <div class="sb-foot">
     <div style="display:flex;align-items:center;gap:.6rem">
@@ -278,7 +278,7 @@ document.addEventListener('DOMContentLoaded',function(){
   </div>
 </aside>
 <main class="main">
-  <button class="menu-toggle" id="menu-toggle" onclick="toggleSidebar()">☰</button>
+  <button class="menu-toggle" id="menu-toggle" onclick="toggleSidebar()"></button>
   <div class="ph">
     <div class="pt">Platform Overview</div>
     <div class="ps">Welcome back, <?php echo htmlspecialchars(explode(' ',$me['full_name'])[0]); ?>. Here's the platform at a glance.</div>
@@ -305,8 +305,8 @@ document.addEventListener('DOMContentLoaded',function(){
             <td class="hide-col-mobile"><?php echo number_format($s['student_count']); ?></td>
             <td><label class="tog"><input type="checkbox" <?php echo $s['is_active']?'checked':''; ?> onchange="togSchool(<?php echo $s['id']; ?>,this.checked?1:0)"><span class="tsl"></span></label></td>
             <td>
-              <a href="schools.php?view=<?php echo $s['id']; ?>"><button class="ab" title="View">👁</button></a>
-              <?php if($s['id']!=1): ?><button class="ab del" onclick="delSchool(<?php echo $s['id']; ?>,'<?php echo htmlspecialchars(addslashes($s['name'])); ?>')">🗑</button><?php endif; ?>
+              <a href="schools.php?view=<?php echo $s['id']; ?>"><button class="ab" title="View"></button></a>
+              <?php if($s['id']!=1): ?><button class="ab del" onclick="delSchool(<?php echo $s['id']; ?>,'<?php echo htmlspecialchars(addslashes($s['name'])); ?>')"></button><?php endif; ?>
             </td>
           </tr>
           <?php endforeach; ?>

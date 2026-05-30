@@ -79,7 +79,7 @@ function sendBrevoEmail(string $to, string $toName, string $subject, string $htm
     ];
 }
 
-// ── Email templates ──
+//  Email templates 
 
 function emailTemplate(string $title, string $body, string $footer = ''): string {
     $year = date('Y');
@@ -124,7 +124,7 @@ function sendPasswordResetEmail(string $to, string $name, string $resetToken, st
 function sendWelcomeEmail(string $to, string $name, string $indexNo, string $tempPassword, string $schoolName): array {
     $subject = 'Welcome to Citadel — ' . $schoolName;
     $html = emailTemplate('Welcome to Citadel', '
-        <h2 style="color:#e8eaf0;font-size:20px;margin:0 0 12px">Welcome to Citadel! 🎓</h2>
+        <h2 style="color:#e8eaf0;font-size:20px;margin:0 0 12px">Welcome to Citadel! </h2>
         <p style="color:#6b7a8d;font-size:14px;line-height:1.6;margin:0 0 20px">Hi <strong style="color:#e8eaf0">' . htmlspecialchars($name) . '</strong>, your account has been created for <strong style="color:#c9a84c">' . htmlspecialchars($schoolName) . '</strong>.</p>
         <table style="background:#060910;border:1px solid #1a2535;border-radius:2px;width:100%;margin-bottom:24px">
           <tr><td style="padding:16px 20px">
@@ -136,7 +136,7 @@ function sendWelcomeEmail(string $to, string $name, string $indexNo, string $tem
             <div style="font-size:18px;color:#4caf82;font-family:monospace;letter-spacing:2px">' . htmlspecialchars($tempPassword) . '</div>
           </td></tr>
         </table>
-        <p style="color:#e05c5c;font-size:12px;margin:0 0 20px">⚠ Please log in and change your password immediately.</p>
+        <p style="color:#e05c5c;font-size:12px;margin:0 0 20px"> Please log in and change your password immediately.</p>
     ', 'Your Citadel account · ' . htmlspecialchars($schoolName));
     return sendBrevoEmail($to, $name, $subject, $html);
 }
@@ -144,7 +144,7 @@ function sendWelcomeEmail(string $to, string $name, string $indexNo, string $tem
 function sendSessionStartEmail(string $to, string $name, string $courseCode, string $courseName, string $code): array {
     $subject = 'Session Started — ' . $courseCode;
     $html = emailTemplate('Session Started', '
-        <h2 style="color:#e8eaf0;font-size:20px;margin:0 0 12px">📚 Session Now Active</h2>
+        <h2 style="color:#e8eaf0;font-size:20px;margin:0 0 12px"> Session Now Active</h2>
         <p style="color:#6b7a8d;font-size:14px;line-height:1.6;margin:0 0 20px">Hi ' . htmlspecialchars($name) . ', a session has started for your course:</p>
         <div style="background:#060910;border:1px solid #1a2535;border-left:3px solid #c9a84c;border-radius:2px;padding:16px 20px;margin-bottom:20px">
           <div style="font-size:11px;color:#6b7a8d;letter-spacing:2px;text-transform:uppercase">' . htmlspecialchars($courseCode) . '</div>

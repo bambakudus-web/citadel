@@ -20,7 +20,7 @@ if ($_SERVER['REQUEST_METHOD']==='POST') {
                     $html = "
                     <div style='font-family:sans-serif;background:#060910;color:#e8eaf0;padding:2rem;border-radius:4px'>
                         <div style='font-family:Georgia,serif;font-size:1.2rem;color:#c9a84c;letter-spacing:4px;margin-bottom:1rem'>CITADEL</div>
-                        <h2 style='color:#4caf82;margin-bottom:.8rem'>✓ School Approved!</h2>
+                        <h2 style='color:#4caf82;margin-bottom:.8rem'> School Approved!</h2>
                         <p style='color:#6b7a8d'>Hi {$admin['full_name']}, your institution <strong style='color:#e8eaf0'>{$admin['inst_name']}</strong> has been approved on Citadel.</p>
                         <div style='background:#0c1018;border:1px solid #1a2535;padding:1rem 1.2rem;margin:1.2rem 0;border-radius:2px'>
                             <div style='margin-bottom:.6rem'><span style='color:#6b7a8d;font-size:.8rem'>School Code</span><br><span style='color:#c9a84c;font-size:1.3rem;font-family:Georgia,serif;letter-spacing:4px'>".strtoupper($admin['slug'])."</span></div>
@@ -134,7 +134,7 @@ html,body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-seri
 
 /* Safari zoom fix — inputs must be 16px */
 
-/* ═══ MOBILE ═══ */
+/*  MOBILE  */
 @media(max-width:768px){
   .sidebar{width:260px!important;position:fixed!important;top:0!important;left:0!important;height:100vh!important;z-index:500!important;transform:translateX(-100%)!important;transition:transform .25s ease!important;box-shadow:4px 0 20px rgba(0,0,0,.8)!important}
   .sidebar.open{transform:translateX(0)!important}
@@ -236,14 +236,14 @@ document.addEventListener('DOMContentLoaded',function(){
   <div class="sb-brand"><div><div class="sb-logo">CITADEL</div><div class="sb-role">Super Admin</div></div></div>
   <nav class="sb-nav">
     <div class="sb-sec">Platform</div>
-    <a href="dashboard.php" class="sb-a">📊 Overview</a>
-    <a href="schools.php"   class="sb-a on">🏫 Schools</a>
-    <a href="users.php"     class="sb-a">👥 All Users</a>
-    <a href="activity.php" class="sb-a">📋 Activity Log</a>
+    <a href="dashboard.php" class="sb-a"> Overview</a>
+    <a href="schools.php"   class="sb-a on"> Schools</a>
+    <a href="users.php"     class="sb-a"> All Users</a>
+    <a href="activity.php" class="sb-a"> Activity Log</a>
     <div class="sb-sec">Tools</div>
-    <a href="announcements.php" class="sb-a">📣 Announcements</a>
-    <a href="export.php" class="sb-a">💾 Export Data</a>
-    <a href="../../onboard.php" class="sb-a">➕ Add School</a>
+    <a href="announcements.php" class="sb-a"> Announcements</a>
+    <a href="export.php" class="sb-a"> Export Data</a>
+    <a href="../../onboard.php" class="sb-a"> Add School</a>
   </nav>
   <div class="sb-foot">
     <div style="display:flex;align-items:center;gap:.6rem">
@@ -254,7 +254,7 @@ document.addEventListener('DOMContentLoaded',function(){
   </div>
 </aside>
 <main class="main">
-  <button class="menu-toggle" id="menu-toggle" onclick="toggleSidebar()">☰</button>
+  <button class="menu-toggle" id="menu-toggle" onclick="toggleSidebar()"></button>
   <div class="ph">
     <div><div class="pt">Schools</div><div class="ps"><?php echo count($schools); ?> institution<?php echo count($schools)!=1?'s':''; ?></div></div>
     <div class="toolbar">
@@ -271,7 +271,7 @@ document.addEventListener('DOMContentLoaded',function(){
   <?php if($pending): ?>
   <div class="sec" style="margin-bottom:1.5rem;border-color:rgba(201,168,76,.3)">
     <div style="padding:.8rem 1rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
-      <span style="font-size:.72rem;letter-spacing:.15em;text-transform:uppercase;color:var(--gold)">⏳ Pending Approval (<?php echo count($pending); ?>)</span>
+      <span style="font-size:.72rem;letter-spacing:.15em;text-transform:uppercase;color:var(--gold)"> Pending Approval (<?php echo count($pending); ?>)</span>
     </div>
     <div style="overflow-x:auto"><table class="tbl">
       <thead><tr><th>Institution</th><th>Code</th><th>Admin</th><th>Registered</th><th>Actions</th></tr></thead>
@@ -283,9 +283,9 @@ document.addEventListener('DOMContentLoaded',function(){
         <td><div style="font-size:.8rem"><?php echo htmlspecialchars($s['admin_name']??'—'); ?></div><div style="font-size:.7rem;color:var(--muted)"><?php echo htmlspecialchars($s['admin_email']??''); ?></div></td>
         <td style="font-size:.75rem;color:var(--muted)"><?php echo date('d M Y',strtotime($s['created_at'])); ?></td>
         <td style="white-space:nowrap;display:flex;gap:.3rem;flex-wrap:wrap">
-          <button class="ab" style="background:rgba(76,175,130,.12);color:var(--success);border:1px solid rgba(76,175,130,.3);padding:.3rem .6rem;font-size:.72rem" onclick="approveSchool(<?php echo $s['id']; ?>,'<?php echo htmlspecialchars(addslashes($s['name'])); ?>')">✓ Approve</button>
-          <button class="ab" onclick="openEmail(<?php echo $s['id']; ?>,'<?php echo htmlspecialchars(addslashes($s['name'])); ?>')">✉️</button>
-          <button class="ab del" onclick="delSchool(<?php echo $s['id']; ?>,'<?php echo htmlspecialchars(addslashes($s['name'])); ?>')">🗑</button>
+          <button class="ab" style="background:rgba(76,175,130,.12);color:var(--success);border:1px solid rgba(76,175,130,.3);padding:.3rem .6rem;font-size:.72rem" onclick="approveSchool(<?php echo $s['id']; ?>,'<?php echo htmlspecialchars(addslashes($s['name'])); ?>')"> Approve</button>
+          <button class="ab" onclick="openEmail(<?php echo $s['id']; ?>,'<?php echo htmlspecialchars(addslashes($s['name'])); ?>')"></button>
+          <button class="ab del" onclick="delSchool(<?php echo $s['id']; ?>,'<?php echo htmlspecialchars(addslashes($s['name'])); ?>')"></button>
         </td>
       </tr>
       <?php endforeach; ?>
@@ -309,10 +309,10 @@ document.addEventListener('DOMContentLoaded',function(){
         <td class="hide-col-mobile"><span class="badge <?php echo $s['is_active']?'ba':'bi'; ?>"><?php echo $s['is_active']?'Active':'Inactive'; ?></span></td>
         <td><label class="tog"><input type="checkbox" <?php echo $s['is_active']?'checked':''; ?> onchange="togSchool(<?php echo $s['id']; ?>,this.checked?1:0,this)"><span class="tsl"></span></label></td>
         <td style="white-space:nowrap">
-          <button class="ab" onclick="openDrw(<?php echo htmlspecialchars(json_encode($s),ENT_QUOTES); ?>)" title="Edit">✏️</button>
-          <button class="ab" onclick="openEmail(<?php echo $s['id']; ?>,'<?php echo htmlspecialchars(addslashes($s['name'])); ?>')" title="Email Admin">✉️</button>
-          <button class="ab" onclick="impersonate(<?php echo $s['id']; ?>,'<?php echo htmlspecialchars(addslashes($s['name'])); ?>')" title="Login as Admin">👤</button>
-          <?php if($s['id']!=1): ?><button class="ab del" onclick="delSchool(<?php echo $s['id']; ?>,'<?php echo htmlspecialchars(addslashes($s['name'])); ?>')" title="Delete">🗑</button><?php endif; ?>
+          <button class="ab" onclick="openDrw(<?php echo htmlspecialchars(json_encode($s),ENT_QUOTES); ?>)" title="Edit"></button>
+          <button class="ab" onclick="openEmail(<?php echo $s['id']; ?>,'<?php echo htmlspecialchars(addslashes($s['name'])); ?>')" title="Email Admin"></button>
+          <button class="ab" onclick="impersonate(<?php echo $s['id']; ?>,'<?php echo htmlspecialchars(addslashes($s['name'])); ?>')" title="Login as Admin"></button>
+          <?php if($s['id']!=1): ?><button class="ab del" onclick="delSchool(<?php echo $s['id']; ?>,'<?php echo htmlspecialchars(addslashes($s['name'])); ?>')" title="Delete"></button><?php endif; ?>
         </td>
       </tr>
       <?php endforeach; ?>
@@ -324,7 +324,7 @@ document.addEventListener('DOMContentLoaded',function(){
 </div>
 <div class="dov" id="dov" onclick="closeDrw()"></div>
 <div class="drw" id="drw">
-  <div class="dt">Edit Institution <button class="dc" onclick="closeDrw()">✕</button></div>
+  <div class="dt">Edit Institution <button class="dc" onclick="closeDrw()"></button></div>
   <input type="hidden" id="dId">
   <div class="df"><label>Name</label><input type="text" id="dName"></div>
   <div class="df"><label>Email</label><input type="email" id="dEmail"></div>
@@ -335,7 +335,7 @@ document.addEventListener('DOMContentLoaded',function(){
 <!-- Email Modal -->
 <div class="dov" id="emov" onclick="closeEmail()"></div>
 <div class="drw" id="emdrw" style="width:380px">
-  <div class="dt">Email School Admin <button class="dc" onclick="closeEmail()">✕</button></div>
+  <div class="dt">Email School Admin <button class="dc" onclick="closeEmail()"></button></div>
   <input type="hidden" id="emId">
   <div class="df"><label>Subject</label><input type="text" id="emSubj" value="Message from Citadel Platform"></div>
   <div class="df"><label>Message</label><textarea id="emMsg" style="min-height:120px" placeholder="Write your message here..."></textarea></div>

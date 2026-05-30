@@ -19,14 +19,14 @@
 <script>
 function toast(type, message, duration) {
   duration = duration || 3500;
-  const icons = { success:'✓', error:'✗', warning:'⚠', info:'ℹ' };
+  const icons = { success:'', error:'', warning:'', info:'ℹ' };
   const container = document.getElementById('toast-container');
   if (!container) return;
   const el = document.createElement('div');
   el.className = 'toast toast-' + type;
   el.innerHTML = '<span class="toast-icon">' + (icons[type]||'•') + '</span>' +
     '<span class="toast-msg">' + message + '</span>' +
-    '<button class="toast-close" onclick="this.parentElement.remove()">✕</button>';
+    '<button class="toast-close" onclick="this.parentElement.remove()"></button>';
   container.appendChild(el);
   setTimeout(() => {
     el.style.animation = 'toastOut .3s ease forwards';
@@ -39,7 +39,7 @@ function toastConfirm(message, onConfirm) {
   const el = document.createElement('div');
   el.className = 'toast toast-warning';
   el.style.cssText += ';flex-direction:column;align-items:flex-start;gap:.6rem;max-width:320px';
-  el.innerHTML = '<div style="display:flex;align-items:center;gap:.6rem"><span class="toast-icon">⚠</span><span>' + message + '</span></div>' +
+  el.innerHTML = '<div style="display:flex;align-items:center;gap:.6rem"><span class="toast-icon"></span><span>' + message + '</span></div>' +
     '<div style="display:flex;gap:.5rem;width:100%;justify-content:flex-end">' +
     '<button onclick="this.closest(\'.toast\').remove()" style="background:transparent;border:1px solid rgba(255,255,255,.1);color:var(--muted);padding:.3rem .8rem;border-radius:2px;cursor:pointer;font-size:.78rem">Cancel</button>' +
     '<button id="confirm-yes" style="background:rgba(224,92,92,.15);border:1px solid rgba(224,92,92,.3);color:#e05c5c;padding:.3rem .8rem;border-radius:2px;cursor:pointer;font-size:.78rem">Confirm</button>' +

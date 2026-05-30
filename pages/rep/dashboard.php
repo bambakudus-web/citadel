@@ -322,7 +322,7 @@ input,select,textarea{font-size:16px!important}
 
 input,select,textarea{font-size:16px!important}
 
-/* ═══ MOBILE - CLEAN ═══ */
+/*  MOBILE - CLEAN  */
 @media(max-width:768px){
   .sidebar{
     width:260px!important;
@@ -539,7 +539,7 @@ document.addEventListener('DOMContentLoaded',function(){
     <div class="nav-section">Sessions</div>
     <a class="nav-item" id="session-nav" onclick="showSection('session',this)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-      <?= $activeSession ? '🟢 Live Session' : 'Start Session' ?>
+      <?= $activeSession ? ' Live Session' : 'Start Session' ?>
     </a>
     <a class="nav-item" id="approvals-nav" onclick="showSection('approvals',this)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
@@ -562,20 +562,20 @@ document.addEventListener('DOMContentLoaded',function(){
   <div class="sidebar-user">
     <div class="u-name"><?= htmlspecialchars($user['full_name'] ?? '') ?></div>
     <div class="u-index">Rep · <?= htmlspecialchars($user['index_no'] ?? '') ?><?= $activeSem ? ' · '.htmlspecialchars($activeSem['name']) : '' ?></div>
-    <div class="sidebar-user-actions"><a href="../../change_password.php" class="btn-pwd">🔑 Password</a><a href="../../logout.php" class="btn-out">Sign Out</a></div>
+    <div class="sidebar-user-actions"><a href="../../change_password.php" class="btn-pwd"> Password</a><a href="../../logout.php" class="btn-out">Sign Out</a></div>
   </div>
 </aside>
 
 <div class="main">
   <div class="topbar">
     <div style="display:flex;align-items:center;gap:1rem">
-      <button id="menu-btn" aria-label="Menu" onclick="toggleSidebar()">☰</button>
+      <button id="menu-btn" aria-label="Menu" onclick="toggleSidebar()"></button>
       <div class="topbar-title" id="page-title">OVERVIEW</div>
     </div>
     <div style="display:flex;align-items:center;gap:1rem">
       <span style="font-size:.75rem;color:var(--muted)"><?= date('l, d M Y') ?></span>
       <span class="badge-rep"><?= terms('rep', $instType) ?></span>
-      <button id="theme-btn" onclick="toggleTheme()" style="background:none;border:1px solid var(--border);color:var(--muted);cursor:pointer;padding:.25rem .6rem;border-radius:2px;font-size:.75rem">🌙</button>
+      <button id="theme-btn" onclick="toggleTheme()" style="background:none;border:1px solid var(--border);color:var(--muted);cursor:pointer;padding:.25rem .6rem;border-radius:2px;font-size:.75rem"></button>
     </div>
   </div>
 
@@ -600,7 +600,7 @@ document.addEventListener('DOMContentLoaded',function(){
                 <?php foreach($todayClasses as $c): ?>
                   <div class="tt-item" style="margin-bottom:0">
                     <div class="tt-time"><?= substr($c['start_time'],0,5) ?> – <?= substr($c['end_time'],0,5) ?></div>
-                    <div><div style="font-size:.7rem;color:var(--muted)"><?= htmlspecialchars($c['course_code']) ?></div><div style="font-size:.85rem"><?= htmlspecialchars($c['course_name']) ?></div><div style="font-size:.72rem;color:var(--muted)">📍 <?= htmlspecialchars($c['room']??'') ?> · <?= htmlspecialchars($c['lecturer_name']??'') ?></div></div>
+                    <div><div style="font-size:.7rem;color:var(--muted)"><?= htmlspecialchars($c['course_code']) ?></div><div style="font-size:.85rem"><?= htmlspecialchars($c['course_name']) ?></div><div style="font-size:.72rem;color:var(--muted)"> <?= htmlspecialchars($c['room']??'') ?> · <?= htmlspecialchars($c['lecturer_name']??'') ?></div></div>
                   </div>
                 <?php endforeach; ?>
               </div>
@@ -632,7 +632,7 @@ document.addEventListener('DOMContentLoaded',function(){
         <div style="margin-bottom:1.5rem">
           <div style="font-family:'Cinzel',serif;font-size:.78rem;color:var(--rep);letter-spacing:.15em;margin-bottom:.6rem;text-transform:uppercase"><?= $day ?></div>
           <div style="display:flex;flex-direction:column;gap:.5rem"><?php foreach($cls as $c): ?>
-            <div class="tt-item"><div class="tt-time"><?= substr($c['start_time'],0,5) ?> – <?= substr($c['end_time'],0,5) ?></div><div style="flex:1"><div style="font-size:.7rem;color:var(--muted)"><?= htmlspecialchars($c['course_code']) ?></div><div style="font-size:.85rem"><?= htmlspecialchars($c['course_name']) ?></div><div style="font-size:.72rem;color:var(--muted)">📍 <?= htmlspecialchars($c['room']??'') ?> · <?= htmlspecialchars($c['lecturer_name']??'') ?></div></div></div>
+            <div class="tt-item"><div class="tt-time"><?= substr($c['start_time'],0,5) ?> – <?= substr($c['end_time'],0,5) ?></div><div style="flex:1"><div style="font-size:.7rem;color:var(--muted)"><?= htmlspecialchars($c['course_code']) ?></div><div style="font-size:.85rem"><?= htmlspecialchars($c['course_name']) ?></div><div style="font-size:.72rem;color:var(--muted)"> <?= htmlspecialchars($c['room']??'') ?> · <?= htmlspecialchars($c['lecturer_name']??'') ?></div></div></div>
           <?php endforeach; ?></div>
         </div>
       <?php endforeach; ?>
@@ -682,7 +682,7 @@ document.addEventListener('DOMContentLoaded',function(){
           <p style="font-size:.82rem;color:var(--muted);margin-bottom:1rem">Quick start from today's schedule:</p>
           <div style="display:flex;flex-wrap:wrap;gap:.7rem;margin-bottom:2rem">
             <?php foreach($todayClasses as $tc): ?>
-              <form method="POST" style="display:inline"><input type="hidden" name="csrf_token" value="<?= csrfToken() ?>"><input type="hidden" name="action" value="start_session"><input type="hidden" name="course_code" value="<?= htmlspecialchars($tc['course_code']) ?>"><input type="hidden" name="course_name" value="<?= htmlspecialchars($tc['course_name']) ?>"><button type="submit" class="btn btn-rep">▶ <?= htmlspecialchars($tc['course_code']) ?> · <?= substr($tc['start_time'],0,5) ?>–<?= substr($tc['end_time'],0,5) ?></button></form>
+              <form method="POST" style="display:inline"><input type="hidden" name="csrf_token" value="<?= csrfToken() ?>"><input type="hidden" name="action" value="start_session"><input type="hidden" name="course_code" value="<?= htmlspecialchars($tc['course_code']) ?>"><input type="hidden" name="course_name" value="<?= htmlspecialchars($tc['course_name']) ?>"><button type="submit" class="btn btn-rep"> <?= htmlspecialchars($tc['course_code']) ?> · <?= substr($tc['start_time'],0,5) ?>–<?= substr($tc['end_time'],0,5) ?></button></form>
             <?php endforeach; ?>
           </div>
         <?php endif; ?>
@@ -716,7 +716,7 @@ document.addEventListener('DOMContentLoaded',function(){
 
     <!-- SESSION HISTORY -->
     <div class="page-section" id="sec-history">
-      <div class="section-header"><div class="section-title">Session <span>History</span></div><a href="../../api/export_attendance.php" class="btn btn-rep btn-sm">⬇ Export All CSV</a></div>
+      <div class="section-header"><div class="section-title">Session <span>History</span></div><a href="../../api/export_attendance.php" class="btn btn-rep btn-sm"> Export All CSV</a></div>
       <div class="card"><div class="card-body" style="padding:0;overflow-x:auto">
         <table class="data-table"><thead><tr><th>Course</th><th>Date</th><th>Present</th><th class="hide-mobile">Late</th><th>Absent</th><th>Export</th></tr></thead><tbody>
         <?php if(empty($sessionHistory)): ?><tr><td colspan="6" style="color:var(--muted)">No past sessions yet.</td></tr>
@@ -727,7 +727,7 @@ document.addEventListener('DOMContentLoaded',function(){
             <td><span class="pill pill-green"><?= $sh['present_count'] ?></span></td>
             <td class="hide-mobile"><span class="pill pill-gold"><?= $sh['late_count'] ?></span></td>
             <td><span class="pill pill-red"><?= $sh['absent_count'] ?></span></td>
-            <td><a href="../../api/export_attendance.php?session_id=<?= $sh['id'] ?>" class="btn btn-ghost btn-sm">⬇ CSV</a></td>
+            <td><a href="../../api/export_attendance.php?session_id=<?= $sh['id'] ?>" class="btn btn-ghost btn-sm"> CSV</a></td>
           </tr>
         <?php endforeach; endif; ?>
         </tbody></table>
@@ -748,7 +748,7 @@ document.addEventListener('DOMContentLoaded',function(){
               <td><?= htmlspecialchars($s['full_name']) ?></td>
               <td class="hide-mobile"><span class="pill pill-<?= $s['role']==='rep'?'rep':'steel' ?>"><?= $s['role'] ?></span></td>
               <?php $pct=$s['attendance_pct']??0; $color=$pct>=75?'var(--success)':($pct>=50?'var(--warning)':'var(--danger)'); ?>
-              <td class="hide-mobile"><div style="display:flex;align-items:center;gap:.5rem"><div style="width:60px;height:5px;background:var(--border);border-radius:3px"><div style="width:<?= min($pct,100) ?>%;height:100%;background:<?= $color ?>;border-radius:3px"></div></div><span style="font-size:.75rem;color:<?= $color ?>;font-weight:600"><?= $pct ?>%</span><?php if($pct<75&&$s['total_sessions']>3): ?><span style="color:var(--danger)">⚠</span><?php endif; ?></div></td>
+              <td class="hide-mobile"><div style="display:flex;align-items:center;gap:.5rem"><div style="width:60px;height:5px;background:var(--border);border-radius:3px"><div style="width:<?= min($pct,100) ?>%;height:100%;background:<?= $color ?>;border-radius:3px"></div></div><span style="font-size:.75rem;color:<?= $color ?>;font-weight:600"><?= $pct ?>%</span><?php if($pct<75&&$s['total_sessions']>3): ?><span style="color:var(--danger)"></span><?php endif; ?></div></td>
               <td>
                 <button class="btn btn-ghost btn-sm" onclick="openEdit(<?= $s['id'] ?>,'<?= htmlspecialchars(addslashes($s['full_name'])) ?>','<?= $s['index_no'] ?>','<?= $s['email'] ?>')">Edit</button>
                 <?php if($s['role']!=='rep'): ?><button class="btn btn-danger btn-sm" onclick="confirmDel(<?= $s['id'] ?>)">Remove</button><?php endif; ?>
@@ -761,7 +761,7 @@ document.addEventListener('DOMContentLoaded',function(){
 
     <!-- ATTENDANCE -->
     <div class="page-section" id="sec-attendance">
-      <div class="section-header"><div class="section-title">Attendance <span>Records</span></div><div style="display:flex;gap:.6rem;flex-wrap:wrap"><a href="../../api/export_attendance.php" class="btn btn-rep btn-sm">⬇ Export All</a><a href="../../api/export_attendance.php?from=<?= date('Y-m-d') ?>&to=<?= date('Y-m-d') ?>" class="btn btn-ghost btn-sm">⬇ Today</a></div></div>
+      <div class="section-header"><div class="section-title">Attendance <span>Records</span></div><div style="display:flex;gap:.6rem;flex-wrap:wrap"><a href="../../api/export_attendance.php" class="btn btn-rep btn-sm"> Export All</a><a href="../../api/export_attendance.php?from=<?= date('Y-m-d') ?>&to=<?= date('Y-m-d') ?>" class="btn btn-ghost btn-sm"> Today</a></div></div>
       <div class="card"><div class="card-body" style="padding:0;overflow-x:auto">
         <table class="data-table"><thead><tr><th>Student</th><th class="hide-mobile">Index</th><th class="hide-mobile">Course</th><th>Status</th><th>Time</th></tr></thead><tbody>
         <?php $allAtt=$pdo->query("SELECT a.*,u.full_name,u.index_no,s.course_code FROM attendance a JOIN users u ON a.student_id=u.id JOIN sessions s ON a.session_id=s.id WHERE u.institution_id=$inst_id ORDER BY a.timestamp DESC LIMIT 100")->fetchAll();
@@ -799,7 +799,7 @@ document.addEventListener('DOMContentLoaded',function(){
 
 <!-- Add Modal -->
 <div class="modal-overlay" id="modal-add">
-  <div class="modal"><div class="modal-head"><div class="modal-title">ADD STUDENT</div><button class="modal-close" onclick="closeModal('modal-add')">✕</button></div>
+  <div class="modal"><div class="modal-head"><div class="modal-title">ADD STUDENT</div><button class="modal-close" onclick="closeModal('modal-add')"></button></div>
     <div class="modal-body"><form method="POST"><input type="hidden" name="csrf_token" value="<?= csrfToken() ?>"><input type="hidden" name="action" value="add">
       <div class="form-row"><div class="form-field"><label>Full Name</label><input type="text" name="full_name" required placeholder="Surname, Firstname"></div><div class="form-field"><label>Index Number</label><input type="text" name="index_no" required placeholder="52430540000"></div></div>
       <div class="form-row"><div class="form-field"><label>Email (optional)</label><input type="email" name="email" placeholder="auto-generated if blank"></div><div class="form-field"><label>WhatsApp</label><input type="text" name="phone" placeholder="+233XXXXXXXXX"></div></div>
@@ -810,7 +810,7 @@ document.addEventListener('DOMContentLoaded',function(){
 
 <!-- Edit Modal -->
 <div class="modal-overlay" id="modal-edit">
-  <div class="modal"><div class="modal-head"><div class="modal-title">EDIT STUDENT</div><button class="modal-close" onclick="closeModal('modal-edit')">✕</button></div>
+  <div class="modal"><div class="modal-head"><div class="modal-title">EDIT STUDENT</div><button class="modal-close" onclick="closeModal('modal-edit')"></button></div>
     <div class="modal-body"><form method="POST"><input type="hidden" name="csrf_token" value="<?= csrfToken() ?>"><input type="hidden" name="action" value="edit"><input type="hidden" name="id" id="e-id">
       <div class="form-row"><div class="form-field"><label>Full Name</label><input type="text" name="full_name" id="e-name" required></div><div class="form-field"><label>Index Number</label><input type="text" name="index_no" id="e-index" required></div></div>
       <div class="form-field"><label>Email</label><input type="email" name="email" id="e-email"></div>
@@ -857,7 +857,7 @@ function loadApprovals(){
     if(badge)badge.textContent=data.total+' pending';
     if(pendingCount)pendingCount.textContent=data.total;
     if(!tbody)return;
-    if(!data.rows||data.rows.length===0){tbody.innerHTML='<tr><td colspan="5" style="color:var(--muted);padding:1.5rem">No pending approvals. ✓</td></tr>';return}
+    if(!data.rows||data.rows.length===0){tbody.innerHTML='<tr><td colspan="5" style="color:var(--muted);padding:1.5rem">No pending approvals. </td></tr>';return}
     tbody.innerHTML=data.rows.map(r=>`
       <tr id="arow-${r.id}">
         <td style="font-weight:500">${r.full_name}</td>
@@ -868,8 +868,8 @@ function loadApprovals(){
         </td>
         <td class="hide-mobile" style="color:var(--muted);font-size:.72rem">${r.submitted_at||r.time||''}</td>
         <td style="display:flex;gap:.4rem;flex-wrap:wrap">
-          <button class="btn btn-rep btn-sm" onclick="approveAtt(${r.id},'approve')">✓ Approve</button>
-          <button class="btn btn-danger btn-sm" onclick="approveAtt(${r.id},'reject')">✕ Reject</button>
+          <button class="btn btn-rep btn-sm" onclick="approveAtt(${r.id},'approve')"> Approve</button>
+          <button class="btn btn-danger btn-sm" onclick="approveAtt(${r.id},'reject')"> Reject</button>
         </td>
       </tr>`).join('');
   });
@@ -885,8 +885,8 @@ async function approveAtt(id,action){
 }
 <?php endif; ?>
 
-function toggleTheme(){const body=document.body;const btn=document.getElementById('theme-btn');if(body.classList.contains('light')){body.classList.remove('light');localStorage.setItem('theme','dark');if(btn)btn.textContent='🌙';}else{body.classList.add('light');localStorage.setItem('theme','light');if(btn)btn.textContent='☀️';}}
-(function(){if(localStorage.getItem('theme')==='light'){document.body.classList.add('light');const btn=document.getElementById('theme-btn');if(btn)btn.textContent='☀️';}})();
+function toggleTheme(){const body=document.body;const btn=document.getElementById('theme-btn');if(body.classList.contains('light')){body.classList.remove('light');localStorage.setItem('theme','dark');if(btn)btn.textContent='';}else{body.classList.add('light');localStorage.setItem('theme','light');if(btn)btn.textContent='';}}
+(function(){if(localStorage.getItem('theme')==='light'){document.body.classList.add('light');const btn=document.getElementById('theme-btn');if(btn)btn.textContent='';}})();
 
 const csrfToken="<?= csrfToken() ?>";
 document.querySelectorAll('form').forEach(form=>{if(!form.querySelector('[name="csrf_token"]')){const input=document.createElement('input');input.type='hidden';input.name='csrf_token';input.value=csrfToken;form.appendChild(input)}});

@@ -86,7 +86,7 @@ html,body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-seri
 
 /* Safari zoom fix — inputs must be 16px */
 
-/* ═══ MOBILE ═══ */
+/*  MOBILE  */
 @media(max-width:768px){
   .sidebar{width:260px!important;position:fixed!important;top:0!important;left:0!important;height:100vh!important;z-index:500!important;transform:translateX(-100%)!important;transition:transform .25s ease!important;box-shadow:4px 0 20px rgba(0,0,0,.8)!important}
   .sidebar.open{transform:translateX(0)!important}
@@ -188,16 +188,16 @@ document.addEventListener('DOMContentLoaded',function(){
   <div class="sb-brand"><div><div class="sb-logo">CITADEL</div><div class="sb-role">Super Admin</div></div></div>
   <nav class="sb-nav">
     <div class="sb-sec">Platform</div>
-    <a href="dashboard.php" class="sb-a">📊 Overview</a>
-    <a href="schools.php"   class="sb-a">🏫 Schools</a>
-    <a href="users.php"     class="sb-a">👥 All Users</a>
+    <a href="dashboard.php" class="sb-a"> Overview</a>
+    <a href="schools.php"   class="sb-a"> Schools</a>
+    <a href="users.php"     class="sb-a"> All Users</a>
     <div class="sb-sec">Reports</div>
-    <a href="activity.php"  class="sb-a on">📋 Activity Log</a>
-    <a href="activity.php" class="sb-a">📋 Activity Log</a>
+    <a href="activity.php"  class="sb-a on"> Activity Log</a>
+    <a href="activity.php" class="sb-a"> Activity Log</a>
     <div class="sb-sec">Tools</div>
-    <a href="announcements.php" class="sb-a">📣 Announcements</a>
-    <a href="export.php" class="sb-a">💾 Export Data</a>
-    <a href="../../onboard.php" class="sb-a">➕ Add School</a>
+    <a href="announcements.php" class="sb-a"> Announcements</a>
+    <a href="export.php" class="sb-a"> Export Data</a>
+    <a href="../../onboard.php" class="sb-a"> Add School</a>
   </nav>
   <div class="sb-foot">
     <div style="display:flex;align-items:center;gap:.6rem">
@@ -208,7 +208,7 @@ document.addEventListener('DOMContentLoaded',function(){
   </div>
 </aside>
 <main class="main">
-  <button class="menu-toggle" id="menu-toggle" onclick="toggleSidebar()">☰</button>
+  <button class="menu-toggle" id="menu-toggle" onclick="toggleSidebar()"></button>
   <div class="ph">
     <div><div class="pt">Activity Log</div><div class="ps"><?php echo number_format($total); ?> events</div></div>
     <div class="toolbar">

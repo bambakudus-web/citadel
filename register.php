@@ -150,7 +150,7 @@ input,select,textarea{font-size:16px!important}
     <?php if ($error): ?><div class="alert-error"><?= htmlspecialchars($error) ?></div><?php endif; ?>
 
     <?php if ($success): ?>
-      <div class="alert-success">✓ Account created! You can now sign in with school code <strong><?= strtoupper(htmlspecialchars($_POST['school_code'])) ?></strong>.</div>
+      <div class="alert-success"> Account created! You can now sign in with school code <strong><?= strtoupper(htmlspecialchars($_POST['school_code'])) ?></strong>.</div>
       <a href="login.php#login" class="btn" style="display:block;text-align:center;text-decoration:none">Go to Login</a>
 
     <?php elseif ($step === 1): ?>
@@ -164,7 +164,7 @@ input,select,textarea{font-size:16px!important}
       </form>
 
     <?php elseif ($step === 2 && $institution): ?>
-      <div class="school-found">📍 Registering at: <strong><?= htmlspecialchars($institution['name']) ?></strong></div>
+      <div class="school-found"> Registering at: <strong><?= htmlspecialchars($institution['name']) ?></strong></div>
       <form method="POST">
         <input type="hidden" name="action" value="register">
         <input type="hidden" name="school_code" value="<?= htmlspecialchars($_POST['school_code']) ?>">

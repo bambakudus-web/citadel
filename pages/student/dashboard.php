@@ -225,7 +225,7 @@ input,select,textarea{font-size:16px!important}
 
 input,select,textarea{font-size:16px!important}
 
-/* ═══ MOBILE - CLEAN ═══ */
+/*  MOBILE - CLEAN  */
 @media(max-width:768px){
   .sidebar{
     width:260px!important;
@@ -438,7 +438,7 @@ document.addEventListener('DOMContentLoaded',function(){
     </a>
     <a class="nav-item" id="mark-nav" onclick="showSection('mark',this)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-      Mark Attendance<?= $activeSession ? ' 🟢' : '' ?>
+      Mark Attendance<?= $activeSession ? ' ' : '' ?>
     </a>
     <a class="nav-item" onclick="showSection('courses',this)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg><?= terms('courses', $instType) ?>
@@ -456,20 +456,20 @@ document.addEventListener('DOMContentLoaded',function(){
   <div class="sidebar-user">
     <div class="u-name"><?= htmlspecialchars($user['full_name'] ?? '') ?></div>
     <div class="u-index"><?= htmlspecialchars($user['index_no'] ?? '') ?><?= $activeSem ? ' · '.htmlspecialchars($activeSem['name']) : '' ?></div>
-    <div class="sidebar-user-actions"><a href="../../change_password.php" class="btn-pwd">🔑 Password</a><a href="../../logout.php" class="btn-out">Sign Out</a></div>
+    <div class="sidebar-user-actions"><a href="../../change_password.php" class="btn-pwd"> Password</a><a href="../../logout.php" class="btn-out">Sign Out</a></div>
   </div>
 </aside>
 
 <div class="main">
   <div class="topbar">
     <div style="display:flex;align-items:center;gap:1rem">
-      <button id="menu-btn" aria-label="Menu" onclick="toggleSidebar()">☰</button>
+      <button id="menu-btn" aria-label="Menu" onclick="toggleSidebar()"></button>
       <div class="topbar-title" id="page-title">OVERVIEW</div>
     </div>
     <div style="display:flex;align-items:center;gap:1rem">
       <span style="font-size:.75rem;color:var(--muted)"><?= date('l, d M Y') ?></span>
       <span class="badge">Student</span>
-      <button id="theme-btn" onclick="toggleTheme()" style="background:none;border:1px solid var(--border);color:var(--muted);cursor:pointer;padding:.25rem .6rem;border-radius:2px;font-size:.75rem">🌙</button>
+      <button id="theme-btn" onclick="toggleTheme()" style="background:none;border:1px solid var(--border);color:var(--muted);cursor:pointer;padding:.25rem .6rem;border-radius:2px;font-size:.75rem"></button>
     </div>
   </div>
 
@@ -490,7 +490,7 @@ document.addEventListener('DOMContentLoaded',function(){
             <?php else: ?><div class="tt-grid"><?php foreach($todayClasses as $c): ?>
               <div class="tt-item">
                 <div class="tt-time"><?= substr($c['start_time'],0,5) ?> – <?= substr($c['end_time'],0,5) ?></div>
-                <div class="tt-info"><div class="code"><?= htmlspecialchars($c['course_code']) ?></div><div class="name"><?= htmlspecialchars($c['course_name']) ?></div><div class="room">📍 <?= htmlspecialchars($c['room'] ?? '') ?> · <?= htmlspecialchars($c['lecturer_name'] ?? '') ?></div></div>
+                <div class="tt-info"><div class="code"><?= htmlspecialchars($c['course_code']) ?></div><div class="name"><?= htmlspecialchars($c['course_name']) ?></div><div class="room"> <?= htmlspecialchars($c['room'] ?? '') ?> · <?= htmlspecialchars($c['lecturer_name'] ?? '') ?></div></div>
               </div>
             <?php endforeach; ?></div>
             <?php if($activeSession): ?><button class="btn btn-gold" style="width:100%;justify-content:center;margin-top:1rem" onclick="showSection('mark',document.getElementById('mark-nav'))">Mark Attendance Now →</button><?php endif; ?>
@@ -509,7 +509,7 @@ document.addEventListener('DOMContentLoaded',function(){
           </div>
         </div>
       </div>
-      <div class="card"><div class="card-head"><div class="card-head-title">📢 Announcements</div></div><div class="card-body" style="padding:0"><table class="data-table"><thead><tr><th>Message</th><th class="hide-mobile">From</th><th class="hide-mobile">Date</th></tr></thead><tbody id="ann-list">
+      <div class="card"><div class="card-head"><div class="card-head-title"> Announcements</div></div><div class="card-body" style="padding:0"><table class="data-table"><thead><tr><th>Message</th><th class="hide-mobile">From</th><th class="hide-mobile">Date</th></tr></thead><tbody id="ann-list">
       <?php if(empty($announcements)): ?><tr><td colspan="3" style="color:var(--muted)">No announcements yet.</td></tr>
       <?php else: foreach($announcements as $ann): ?><tr><td><?= htmlspecialchars($ann['message']) ?></td><td style="color:var(--gold);font-size:.75rem"><?= htmlspecialchars($ann['full_name']) ?></td><td style="color:var(--muted);font-size:.72rem"><?= date('d M H:i',strtotime($ann['created_at'])) ?></td></tr><?php endforeach; endif; ?>
       </tbody></table></div></div>
@@ -520,14 +520,14 @@ document.addEventListener('DOMContentLoaded',function(){
       <div class="attend-zone">
         <?php if ($myPending): ?>
           <div class="pending-card">
-            <div class="pending-icon">⏳</div>
+            <div class="pending-icon"></div>
             <div class="pending-title">Awaiting Approval</div>
             <div class="pending-sub">Your attendance for <strong><?= htmlspecialchars($activeSession['course_code'] ?? '') ?></strong> is pending.<br><?= $instType==='university' ? 'The Course Rep will review shortly.' : 'Your teacher will mark you shortly.' ?></div>
             <?php if($myPending['selfie_url']): ?><img src="<?= strpos($myPending['selfie_url'],'data:')===0 ? htmlspecialchars($myPending['selfie_url']) : '../../'.htmlspecialchars($myPending['selfie_url']) ?>" style="width:80px;height:80px;object-fit:cover;border-radius:50%;border:2px solid var(--warning);margin:1.2rem auto 0;display:block"><?php endif; ?>
           </div>
         <?php elseif ($myRecord && $myRecord['status'] !== 'pending'): ?>
           <div class="pending-card" style="border-color:rgba(76,175,130,.3)">
-            <div class="pending-icon"><?= $myRecord['status']==='present'?'✅':'⏰' ?></div>
+            <div class="pending-icon"><?= $myRecord['status']==='present'?'':'' ?></div>
             <div class="pending-title" style="color:var(--success)">Marked <?= ucfirst($myRecord['status']) ?></div>
             <div class="pending-sub">You have been marked <strong><?= $myRecord['status'] ?></strong> for <?= htmlspecialchars($activeSession['course_code'] ?? '') ?>.</div>
           </div>
@@ -541,7 +541,7 @@ document.addEventListener('DOMContentLoaded',function(){
           </div>
           <?php if($instType !== 'university'): ?>
           <div class="pending-card" style="border-color:rgba(76,175,130,.3);margin-top:1rem">
-            <div class="pending-icon">📋</div>
+            <div class="pending-icon"></div>
             <div class="pending-title" style="color:var(--success)">Class in Progress</div>
             <div class="pending-sub">Your teacher is marking attendance. You will be marked automatically.</div>
           </div>
@@ -574,7 +574,7 @@ document.addEventListener('DOMContentLoaded',function(){
             <img id="selfie-preview" class="selfie-preview" style="display:none">
             <div style="display:flex;gap:.8rem;margin-top:1rem">
               <button class="btn btn-ghost" id="retake-btn" onclick="retakeSelfie()" style="flex:1;justify-content:center;display:none">Retake</button>
-              <button class="btn btn-gold" id="capture-btn" onclick="captureSelfie()" style="flex:1;justify-content:center">📸 Capture Selfie</button>
+              <button class="btn btn-gold" id="capture-btn" onclick="captureSelfie()" style="flex:1;justify-content:center"> Capture Selfie</button>
               <button class="btn btn-gold" id="submit-btn" onclick="submitAttendance()" style="flex:1;justify-content:center;display:none">Submit →</button>
             </div>
             <div id="submit-error" style="color:var(--danger);font-size:.78rem;margin-top:.6rem;text-align:center;display:none"></div>
@@ -582,7 +582,7 @@ document.addEventListener('DOMContentLoaded',function(){
           <?php endif; ?>
         <?php else: ?>
           <div class="no-session-card">
-            <div style="font-size:2rem;margin-bottom:1rem">🔒</div>
+            <div style="font-size:2rem;margin-bottom:1rem"></div>
             <div style="font-family:'Cinzel',serif;font-size:.9rem;color:var(--muted);letter-spacing:.1em">NO ACTIVE SESSION</div>
             <div style="font-size:.82rem;color:var(--muted);margin-top:.5rem">Wait for your lecturer or course rep to start an attendance session.</div>
           </div>
@@ -606,7 +606,7 @@ document.addEventListener('DOMContentLoaded',function(){
               <td><?= htmlspecialchars($c['name']) ?></td>
               <td class="hide-mobile" style="color:var(--muted);font-size:.78rem"><?= htmlspecialchars($c['lecturer_name'] ?? '—') ?></td>
               <td><?= $c['attended'] ?> / <?= $c['total_sessions'] ?></td>
-              <td><span style="color:<?= $color ?>;font-weight:600"><?= $pct ?>%</span><?php if($pct<75&&$c['total_sessions']>3): ?> <span style="color:var(--danger)">⚠</span><?php endif; ?></td>
+              <td><span style="color:<?= $color ?>;font-weight:600"><?= $pct ?>%</span><?php if($pct<75&&$c['total_sessions']>3): ?> <span style="color:var(--danger)"></span><?php endif; ?></td>
             </tr>
           <?php endforeach; ?>
           </tbody></table>
@@ -631,7 +631,7 @@ document.addEventListener('DOMContentLoaded',function(){
         <div style="margin-bottom:1.5rem">
           <div style="font-family:'Cinzel',serif;font-size:.78rem;color:var(--gold);letter-spacing:.15em;margin-bottom:.6rem"><?= strtoupper($day) ?></div>
           <div class="tt-grid"><?php foreach($dayCls as $c): ?>
-            <div class="tt-item"><div class="tt-time"><?= substr($c['start_time'],0,5) ?> – <?= substr($c['end_time'],0,5) ?></div><div class="tt-info"><div class="code"><?= htmlspecialchars($c['course_code']) ?></div><div class="name"><?= htmlspecialchars($c['course_name']) ?></div><div class="room">📍 <?= htmlspecialchars($c['room']??'') ?> · <?= htmlspecialchars($c['lecturer_name']??'') ?></div></div></div>
+            <div class="tt-item"><div class="tt-time"><?= substr($c['start_time'],0,5) ?> – <?= substr($c['end_time'],0,5) ?></div><div class="tt-info"><div class="code"><?= htmlspecialchars($c['course_code']) ?></div><div class="name"><?= htmlspecialchars($c['course_name']) ?></div><div class="room"> <?= htmlspecialchars($c['room']??'') ?> · <?= htmlspecialchars($c['lecturer_name']??'') ?></div></div></div>
           <?php endforeach; ?></div>
         </div>
       <?php endforeach; ?>
@@ -657,7 +657,7 @@ document.addEventListener('DOMContentLoaded',function(){
     <div class="page-section" id="sec-stats">
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.8rem;margin-bottom:1.8rem">
         <div class="section-title" style="margin-bottom:0">My <span>Stats</span></div>
-        <a href="../../api/attendance_certificate.php" class="btn btn-gold" style="font-size:.72rem;padding:.3rem .7rem">⬇ Download Certificate</a>
+        <a href="../../api/attendance_certificate.php" class="btn btn-gold" style="font-size:.72rem;padding:.3rem .7rem"> Download Certificate</a>
       </div>
       <?php if(empty($enrolledCourses)): ?>
         <p style="color:var(--muted);font-size:.83rem">No attendance data yet.</p>
@@ -686,7 +686,7 @@ setInterval(()=>{timeLeft--;if(timeLeft<0){timeLeft=119;clearCodeInputs();}updat
 <?php endif; ?>
 
 let lastStatus="<?= $myRecord?$myRecord['status']:'none' ?>";
-setInterval(()=>{fetch(API + '/session_status.php').then(r=>r.json()).then(data=>{const hasActive=<?= $activeSession?'true':'false' ?>;if(data.active&&!hasActive){location.reload();return;}if(!data.active&&hasActive){location.reload();return;}const newStatus=data.my_status||'none';if(newStatus!==lastStatus){if(newStatus==='present'||newStatus==='late'){const t=document.createElement('div');t.style.cssText='position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:var(--success);color:#060910;padding:.8rem 1.5rem;border-radius:2px;font-family:Cinzel,serif;font-size:.82rem;font-weight:700;z-index:999';t.textContent='✓ Approved! Marked '+newStatus.toUpperCase();document.body.appendChild(t);setTimeout(()=>location.reload(),2000);}else if(lastStatus==='pending'&&newStatus==='none'){const t=document.createElement('div');t.style.cssText='position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:var(--danger);color:#fff;padding:.8rem 1.5rem;border-radius:2px;font-family:Cinzel,serif;font-size:.82rem;font-weight:700;z-index:999';t.textContent='✗ Attendance Rejected. Please try again.';document.body.appendChild(t);setTimeout(()=>location.reload(),2500);}lastStatus=newStatus;}}).catch(()=>{})},10000);
+setInterval(()=>{fetch(API + '/session_status.php').then(r=>r.json()).then(data=>{const hasActive=<?= $activeSession?'true':'false' ?>;if(data.active&&!hasActive){location.reload();return;}if(!data.active&&hasActive){location.reload();return;}const newStatus=data.my_status||'none';if(newStatus!==lastStatus){if(newStatus==='present'||newStatus==='late'){const t=document.createElement('div');t.style.cssText='position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:var(--success);color:#060910;padding:.8rem 1.5rem;border-radius:2px;font-family:Cinzel,serif;font-size:.82rem;font-weight:700;z-index:999';t.textContent=' Approved! Marked '+newStatus.toUpperCase();document.body.appendChild(t);setTimeout(()=>location.reload(),2000);}else if(lastStatus==='pending'&&newStatus==='none'){const t=document.createElement('div');t.style.cssText='position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:var(--danger);color:#fff;padding:.8rem 1.5rem;border-radius:2px;font-family:Cinzel,serif;font-size:.82rem;font-weight:700;z-index:999';t.textContent=' Attendance Rejected. Please try again.';document.body.appendChild(t);setTimeout(()=>location.reload(),2500);}lastStatus=newStatus;}}).catch(()=>{})},10000);
 
 function codeInput(el,idx){el.value=el.value.replace(/\D/,'');if(el.value)el.classList.add('filled');else el.classList.remove('filled');if(el.value&&idx<6)document.getElementById('ci'+(idx+1)).focus();checkCodeReady()}
 function codeBack(e,idx){if(e.key==='Backspace'&&!document.getElementById('ci'+idx).value&&idx>1)document.getElementById('ci'+(idx-1)).focus()}
@@ -702,8 +702,8 @@ function stopCamera(){if(stream){stream.getTracks().forEach(t=>t.stop());stream=
 
 const SESSION_ID=<?= $activeSession ? $activeSession["id"] : "null" ?>;
 let capturedSelfie=null,capturedClassroom=null,cameraStep='selfie';
-function retakeSelfie(){capturedSelfie=null;capturedClassroom=null;cameraStep='selfie';document.getElementById('selfie-preview').style.display='none';document.getElementById('capture-btn').style.display='flex';document.getElementById('capture-btn').textContent='📸 Capture Selfie';document.getElementById('retake-btn').style.display='none';document.getElementById('submit-btn').style.display='none';document.getElementById('step-label').textContent='Step 2: Take your selfie';startCamera()}
-// ── AI-POWERED ATTENDANCE SUBMISSION ──
+function retakeSelfie(){capturedSelfie=null;capturedClassroom=null;cameraStep='selfie';document.getElementById('selfie-preview').style.display='none';document.getElementById('capture-btn').style.display='flex';document.getElementById('capture-btn').textContent=' Capture Selfie';document.getElementById('retake-btn').style.display='none';document.getElementById('submit-btn').style.display='none';document.getElementById('step-label').textContent='Step 2: Take your selfie';startCamera()}
+//  AI-POWERED ATTENDANCE SUBMISSION 
 // Replace the existing submitAttendance() and captureSelfie() functions
 // in pages/student/dashboard.php with these
 
@@ -717,10 +717,10 @@ async function captureSelfie() {
   if (cameraStep === 'selfie') {
     capturedSelfie = canvas.toDataURL('image/jpeg', 0.8);
 
-    // ── AI Face Verification ──
+    //  AI Face Verification 
     document.getElementById('step-label').textContent = 'Verifying face with AI...';
     document.getElementById('capture-btn').disabled = true;
-    document.getElementById('capture-btn').textContent = '🤖 Verifying...';
+    document.getElementById('capture-btn').textContent = ' Verifying...';
 
     try {
       const faceRes = await fetch(API + '/ai_verify.php', {
@@ -734,7 +734,7 @@ async function captureSelfie() {
         // Face not verified — retake
         capturedSelfie = null;
         document.getElementById('capture-btn').disabled = false;
-        document.getElementById('capture-btn').textContent = '📸 Capture Selfie';
+        document.getElementById('capture-btn').textContent = ' Capture Selfie';
         document.getElementById('step-label').textContent = 'Step 2: Take your selfie';
         document.getElementById('code-error') && (document.getElementById('code-error').style.display = 'none');
         const errEl = document.getElementById('submit-error');
@@ -749,7 +749,7 @@ async function captureSelfie() {
 
     // Face verified — switch to classroom
     document.getElementById('selfie-preview').src = capturedSelfie;
-    document.getElementById('capture-btn').textContent = '📸 Capture Classroom';
+    document.getElementById('capture-btn').textContent = ' Capture Classroom';
     document.getElementById('capture-btn').disabled = false;
     document.getElementById('retake-btn').style.display = 'flex';
     document.getElementById('video-preview').style.display = 'block';
@@ -770,10 +770,10 @@ async function captureSelfie() {
     // Classroom capture
     capturedClassroom = canvas.toDataURL('image/jpeg', 0.8);
 
-    // ── AI Classroom Verification ──
+    //  AI Classroom Verification 
     document.getElementById('step-label').textContent = 'Verifying classroom with AI...';
     document.getElementById('capture-btn').disabled = true;
-    document.getElementById('capture-btn').textContent = '🤖 Verifying...';
+    document.getElementById('capture-btn').textContent = ' Verifying...';
 
     try {
       const classRes = await fetch(API + '/ai_verify.php', {
@@ -786,7 +786,7 @@ async function captureSelfie() {
       if (!classData.success) {
         capturedClassroom = null;
         document.getElementById('capture-btn').disabled = false;
-        document.getElementById('capture-btn').textContent = '📸 Capture Classroom';
+        document.getElementById('capture-btn').textContent = ' Capture Classroom';
         document.getElementById('step-label').textContent = 'Step 3: Show your classroom';
         const errEl = document.getElementById('submit-error');
         errEl.textContent = classData.message || 'Not a classroom. Show desks and other students.';
@@ -804,7 +804,7 @@ async function captureSelfie() {
     document.getElementById('capture-btn').style.display = 'none';
     document.getElementById('video-preview').style.display = 'none';
     document.getElementById('submit-btn').style.display = 'flex';
-    document.getElementById('step-label').textContent = '✓ AI verified — ready to submit';
+    document.getElementById('step-label').textContent = ' AI verified — ready to submit';
     document.getElementById('dot-class').className = 'step-dot done';
     stopCamera();
   }
@@ -830,7 +830,7 @@ async function submitAttendance() {
     if (data.success) {
       document.getElementById('step-selfie-section').innerHTML = `
         <div class="pending-card" style="margin-top:1rem;border-color:rgba(76,175,130,.3)">
-          <div class="pending-icon">🤖✓</div>
+          <div class="pending-icon"></div>
           <div class="pending-title" style="color:var(--success)">AI Verified & Submitted!</div>
           <div class="pending-sub">Your attendance has been verified and submitted successfully.</div>
         </div>`;
@@ -846,8 +846,8 @@ async function submitAttendance() {
   }
 }
 
-function toggleTheme(){const body=document.body;const btn=document.getElementById('theme-btn');if(body.classList.contains('light')){body.classList.remove('light');localStorage.setItem('theme','dark');if(btn)btn.textContent='🌙';}else{body.classList.add('light');localStorage.setItem('theme','light');if(btn)btn.textContent='☀️';}}
-(function(){if(localStorage.getItem('theme')==='light'){document.body.classList.add('light');const btn=document.getElementById('theme-btn');if(btn)btn.textContent='☀️';}})();
+function toggleTheme(){const body=document.body;const btn=document.getElementById('theme-btn');if(body.classList.contains('light')){body.classList.remove('light');localStorage.setItem('theme','dark');if(btn)btn.textContent='';}else{body.classList.add('light');localStorage.setItem('theme','light');if(btn)btn.textContent='';}}
+(function(){if(localStorage.getItem('theme')==='light'){document.body.classList.add('light');const btn=document.getElementById('theme-btn');if(btn)btn.textContent='';}})();
 
 const csrfToken="<?= csrfToken() ?>";
 const originalFetch=window.fetch;

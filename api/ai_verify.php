@@ -155,7 +155,7 @@ if ($type === 'face') {
         echo json_encode([
             'success'    => true,
             'confidence' => $confidence,
-            'message'    => 'Face verified ✓',
+            'message'    => 'Face verified ',
         ]);
     }
 
@@ -194,7 +194,7 @@ if ($type === 'face') {
         echo json_encode([
             'success'    => true,
             'confidence' => $confidence,
-            'message'    => 'Classroom verified ✓',
+            'message'    => 'Classroom verified ',
             'indicators' => $indicators
         ]);
     }

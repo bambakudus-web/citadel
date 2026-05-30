@@ -232,7 +232,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;background:radial-gradi
 .type-features-title{font-size:.65rem;letter-spacing:.15em;text-transform:uppercase;color:var(--steel);margin-bottom:.5rem}
 .type-features ul{list-style:none;padding:0}
 .type-features ul li{font-size:.75rem;color:var(--muted);padding:.2rem 0;display:flex;align-items:center;gap:.4rem}
-.type-features ul li::before{content:'✓';color:var(--success);font-size:.7rem}
+.type-features ul li::before{content:'';color:var(--success);font-size:.7rem}
 
 /* Form sections that show/hide per type */
 .form-section{display:none}
@@ -269,7 +269,7 @@ input,select,textarea{font-size:16px!important}
       <?php endif; ?>
       <?php if ($success): ?>
         <div class="alert alert-success">
-          ✓ Registration submitted! Your institution is pending approval.<br><br>
+           Registration submitted! Your institution is pending approval.<br><br>
           Your school code is: <strong><?= strtoupper(htmlspecialchars($schoolCode)) ?></strong><br>
           Share this with your staff and students to log in.
         </div>
@@ -282,11 +282,11 @@ input,select,textarea{font-size:16px!important}
         <div class="field">
           <label>What type of institution are you registering?</label>
           <select name="inst_type" id="inst-type-select" onchange="selectType(this.value)" required>
-            <option value="university" <?= $selectedType==='university'?'selected':'' ?>>🎓 University / Polytechnic / College</option>
-            <option value="shs" <?= $selectedType==='shs'?'selected':'' ?>>🏫 Senior High School (SHS)</option>
-            <option value="jhs" <?= $selectedType==='jhs'?'selected':'' ?>>📚 Junior High School (JHS)</option>
-            <option value="primary" <?= $selectedType==='primary'?'selected':'' ?>>✏️ Primary School</option>
-            <option value="other" <?= $selectedType==='other'?'selected':'' ?>>🏢 Other Institution</option>
+            <option value="university" <?= $selectedType==='university'?'selected':'' ?>> University / Polytechnic / College</option>
+            <option value="shs" <?= $selectedType==='shs'?'selected':'' ?>> Senior High School (SHS)</option>
+            <option value="jhs" <?= $selectedType==='jhs'?'selected':'' ?>> Junior High School (JHS)</option>
+            <option value="primary" <?= $selectedType==='primary'?'selected':'' ?>> Primary School</option>
+            <option value="other" <?= $selectedType==='other'?'selected':'' ?>> Other Institution</option>
           </select>
         </div>
 

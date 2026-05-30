@@ -174,7 +174,7 @@ html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:'DM
   </div>
 
   <div style="text-align:center;margin-top:1rem">
-    <a href="../../change_password.php" style="color:var(--muted);font-size:.8rem;text-decoration:none">🔑 Change Password</a>
+    <a href="../../change_password.php" style="color:var(--muted);font-size:.8rem;text-decoration:none"> Change Password</a>
   </div>
 </div>
 </body>

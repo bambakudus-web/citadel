@@ -14,7 +14,7 @@ try {
     $pdo->exec("ALTER TABLE users ADD COLUMN IF NOT EXISTS reset_expires DATETIME DEFAULT NULL");
 } catch(Exception $e) {}
 
-// ── If token in URL → show reset form ──
+//  If token in URL → show reset form 
 if ($token && $_SERVER['REQUEST_METHOD'] === 'GET') {
     $stmt = $pdo->prepare("SELECT id, full_name FROM users WHERE reset_token=? AND reset_expires > NOW() LIMIT 1");
     $stmt->execute([$token]);
@@ -166,7 +166,7 @@ input,select,textarea{font-size:16px!important}
       </form>
 
     <?php elseif($step === 'sent'): ?>
-      <div class="sent-icon">📧</div>
+      <div class="sent-icon"></div>
       <div class="alert ok"><?= htmlspecialchars($success) ?></div>
       <p class="hint" style="text-align:center">Check your inbox for the reset link. It expires in 1 hour.<br><br>Don't see it? Check your spam folder.</p>
 
@@ -182,7 +182,7 @@ input,select,textarea{font-size:16px!important}
 
     <?php elseif($step === 'done'): ?>
       <div style="text-align:center;padding:1rem 0">
-        <div style="font-size:3rem;margin-bottom:1rem">✓</div>
+        <div style="font-size:3rem;margin-bottom:1rem"></div>
         <div class="alert ok"><?= htmlspecialchars($success) ?></div>
         <p class="hint" style="text-align:center">You can now sign in with your new password.</p>
         <a href="index.php" class="btn">Go to Login</a>

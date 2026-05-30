@@ -125,14 +125,14 @@ function toggleSidebar(){var sb=document.getElementById('sidebar');var ov=docume
   <div class="sb-brand"><div><div class="sb-logo">CITADEL</div><div class="sb-role">Super Admin</div></div></div>
   <nav class="sb-nav">
     <div class="sb-sec">Platform</div>
-    <a href="dashboard.php" class="sb-a">📊 Overview</a>
-    <a href="schools.php" class="sb-a">🏫 Schools</a>
-    <a href="users.php" class="sb-a">👥 All Users</a>
-    <a href="activity.php" class="sb-a">📋 Activity Log</a>
+    <a href="dashboard.php" class="sb-a"> Overview</a>
+    <a href="schools.php" class="sb-a"> Schools</a>
+    <a href="users.php" class="sb-a"> All Users</a>
+    <a href="activity.php" class="sb-a"> Activity Log</a>
     <div class="sb-sec">Tools</div>
-    <a href="announcements.php" class="sb-a on">📣 Announcements</a>
-    <a href="export.php" class="sb-a">💾 Export Data</a>
-    <a href="../../onboard.php" class="sb-a">➕ Add School</a>
+    <a href="announcements.php" class="sb-a on"> Announcements</a>
+    <a href="export.php" class="sb-a"> Export Data</a>
+    <a href="../../onboard.php" class="sb-a"> Add School</a>
   </nav>
   <div class="sb-foot">
     <div style="display:flex;align-items:center;gap:.6rem">
@@ -143,7 +143,7 @@ function toggleSidebar(){var sb=document.getElementById('sidebar');var ov=docume
   </div>
 </aside>
 <main class="main">
-  <button class="menu-toggle" id="menu-toggle" onclick="toggleSidebar()">☰</button>
+  <button class="menu-toggle" id="menu-toggle" onclick="toggleSidebar()"></button>
   <div style="margin-bottom:1.5rem">
     <div class="pt">Announcements</div>
     <div class="ps">Broadcast messages to school admins</div>
@@ -163,7 +163,7 @@ function toggleSidebar(){var sb=document.getElementById('sidebar');var ov=docume
           </div>
           <div class="df"><label>Subject</label><input type="text" id="ann-subj" placeholder="e.g. New Feature Available"></div>
           <div class="df"><label>Message</label><textarea id="ann-msg" placeholder="Write your announcement here..."></textarea></div>
-          <button class="bg" onclick="sendBroadcast()">📣 Send Broadcast</button>
+          <button class="bg" onclick="sendBroadcast()"> Send Broadcast</button>
         </div>
       </div>
     </div>
@@ -178,7 +178,7 @@ function toggleSidebar(){var sb=document.getElementById('sidebar');var ov=docume
           <div class="fd"></div>
           <div style="flex:1">
             <div class="fa">Broadcast sent</div>
-            <div class="fm">✅ <?php echo $m[1]??'?'; ?> sent · ❌ <?php echo $m[2]??'0'; ?> failed · Target: <?php echo ucfirst($m[3]??'all'); ?></div>
+            <div class="fm"> <?php echo $m[1]??'?'; ?> sent ·  <?php echo $m[2]??'0'; ?> failed · Target: <?php echo ucfirst($m[3]??'all'); ?></div>
           </div>
           <div class="ft"><?php echo date('d M H:i', strtotime($b['created_at'])); ?></div>
         </div>
@@ -200,7 +200,7 @@ async function sendBroadcast(){
   if(!subj||!msg){toast('Subject and message required','err');return;}
   const btn=document.querySelector('.bg');btn.textContent='Sending...';btn.disabled=true;
   const r=await(await fetch('announcements.php',{method:'POST',body:new URLSearchParams({action:'broadcast',subject:subj,message:msg,target:selTgt})})).json();
-  btn.textContent='📣 Send Broadcast';btn.disabled=false;
+  btn.textContent=' Send Broadcast';btn.disabled=false;
   if(r.ok){toast(`Sent to ${r.sent} schools!${r.failed?' ('+r.failed+' failed)':''}`);document.getElementById('ann-msg').value='';setTimeout(()=>location.reload(),2000);}
   else toast(r.msg||'Error','err');
 }

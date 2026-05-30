@@ -96,14 +96,14 @@ a{color:inherit;text-decoration:none}
   <div class="sb-brand"><div><div class="sb-logo">CITADEL</div><div class="sb-role">Super Admin</div></div></div>
   <nav class="sb-nav">
     <div class="sb-sec">Platform</div>
-    <a href="dashboard.php" class="sb-a">📊 Overview</a>
-    <a href="schools.php" class="sb-a">🏫 Schools</a>
-    <a href="users.php" class="sb-a">👥 All Users</a>
-    <a href="activity.php" class="sb-a">📋 Activity Log</a>
+    <a href="dashboard.php" class="sb-a"> Overview</a>
+    <a href="schools.php" class="sb-a"> Schools</a>
+    <a href="users.php" class="sb-a"> All Users</a>
+    <a href="activity.php" class="sb-a"> Activity Log</a>
     <div class="sb-sec">Tools</div>
-    <a href="announcements.php" class="sb-a">📣 Announcements</a>
-    <a href="export.php" class="sb-a on">💾 Export Data</a>
-    <a href="../../onboard.php" class="sb-a">➕ Add School</a>
+    <a href="announcements.php" class="sb-a"> Announcements</a>
+    <a href="export.php" class="sb-a on"> Export Data</a>
+    <a href="../../onboard.php" class="sb-a"> Add School</a>
   </nav>
   <div class="sb-foot">
     <div style="display:flex;align-items:center;gap:.6rem">
@@ -114,42 +114,42 @@ a{color:inherit;text-decoration:none}
   </div>
 </aside>
 <main class="main">
-  <button class="menu-toggle" id="menu-toggle" onclick="toggleSidebar()">☰</button>
+  <button class="menu-toggle" id="menu-toggle" onclick="toggleSidebar()"></button>
   <div style="margin-bottom:1.5rem">
     <div class="pt">Export Data</div>
     <div class="ps">Download platform data as CSV files</div>
   </div>
   <div class="export-grid">
     <div class="ecard">
-      <div class="ecard-icon">🏫</div>
+      <div class="ecard-icon"></div>
       <div class="ecard-title">Institutions</div>
       <div class="ecard-count"><?php echo number_format($stats['institutions']); ?></div>
       <div class="ecard-sub">All registered schools</div>
       <a href="export.php?type=institutions">↓ Download CSV</a>
     </div>
     <div class="ecard">
-      <div class="ecard-icon">👥</div>
+      <div class="ecard-icon"></div>
       <div class="ecard-title">Users</div>
       <div class="ecard-count"><?php echo number_format($stats['users']); ?></div>
       <div class="ecard-sub">All students, lecturers & admins</div>
       <a href="export.php?type=users">↓ Download CSV</a>
     </div>
     <div class="ecard">
-      <div class="ecard-icon">✅</div>
+      <div class="ecard-icon"></div>
       <div class="ecard-title">Attendance</div>
       <div class="ecard-count"><?php echo number_format($stats['attendance']); ?></div>
       <div class="ecard-sub">All attendance records (max 50k)</div>
       <a href="export.php?type=attendance">↓ Download CSV</a>
     </div>
     <div class="ecard">
-      <div class="ecard-icon">🕐</div>
+      <div class="ecard-icon"></div>
       <div class="ecard-title">Sessions</div>
       <div class="ecard-count"><?php echo number_format($stats['sessions']); ?></div>
       <div class="ecard-sub">All attendance sessions</div>
       <a href="export.php?type=sessions">↓ Download CSV</a>
     </div>
   </div>
-  <div class="note">💡 Exports are generated in real-time. Large datasets may take a few seconds to download. Attendance export is capped at 50,000 records.</div>
+  <div class="note"> Exports are generated in real-time. Large datasets may take a few seconds to download. Attendance export is capped at 50,000 records.</div>
 </main>
 </div>
 </body></html>

@@ -57,7 +57,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
 $user = currentUser();
 
-// ── Stats ──
+//  Stats 
 $inst_id = (int)($_SESSION['institution_id'] ?? 1);
 
 $totalStudents   = $pdo->query("SELECT COUNT(*) FROM users WHERE role='student' AND institution_id=$inst_id")->fetchColumn();
@@ -65,21 +65,21 @@ $totalLecturers  = $pdo->query("SELECT COUNT(*) FROM users WHERE role='lecturer'
 $totalSessions   = $pdo->query("SELECT COUNT(*) FROM sessions s JOIN users u ON u.id=s.lecturer_id WHERE u.institution_id=$inst_id")->fetchColumn();
 $todayAttendance = $pdo->query("SELECT COUNT(*) FROM attendance a JOIN sessions s ON s.id=a.session_id JOIN users u ON u.id=s.lecturer_id WHERE DATE(a.timestamp)=CURDATE() AND u.institution_id=$inst_id")->fetchColumn();
 
-// ── Today's timetable ──
+//  Today's timetable 
 $today = date('l');
 $activeSemId = $activeSemester["id"] ?? 0;
 $todayClasses = $pdo->prepare("SELECT t.*, u.full_name as lecturer_name FROM timetable t JOIN users u ON t.lecturer_id=u.id WHERE t.day_of_week=? AND u.institution_id=$inst_id AND (t.semester_id=? OR t.semester_id IS NULL) ORDER BY t.start_time");
 $todayClasses->execute([$today, $activeSemId]);
 $todayClasses = $todayClasses->fetchAll();
 
-// ── Recent activity ──
+//  Recent activity 
 $recentActivity = $pdo->query("
     SELECT a.timestamp, u.full_name, u.index_no, s.course_code, a.status
     FROM attendance a JOIN users u ON a.student_id=u.id JOIN sessions s ON a.session_id=s.id WHERE u.institution_id=$inst_id
     ORDER BY a.timestamp DESC LIMIT 10
 ")->fetchAll();
 
-// ── Students ──
+//  Students 
 $students = $pdo->query("
     SELECT u.*, COUNT(DISTINCT s.id) as total_sessions,
     SUM(CASE WHEN a.status IN ('present','late') THEN 1 ELSE 0 END) as attended,
@@ -87,7 +87,7 @@ $students = $pdo->query("
     FROM users u LEFT JOIN attendance a ON u.id=a.student_id LEFT JOIN sessions s ON a.session_id=s.id WHERE u.institution_id=$inst_id AND u.role='student' AND u.institution_id=$inst_id GROUP BY u.id ORDER BY attendance_pct ASC, u.full_name
 ")->fetchAll();
 
-// ── Sessions ──
+//  Sessions 
 $sessions = $pdo->query("
     SELECT s.*, u.full_name as lecturer_name, COUNT(a.id) as attendance_count
     FROM sessions s JOIN users u ON s.lecturer_id=u.id LEFT JOIN attendance a ON s.id=a.session_id
@@ -120,7 +120,7 @@ if ($activeSession) {
     $la->execute([$activeSession['id']]); $liveAttendance = $la->fetchAll();
 }
 
-// ── NEW: Semester & Course data ──
+//  NEW: Semester & Course data 
 $activeSemester = $pdo->query("SELECT * FROM semesters WHERE is_active=1 AND institution_id=$inst_id LIMIT 1")->fetch();
 $activeSemId    = $activeSemester['id'] ?? null;
 
@@ -165,7 +165,7 @@ $auditLog = $pdo->query("
 $devs = $pdo->query("SELECT id, full_name, index_no, device_fingerprint, is_locked, login_attempts FROM users WHERE role IN ('student','rep','lecturer') AND institution_id=$inst_id ORDER BY is_locked DESC, full_name")->fetchAll();
 $lockedUsers = $pdo->query("SELECT id, full_name, index_no, role, login_attempts FROM users WHERE is_locked=1 AND institution_id=$inst_id ORDER BY full_name")->fetchAll();
 
-// ── Code gen ──
+//  Code gen 
 function generateCode(string $secret, int $window): string {
     $hash = hash_hmac('sha256', (string)$window, $secret);
     $offset = hexdec(substr($hash, -1)) & 0xf;
@@ -287,7 +287,7 @@ input,select,textarea{font-size:16px!important}
 
 input,select,textarea{font-size:16px!important}
 
-/* ═══ MOBILE - CLEAN ═══ */
+/*  MOBILE - CLEAN  */
 @media(max-width:768px){
   .sidebar{
     width:260px!important;
@@ -515,7 +515,7 @@ document.addEventListener('DOMContentLoaded',function(){
 <body>
 <div class="layout">
 
-<!-- ── Sidebar ── -->
+<!--  Sidebar  -->
 <div id="sidebar-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:400;backdrop-filter:blur(2px)"></div>
 <aside class="sidebar" id="sidebar">
   <div class="sidebar-brand">
@@ -575,7 +575,7 @@ document.addEventListener('DOMContentLoaded',function(){
     </a>
     <a class="nav-item" onclick="showSection('live',this)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-      <?= $activeSession ? '🟢 Live Session' : 'Live Session' ?>
+      <?= $activeSession ? ' Live Session' : 'Live Session' ?>
     </a>
     <a class="nav-item" onclick="showSection('locked',this)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Locked Accounts<?php if(!empty($lockedUsers)): ?> <span style="background:var(--danger);color:#fff;font-size:.6rem;padding:.1rem .35rem;border-radius:2px;margin-left:auto"><?= count($lockedUsers) ?></span><?php endif ?>
@@ -584,11 +584,11 @@ document.addEventListener('DOMContentLoaded',function(){
   </nav>
   <div class="sidebar-footer">
     Logged in as <strong style="color:var(--text)"><?= htmlspecialchars($user['full_name'] ?? 'Admin') ?></strong><br>
-    <div class="sidebar-user-actions"><a href="../../change_password.php" class="btn-pwd">🔑 Password</a><a href="../../logout.php" class="btn-out">Sign Out</a></div>
+    <div class="sidebar-user-actions"><a href="../../change_password.php" class="btn-pwd"> Password</a><a href="../../logout.php" class="btn-out">Sign Out</a></div>
   </div>
 </aside>
 
-<!-- ── Main ── -->
+<!--  Main  -->
 <div class="main">
   <div class="topbar">
     <div style="display:flex;align-items:center;gap:1rem">
@@ -605,13 +605,13 @@ document.addEventListener('DOMContentLoaded',function(){
       <?php endif; ?>
       <span class="hide-mobile" style="font-size:.75rem;color:var(--muted);white-space:nowrap"><?= date('l, d M Y') ?></span>
       <span class="badge-admin"><?= strtoupper($instType) ?></span>
-      <button id="theme-btn" onclick="toggleTheme()" style="background:none;border:1px solid var(--border);color:var(--muted);cursor:pointer;padding:.25rem .6rem;border-radius:2px;font-size:.75rem">🌙</button>
+      <button id="theme-btn" onclick="toggleTheme()" style="background:none;border:1px solid var(--border);color:var(--muted);cursor:pointer;padding:.25rem .6rem;border-radius:2px;font-size:.75rem"></button>
     </div>
   </div>
 
   <div class="content">
 
-    <!-- ══ OVERVIEW ══ -->
+    <!--  OVERVIEW  -->
     <div class="page-section active" id="sec-overview">
       <div class="stats-grid">
         <div class="stat-card gold"><div class="stat-label">Total Students</div><div class="stat-value"><?= $totalStudents ?></div><div class="stat-sub">Active in system</div></div>
@@ -630,7 +630,7 @@ document.addEventListener('DOMContentLoaded',function(){
                 <div class="tt-course">
                   <div class="tt-course-code"><?= htmlspecialchars($c['course_code']) ?></div>
                   <div class="tt-course-name"><?= htmlspecialchars($c['course_name']) ?></div>
-                  <div class="tt-room">📍 <?= htmlspecialchars($c['room']) ?> · <?= htmlspecialchars($c['lecturer_name']) ?></div>
+                  <div class="tt-room"> <?= htmlspecialchars($c['room']) ?> · <?= htmlspecialchars($c['lecturer_name']) ?></div>
                 </div>
               </div>
             <?php endforeach; ?></div><?php endif; ?>
@@ -655,7 +655,7 @@ document.addEventListener('DOMContentLoaded',function(){
       <div class="card" style="margin-bottom:1.5rem" id="charts-card"><div class="card-head"><div class="card-head-title">Attendance <span>Analytics</span></div></div><div class="card-body"><div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem" class="charts-grid"><div><canvas id="chart-attendance-trend" height="200"></canvas></div><div><canvas id="chart-course-rates" height="200"></canvas></div></div></div></div>
     </div>
 
-     <!-- ══ TIMETABLE ══ -->
+     <!--  TIMETABLE  -->
     <div class="page-section" id="sec-timetable">
       <div class="section-header">
         <div class="section-title">Class <span>Timetable</span></div>
@@ -688,7 +688,7 @@ $ttAll = $ttStmt->fetchAll();
               <div class="tt-course" style="flex:1">
                 <div class="tt-course-code"><?= htmlspecialchars($c['course_code']) ?></div>
                 <div class="tt-course-name"><?= htmlspecialchars($c['course_name']) ?></div>
-                <div class="tt-room">📍 <?= htmlspecialchars($c['room'] ?? '') ?> · <?= htmlspecialchars($c['lecturer_name'] ?? '—') ?></div>
+                <div class="tt-room"> <?= htmlspecialchars($c['room'] ?? '') ?> · <?= htmlspecialchars($c['lecturer_name'] ?? '—') ?></div>
               </div>
               <div style="display:flex;gap:.4rem;flex-shrink:0">
                 <button class="btn btn-ghost btn-sm" onclick="editSlot(<?= $c['id'] ?>,'<?= $c['day_of_week'] ?>','<?= substr($c['start_time'],0,5) ?>','<?= substr($c['end_time'],0,5) ?>','<?= htmlspecialchars(addslashes($c['course_code'])) ?>','<?= htmlspecialchars(addslashes($c['course_name'])) ?>','<?= htmlspecialchars(addslashes($c['room'] ?? '')) ?>',<?= $c['lecturer_id'] ?? 'null' ?>)">Edit</button>
@@ -703,7 +703,7 @@ $ttAll = $ttStmt->fetchAll();
       <?php endif; ?>
     </div>
 
-    <!-- ══ SEMESTERS ══ -->
+    <!--  SEMESTERS  -->
     <div class="page-section" id="sec-semesters">
       <div class="section-header">
         <div class="section-title">Semester <span>Management</span></div>
@@ -738,7 +738,7 @@ $ttAll = $ttStmt->fetchAll();
       </div></div>
     </div>
 
-    <!-- ══ PROGRAMS ══ -->
+    <!--  PROGRAMS  -->
     <div class="page-section" id="sec-programs">
       <div class="section-header">
         <div class="section-title"><?= terms('program', $instType) ?> <span>Management</span></div>
@@ -769,7 +769,7 @@ $ttAll = $ttStmt->fetchAll();
       </div></div>
     </div>
 
-    <!-- ══ COURSES ══ -->
+    <!--  COURSES  -->
     <div class="page-section" id="sec-courses">
       <div class="section-header">
         <div class="section-title"><?= terms('course', $instType) ?> <span>Management</span><?php if($activeSemester): ?><span style="font-size:.65rem;color:var(--muted);font-family:'DM Sans',sans-serif;letter-spacing:.1em;margin-left:.8rem"><?= htmlspecialchars($activeSemester['name']) ?></span><?php endif; ?></div>
@@ -794,7 +794,7 @@ $ttAll = $ttStmt->fetchAll();
       </div></div>
     </div>
 
-    <!-- ══ LECTURERS ══ -->
+    <!--  LECTURERS  -->
     <div class="page-section" id="sec-lecturers">
       <div class="section-header">
         <div class="section-title"><?= terms('lecturer', $instType) ?> <span>Registry</span></div>
@@ -819,12 +819,12 @@ $ttAll = $ttStmt->fetchAll();
       </div></div>
     </div>
 
-    <!-- ══ STUDENTS ══ -->
+    <!--  STUDENTS  -->
     <div class="page-section" id="sec-students">
       <div class="section-header">
         <div class="section-title">Student <span>Registry</span></div>
         <button class="btn btn-gold" onclick="openModal('modal-add-student')">+ Add Student</button>
-        <button class="btn btn-ghost" onclick="openModal('modal-import-csv')">⬆ Import CSV</button>
+        <button class="btn btn-ghost" onclick="openModal('modal-import-csv')"> Import CSV</button>
       </div>
       <div class="filter-bar"><input type="text" id="student-search" placeholder="Search name or index number..." oninput="filterStudents()"></div>
       <div class="card"><div class="card-body" style="padding:0;overflow-x:auto">
@@ -839,9 +839,9 @@ $ttAll = $ttStmt->fetchAll();
               <td class="hide-mobile" style="color:var(--muted);font-size:.78rem"><?= $s['email'] ?></td>
               <td class="hide-mobile"><span class="pill pill-<?= $s['role']==='rep'?'gold':'steel' ?>"><?= $s['role'] ?></span></td>
               <?php $pct=$s['attendance_pct']??0; $color=$pct>=75?'var(--success)':($pct>=50?'var(--warning)':'var(--danger)'); ?>
-              <td class="hide-mobile"><div style="display:flex;align-items:center;gap:.5rem"><div style="width:60px;height:5px;background:var(--border);border-radius:3px"><div style="width:<?= min($pct,100) ?>%;height:100%;background:<?= $color ?>;border-radius:3px"></div></div><span style="font-size:.75rem;color:<?= $color ?>;font-weight:600"><?= $pct ?>%</span><?php if($pct<75&&$s['total_sessions']>3): ?><span title="Below 75%" style="color:var(--danger);font-size:.8rem">⚠</span><?php endif; ?></div></td>
+              <td class="hide-mobile"><div style="display:flex;align-items:center;gap:.5rem"><div style="width:60px;height:5px;background:var(--border);border-radius:3px"><div style="width:<?= min($pct,100) ?>%;height:100%;background:<?= $color ?>;border-radius:3px"></div></div><span style="font-size:.75rem;color:<?= $color ?>;font-weight:600"><?= $pct ?>%</span><?php if($pct<75&&$s['total_sessions']>3): ?><span title="Below 75%" style="color:var(--danger);font-size:.8rem"></span><?php endif; ?></div></td>
               <td>
-                <a href="../../api/attendance_certificate.php?student_id=<?= $s['id'] ?>" class="btn btn-ghost btn-sm" style="text-decoration:none">⬇ Cert</a>
+                <a href="../../api/attendance_certificate.php?student_id=<?= $s['id'] ?>" class="btn btn-ghost btn-sm" style="text-decoration:none"> Cert</a>
                 <button class="btn btn-ghost btn-sm" onclick="editStudent(<?= $s['id'] ?>,'<?= htmlspecialchars(addslashes($s['full_name'])) ?>','<?= $s['index_no'] ?>','<?= $s['email'] ?>','<?= $s['role'] ?>',<?= $s['is_locked'] ?>,'<?= $s['device_fingerprint']?'registered':'none' ?>')">Edit</button>
               </td>
             </tr>
@@ -851,7 +851,7 @@ $ttAll = $ttStmt->fetchAll();
       </div></div>
     </div>
 
-    <!-- ══ SESSIONS ══ -->
+    <!--  SESSIONS  -->
     <div class="page-section" id="sec-sessions">
       <div class="section-header"><div class="section-title">Attendance <span>Sessions</span></div></div>
       <div class="card"><div class="card-body" style="padding:0;overflow-x:auto">
@@ -871,13 +871,13 @@ $ttAll = $ttStmt->fetchAll();
       </div></div>
     </div>
 
-    <!-- ══ ATTENDANCE ══ -->
+    <!--  ATTENDANCE  -->
     <div class="page-section" id="sec-attendance">
       <div class="section-header">
         <div class="section-title">Attendance <span>Records</span></div>
         <div style="display:flex;gap:.6rem;flex-wrap:wrap">
-          <a href="../../api/export_attendance.php" class="btn btn-ghost btn-sm">⬇ Export All</a>
-          <a href="../../api/export_attendance.php?from=<?= date('Y-m-d') ?>&to=<?= date('Y-m-d') ?>" class="btn btn-ghost btn-sm">⬇ Today</a>
+          <a href="../../api/export_attendance.php" class="btn btn-ghost btn-sm"> Export All</a>
+          <a href="../../api/export_attendance.php?from=<?= date('Y-m-d') ?>&to=<?= date('Y-m-d') ?>" class="btn btn-ghost btn-sm"> Today</a>
         </div>
       </div>
       <div class="filter-bar">
@@ -900,14 +900,14 @@ $ttAll = $ttStmt->fetchAll();
             <td class="hide-mobile"><?= $r['course_code'] ?></td>
             <td><span class="pill pill-<?= $r['status']==='present'?'green':($r['status']==='late'?'gold':'red') ?>"><?= $r['status'] ?></span></td>
             <td class="hide-mobile" style="color:var(--muted);font-size:.75rem"><?= date('d M Y H:i',strtotime($r['timestamp'])) ?></td>
-            <td class="hide-mobile"><?= $r['selfie_url']?'<span class="pill pill-green">✓</span>':'<span class="pill pill-red">—</span>' ?></td>
+            <td class="hide-mobile"><?= $r['selfie_url']?'<span class="pill pill-green"></span>':'<span class="pill pill-red">—</span>' ?></td>
           </tr>
         <?php endforeach; endif; ?>
         </tbody></table>
       </div></div>
     </div>
 
-    <!-- ══ AUDIT LOG ══ -->
+    <!--  AUDIT LOG  -->
     <div class="page-section" id="sec-audit">
       <div class="section-header"><div class="section-title">System <span>Audit Log</span></div></div>
       <div class="card"><div class="card-body">
@@ -922,7 +922,7 @@ $ttAll = $ttStmt->fetchAll();
       </div></div>
     </div>
 
-    <!-- ══ LIVE SESSION ══ -->
+    <!--  LIVE SESSION  -->
     <div class="page-section" id="sec-live">
       <div class="section-header"><div class="section-title">Live <span>Session</span></div></div>
       <?php if($activeSession): ?>
@@ -946,9 +946,9 @@ $ttAll = $ttStmt->fetchAll();
       <?php endif; ?>
     </div>
 
-    <!-- ══ SESSION HISTORY ══ -->
+    <!--  SESSION HISTORY  -->
     <div class="page-section" id="sec-history">
-      <div class="section-header"><div class="section-title">Session <span>History</span></div><a href="../../api/export_attendance.php" class="btn btn-ghost btn-sm">⬇ Export All CSV</a></div>
+      <div class="section-header"><div class="section-title">Session <span>History</span></div><a href="../../api/export_attendance.php" class="btn btn-ghost btn-sm"> Export All CSV</a></div>
       <div class="card"><div class="card-body" style="padding:0;overflow-x:auto">
         <table class="data-table"><thead><tr><th>Course</th><th>Present</th><th class="hide-mobile">Late</th><th>Absent</th><th>Export</th></tr></thead><tbody>
         <?php if(empty($sessionHistory)): ?><tr><td colspan="5" style="color:var(--muted)">No past sessions yet.</td></tr>
@@ -958,20 +958,20 @@ $ttAll = $ttStmt->fetchAll();
             <td><span class="pill pill-green"><?= $sh['present_count'] ?></span></td>
             <td class="hide-mobile"><span class="pill pill-gold"><?= $sh['late_count'] ?></span></td>
             <td><span class="pill pill-red"><?= $sh['absent_count'] ?></span></td>
-            <td><a href="../../api/export_attendance.php?session_id=<?= $sh['id'] ?>" class="btn btn-ghost btn-sm">⬇ CSV</a></td>
+            <td><a href="../../api/export_attendance.php?session_id=<?= $sh['id'] ?>" class="btn btn-ghost btn-sm"> CSV</a></td>
           </tr>
         <?php endforeach; endif; ?>
         </tbody></table>
       </div></div>
     </div>
 
-    <!-- ══ ANNOUNCEMENTS ══ -->
+    <!--  ANNOUNCEMENTS  -->
     <div class="page-section" id="sec-announce">
       <div class="section-header"><div class="section-title">Class <span>Announcements</span></div></div>
       <div class="card" style="margin-bottom:1.5rem"><div class="card-head"><div class="card-head-title">Post Announcement</div></div><div class="card-body">
         <form method="POST"><input type="hidden" name="csrf_token" value="<?= csrfToken() ?>"><input type="hidden" name="action" value="announce">
           <div class="form-field"><label>Message</label><textarea name="message" required style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:.75rem;border-radius:2px;font-family:'DM Sans',sans-serif;min-height:80px;resize:vertical"></textarea></div>
-          <button type="submit" class="btn btn-gold">📢 Post to Class</button>
+          <button type="submit" class="btn btn-gold"> Post to Class</button>
         </form>
       </div></div>
       <div class="card"><div class="card-head"><div class="card-head-title">Recent Announcements</div></div><div class="card-body" style="padding:0;overflow-x:auto">
@@ -988,12 +988,12 @@ $ttAll = $ttStmt->fetchAll();
 </div><!-- /main -->
 </div><!-- /layout -->
 
-<!-- ══ MODALS ══ -->
+<!--  MODALS  -->
 
 <!-- Add Student -->
 <div class="modal-overlay" id="modal-add-student">
   <div class="modal">
-    <div class="modal-head"><div class="modal-title">ADD STUDENT</div><button class="modal-close" onclick="closeModal('modal-add-student')">✕</button></div>
+    <div class="modal-head"><div class="modal-title">ADD STUDENT</div><button class="modal-close" onclick="closeModal('modal-add-student')"></button></div>
     <div class="modal-body">
       <form method="POST" action="../../api/add_student.php"><input type="hidden" name="csrf_token" value="<?= csrfToken() ?>">
         <div class="form-row">
@@ -1022,7 +1022,7 @@ $ttAll = $ttStmt->fetchAll();
 <!-- Edit Student -->
 <div class="modal-overlay" id="modal-edit-student">
   <div class="modal">
-    <div class="modal-head"><div class="modal-title">EDIT STUDENT</div><button class="modal-close" onclick="closeModal('modal-edit-student')">✕</button></div>
+    <div class="modal-head"><div class="modal-title">EDIT STUDENT</div><button class="modal-close" onclick="closeModal('modal-edit-student')"></button></div>
     <div class="modal-body">
       <form method="POST" action="../../api/edit_student.php"><input type="hidden" name="csrf_token" value="<?= csrfToken() ?>">
         <input type="hidden" name="id" id="edit-id">
@@ -1037,9 +1037,9 @@ $ttAll = $ttStmt->fetchAll();
       <div style="margin-top:1.5rem;padding-top:1.2rem;border-top:1px solid rgba(224,92,92,.2)">
         <div style="font-size:.7rem;color:var(--danger);letter-spacing:.12em;margin-bottom:.8rem">DANGER ZONE</div>
         <div style="display:flex;flex-wrap:wrap;gap:.5rem">
-          <form method="POST" style="display:inline"><input type="hidden" name="csrf_token" value="<?= csrfToken() ?>"><input type="hidden" name="action" value="reset_device"><input type="hidden" name="user_id" id="danger-user-id"><button type="submit" class="btn btn-ghost btn-sm" onclick="return confirm('Reset device fingerprint?')">📱 Reset Device</button></form>
-          <form method="POST" style="display:inline"><input type="hidden" name="csrf_token" value="<?= csrfToken() ?>"><input type="hidden" name="action" value="unlock_account"><input type="hidden" name="user_id" id="danger-user-id2"><button type="submit" class="btn btn-sm" style="background:rgba(76,175,130,.15);color:var(--success);border:1px solid rgba(76,175,130,.3)" onclick="return confirm('Unlock this account?')">🔓 Unlock Account</button></form>
-          <button class="btn btn-danger btn-sm" id="danger-remove-btn">🗑 Remove Student</button>
+          <form method="POST" style="display:inline"><input type="hidden" name="csrf_token" value="<?= csrfToken() ?>"><input type="hidden" name="action" value="reset_device"><input type="hidden" name="user_id" id="danger-user-id"><button type="submit" class="btn btn-ghost btn-sm" onclick="return confirm('Reset device fingerprint?')"> Reset Device</button></form>
+          <form method="POST" style="display:inline"><input type="hidden" name="csrf_token" value="<?= csrfToken() ?>"><input type="hidden" name="action" value="unlock_account"><input type="hidden" name="user_id" id="danger-user-id2"><button type="submit" class="btn btn-sm" style="background:rgba(76,175,130,.15);color:var(--success);border:1px solid rgba(76,175,130,.3)" onclick="return confirm('Unlock this account?')"> Unlock Account</button></form>
+          <button class="btn btn-danger btn-sm" id="danger-remove-btn"> Remove Student</button>
         </div>
       </div>
     </div>
@@ -1049,7 +1049,7 @@ $ttAll = $ttStmt->fetchAll();
 <!-- Add/Edit Semester -->
 <div class="modal-overlay" id="modal-add-semester">
   <div class="modal">
-    <div class="modal-head"><div class="modal-title" id="semester-modal-title">ADD SEMESTER</div><button class="modal-close" onclick="closeModal('modal-add-semester')">✕</button></div>
+    <div class="modal-head"><div class="modal-title" id="semester-modal-title">ADD SEMESTER</div><button class="modal-close" onclick="closeModal('modal-add-semester')"></button></div>
     <div class="modal-body">
       <input type="hidden" id="sem-edit-id">
       <div class="form-row">
@@ -1072,7 +1072,7 @@ $ttAll = $ttStmt->fetchAll();
 <!-- Add/Edit Course -->
 <div class="modal-overlay" id="modal-add-course">
   <div class="modal">
-    <div class="modal-head"><div class="modal-title" id="course-modal-title">ADD COURSE</div><button class="modal-close" onclick="closeModal('modal-add-course')">✕</button></div>
+    <div class="modal-head"><div class="modal-title" id="course-modal-title">ADD COURSE</div><button class="modal-close" onclick="closeModal('modal-add-course')"></button></div>
     <div class="modal-body">
       <input type="hidden" id="course-edit-id">
       <div class="form-field"><label>Program</label>
@@ -1098,7 +1098,7 @@ $ttAll = $ttStmt->fetchAll();
 <!-- Add/Edit Lecturer -->
 <div class="modal-overlay" id="modal-add-lecturer">
   <div class="modal">
-    <div class="modal-head"><div class="modal-title" id="lecturer-modal-title">ADD LECTURER</div><button class="modal-close" onclick="closeModal('modal-add-lecturer')">✕</button></div>
+    <div class="modal-head"><div class="modal-title" id="lecturer-modal-title">ADD LECTURER</div><button class="modal-close" onclick="closeModal('modal-add-lecturer')"></button></div>
     <div class="modal-body">
       <input type="hidden" id="lecturer-edit-id">
       <div class="form-row">
@@ -1115,16 +1115,16 @@ $ttAll = $ttStmt->fetchAll();
 </div>
 
 <script>
-// ── Navigation ──
+//  Navigation 
 
-// ── Modals ──
+//  Modals 
 function openModal(id) { document.getElementById(id).classList.add('open'); }
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 document.querySelectorAll('.modal-overlay').forEach(o => {
   o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); });
 });
 
-// ── Edit Student ──
+//  Edit Student 
 function editStudent(id, name, index, email, role, locked, device) {
   document.getElementById('edit-id').value    = id;
   document.getElementById('edit-name').value  = name;
@@ -1157,7 +1157,7 @@ function closeSession(id) {
   }
 }
 
-// ── Semester Management ──
+//  Semester Management 
 function openAddSemester() {
   document.getElementById('sem-edit-id').value = '';
   document.getElementById('sem-name').value    = '';
@@ -1200,7 +1200,7 @@ function setActiveSemester(id, name) {
     .then(r => r.json()).then(d => { if (d.success) location.reload(); else alert(d.error || 'Failed'); });
 }
 
-// ── Course Management ──
+//  Course Management 
 function openAddCourse() {
   document.getElementById('course-edit-id').value = '';
   document.getElementById('course-code').value    = '';
@@ -1245,7 +1245,7 @@ function deleteCourse(id, code) {
     .then(r => r.json()).then(d => { if (d.success) location.reload(); else alert(d.error || 'Cannot delete'); });
 }
 
-// ── Lecturer Management ──
+//  Lecturer Management 
 function openAddLecturer() {
   document.getElementById('lecturer-edit-id').value = '';
   document.getElementById('lecturer-name').value    = '';
@@ -1285,7 +1285,7 @@ function toggleUser(id, isActive) {
     .then(r => r.json()).then(d => { if (d.success) location.reload(); else alert(d.error || 'Failed'); });
 }
 
-// ── Approvals ──
+//  Approvals 
     if (badge) { badge.style.display = 'inline'; badge.textContent = data.rows.length; }
     if (countBadge) countBadge.textContent = data.rows.length + ' PENDING';
     tbody.innerHTML = data.rows.map(r => `
@@ -1298,8 +1298,8 @@ function toggleUser(id, isActive) {
         </td>
         <td style="color:var(--muted);font-size:.72rem">${r.submitted_at}</td>
         <td style="display:flex;gap:.4rem">
-          <button class="btn btn-sm" style="background:rgba(76,175,130,.15);color:var(--success);border:1px solid rgba(76,175,130,.3)" onclick="approveAdmin(${r.id},'approve')">✓ Approve</button>
-          <button class="btn btn-sm" style="background:rgba(224,92,92,.15);color:var(--danger);border:1px solid rgba(224,92,92,.3)" onclick="approveAdmin(${r.id},'reject')">✗ Reject</button>
+          <button class="btn btn-sm" style="background:rgba(76,175,130,.15);color:var(--success);border:1px solid rgba(76,175,130,.3)" onclick="approveAdmin(${r.id},'approve')"> Approve</button>
+          <button class="btn btn-sm" style="background:rgba(224,92,92,.15);color:var(--danger);border:1px solid rgba(224,92,92,.3)" onclick="approveAdmin(${r.id},'reject')"> Reject</button>
         </td>
       </tr>`).join('');
   }).catch(() => {});
@@ -1323,10 +1323,10 @@ function manageDevice(id, name, locked) {
 
 function toggleTheme() {
   const body = document.body, btn = document.getElementById('theme-btn');
-  if (body.classList.contains('light')) { body.classList.remove('light'); localStorage.setItem('theme','dark'); if(btn) btn.textContent='🌙'; }
-  else { body.classList.add('light'); localStorage.setItem('theme','light'); if(btn) btn.textContent='☀️'; }
+  if (body.classList.contains('light')) { body.classList.remove('light'); localStorage.setItem('theme','dark'); if(btn) btn.textContent=''; }
+  else { body.classList.add('light'); localStorage.setItem('theme','light'); if(btn) btn.textContent=''; }
 }
-(function(){ if(localStorage.getItem('theme')==='light'){ document.body.classList.add('light'); const btn=document.getElementById('theme-btn'); if(btn) btn.textContent='☀️'; } })();
+(function(){ if(localStorage.getItem('theme')==='light'){ document.body.classList.add('light'); const btn=document.getElementById('theme-btn'); if(btn) btn.textContent=''; } })();
 
 
 
@@ -1350,7 +1350,7 @@ window.fetch = function(url, options = {}) {
   <div class="modal">
     <div class="modal-head">
       <div class="modal-title" id="tt-modal-title">ADD TIMETABLE SLOT</div>
-      <button class="modal-close" onclick="closeModal('modal-timetable')">✕</button>
+      <button class="modal-close" onclick="closeModal('modal-timetable')"></button>
     </div>
     <div class="modal-body">
       <input type="hidden" id="tt-edit-id">
@@ -1493,7 +1493,7 @@ function deleteSlot(id, code) {
   <div class="modal">
     <div class="modal-head">
       <div class="modal-title">IMPORT STUDENTS — CSV</div>
-      <button class="modal-close" onclick="closeModal('modal-import-csv')">✕</button>
+      <button class="modal-close" onclick="closeModal('modal-import-csv')"></button>
     </div>
     <div class="modal-body">
       <div style="background:rgba(74,111,165,.06);border:1px solid rgba(74,111,165,.2);border-radius:2px;padding:.8rem 1rem;font-size:.78rem;color:var(--muted);margin-bottom:1.2rem;line-height:1.6">
@@ -1526,7 +1526,7 @@ function importCSV() {
     .then(d => {
       if (d.success) {
         result.style.color = 'var(--success)';
-        result.innerHTML = '✓ ' + d.inserted + ' students imported, ' + d.skipped + ' skipped.';
+        result.innerHTML = ' ' + d.inserted + ' students imported, ' + d.skipped + ' skipped.';
         setTimeout(() => { closeModal('modal-import-csv'); location.reload(); }, 2000);
       } else {
         result.style.color = 'var(--danger)';
@@ -1539,7 +1539,7 @@ function importCSV() {
 <!-- Add Department Modal -->
 <div class="modal-overlay" id="modal-add-dept">
   <div class="modal">
-    <div class="modal-head"><div class="modal-title">ADD DEPARTMENT</div><button class="modal-close" onclick="closeModal('modal-add-dept')">✕</button></div>
+    <div class="modal-head"><div class="modal-title">ADD DEPARTMENT</div><button class="modal-close" onclick="closeModal('modal-add-dept')"></button></div>
     <div class="modal-body">
       <div class="form-field"><label>Department Name</label><input type="text" id="dept-name" placeholder="e.g. Computer Science"></div>
       <div class="form-field"><label>Code (optional)</label><input type="text" id="dept-code" placeholder="e.g. CS"></div>
@@ -1551,7 +1551,7 @@ function importCSV() {
 <!-- Add/Edit Program Modal -->
 <div class="modal-overlay" id="modal-add-program">
   <div class="modal">
-    <div class="modal-head"><div class="modal-title" id="prog-modal-title">ADD PROGRAM</div><button class="modal-close" onclick="closeModal('modal-add-program')">✕</button></div>
+    <div class="modal-head"><div class="modal-title" id="prog-modal-title">ADD PROGRAM</div><button class="modal-close" onclick="closeModal('modal-add-program')"></button></div>
     <div class="modal-body">
       <input type="hidden" id="prog-edit-id">
       <div class="form-field">
@@ -1581,7 +1581,7 @@ function importCSV() {
 <?php require_once '../../includes/toast.php'; ?>
 <script src="/admin_charts.js"></script>
 <script>
-// ── PROGRAMS ──
+//  PROGRAMS 
 function openAddProgram(){
   document.getElementById('prog-edit-id').value='';
   document.getElementById('prog-modal-title').textContent='ADD PROGRAM';

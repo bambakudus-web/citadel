@@ -295,7 +295,7 @@ input,select,textarea{font-size:16px!important}
 
 input,select,textarea{font-size:16px!important}
 
-/* ═══ MOBILE - CLEAN ═══ */
+/*  MOBILE - CLEAN  */
 @media(max-width:768px){
   .sidebar{
     width:260px!important;
@@ -505,7 +505,7 @@ document.addEventListener('DOMContentLoaded',function(){
     <div class="nav-section">Sessions</div>
     <a class="nav-item active" onclick="showSection('session',this)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-      <?= $activeSession ? '🟢 Live Session' : 'Start Session' ?>
+      <?= $activeSession ? ' Live Session' : 'Start Session' ?>
     </a>
     <a class="nav-item" onclick="showSection('history',this)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
@@ -524,26 +524,26 @@ document.addEventListener('DOMContentLoaded',function(){
   <div class="sidebar-user">
     <div class="u-name"><?= htmlspecialchars($user['full_name'] ?? 'Lecturer') ?></div>
     <div class="u-role"><?= terms('lecturer', $instType) ?> <?= $activeSem ? '· '.htmlspecialchars($activeSem['name']) : '' ?></div>
-    <div class="sidebar-user-actions"><a href="../../change_password.php" class="btn-pwd">🔑 Password</a><a href="../../logout.php" class="btn-out">Sign Out</a></div>
+    <div class="sidebar-user-actions"><a href="../../change_password.php" class="btn-pwd"> Password</a><a href="../../logout.php" class="btn-out">Sign Out</a></div>
   </div>
 </aside>
 
 <div class="main">
   <div class="topbar">
     <div style="display:flex;align-items:center;gap:1rem">
-      <button id="menu-btn" aria-label="Menu" onclick="toggleSidebar()">☰</button>
+      <button id="menu-btn" aria-label="Menu" onclick="toggleSidebar()"></button>
       <div class="topbar-title" id="page-title">LIVE SESSION</div>
     </div>
     <div style="display:flex;align-items:center;gap:1rem">
       <span style="font-size:.75rem;color:var(--muted)"><?= date('l, d M Y') ?></span>
       <span class="badge-lec"><?= terms('lecturer', $instType) ?></span>
-      <button id="theme-btn" onclick="toggleTheme()" style="background:none;border:1px solid var(--border);color:var(--muted);cursor:pointer;padding:.25rem .6rem;border-radius:2px;font-size:.75rem">🌙</button>
+      <button id="theme-btn" onclick="toggleTheme()" style="background:none;border:1px solid var(--border);color:var(--muted);cursor:pointer;padding:.25rem .6rem;border-radius:2px;font-size:.75rem"></button>
     </div>
   </div>
 
   <div class="content">
 
-    <!-- ══ LIVE SESSION ══ -->
+    <!--  LIVE SESSION  -->
     <div class="page-section active" id="sec-session">
       <?php if ($activeSession): ?>
         <div class="section-header">
@@ -572,7 +572,7 @@ document.addEventListener('DOMContentLoaded',function(){
             </div>
             <?php if ($instType !== 'university'): ?>
             <div style="margin-top:1rem">
-              <button class="btn btn-lec" style="width:100%" onclick="loadTeacherMarkPanel()">📋 Mark Attendance from List</button>
+              <button class="btn btn-lec" style="width:100%" onclick="loadTeacherMarkPanel()"> Mark Attendance from List</button>
             </div>
             <?php endif; ?>
           </div>
@@ -601,7 +601,7 @@ document.addEventListener('DOMContentLoaded',function(){
                 <input type="hidden" name="course_id" value="<?= $tc['course_id'] ?? '' ?>">
                 <input type="hidden" name="course_code" value="<?= htmlspecialchars($tc['course_code']) ?>">
                 <input type="hidden" name="course_name" value="<?= htmlspecialchars($tc['course_name']) ?>">
-                <button type="submit" class="btn btn-lec">▶ <?= htmlspecialchars($tc['course_code']) ?> · <?= substr($tc['start_time'],0,5) ?>–<?= substr($tc['end_time'],0,5) ?></button>
+                <button type="submit" class="btn btn-lec"> <?= htmlspecialchars($tc['course_code']) ?> · <?= substr($tc['start_time'],0,5) ?>–<?= substr($tc['end_time'],0,5) ?></button>
               </form>
             <?php endforeach; ?>
           </div>
@@ -635,7 +635,7 @@ document.addEventListener('DOMContentLoaded',function(){
       <?php endif; ?>
     </div>
 
-    <!-- ══ MY COURSES ══ -->
+    <!--  MY COURSES  -->
     <div class="page-section" id="sec-courses">
       <div class="section-header"><div class="section-title">My <span>Courses</span><?php if($activeSem): ?><span style="font-size:.65rem;color:var(--muted);font-family:'DM Sans',sans-serif;letter-spacing:.1em;margin-left:.8rem"><?= htmlspecialchars($activeSem['name']) ?></span><?php endif; ?></div></div>
       <?php if (empty($myCourses)): ?>
@@ -653,7 +653,7 @@ document.addEventListener('DOMContentLoaded',function(){
                 <input type="hidden" name="course_id" value="<?= $c['id'] ?>">
                 <input type="hidden" name="course_code" value="<?= htmlspecialchars($c['code']) ?>">
                 <input type="hidden" name="course_name" value="<?= htmlspecialchars($c['name']) ?>">
-                <button type="submit" class="btn btn-lec btn-sm">▶ Start Session</button>
+                <button type="submit" class="btn btn-lec btn-sm"> Start Session</button>
               </form>
             </div>
           <?php endforeach; ?>
@@ -661,7 +661,7 @@ document.addEventListener('DOMContentLoaded',function(){
       <?php endif; ?>
     </div>
 
-    <!-- ══ PAST SESSIONS ══ -->
+    <!--  PAST SESSIONS  -->
     <div class="page-section" id="sec-history">
       <div class="section-header"><div class="section-title">Past <span>Sessions</span></div></div>
       <div class="card"><div class="card-body" style="padding:0;overflow-x:auto">
@@ -687,7 +687,7 @@ document.addEventListener('DOMContentLoaded',function(){
       </div></div>
     </div>
 
-    <!-- ══ TIMETABLE ══ -->
+    <!--  TIMETABLE  -->
     <div class="page-section" id="sec-timetable">
       <div class="section-header"><div class="section-title">My <span>Timetable</span></div></div>
       <?php foreach(['Monday','Tuesday','Wednesday','Thursday','Friday'] as $day):
@@ -700,7 +700,7 @@ document.addEventListener('DOMContentLoaded',function(){
             <div style="flex:1">
               <div style="font-size:.7rem;color:var(--muted);letter-spacing:.1em"><?= htmlspecialchars($c['course_code']) ?></div>
               <div style="font-size:.85rem;color:var(--text)"><?= htmlspecialchars($c['course_name']) ?></div>
-              <div style="font-size:.72rem;color:var(--muted)">📍 <?= htmlspecialchars($c['room'] ?? '') ?></div>
+              <div style="font-size:.72rem;color:var(--muted)"> <?= htmlspecialchars($c['room'] ?? '') ?></div>
             </div>
             <form method="POST">
               <input type="hidden" name="csrf_token" value="<?= csrfToken() ?>">
@@ -742,8 +742,8 @@ setInterval(()=>{fetch(API + '/get_code.php?session_id=<?= $activeSession['id'] 
 setInterval(()=>{fetch(API + '/live_attendance.php?session_id=<?= $activeSession['id'] ?>').then(r=>r.json()).then(data=>{if(!data.rows)return;const tbody=document.getElementById('live-tbody');const pill=document.getElementById('live-pill');const count=document.getElementById('live-count');if(count)count.textContent=data.total;if(pill)pill.textContent=data.total+' present';if(tbody&&data.rows.length>0){const empty=document.getElementById('empty-row');if(empty)empty.remove();tbody.innerHTML=data.rows.map(r=>`<tr><td>${r.full_name}</td><td style="color:var(--gold);font-size:.78rem">${r.index_no}</td><td><span class="pill pill-${r.status==='present'?'green':'gold'}">${r.status}</span></td><td style="color:var(--muted);font-size:.72rem">${r.time}</td></tr>`).join('')}})},10000);
 <?php endif; ?>
 
-function toggleTheme(){const body=document.body;const btn=document.getElementById('theme-btn');if(body.classList.contains('light')){body.classList.remove('light');localStorage.setItem('theme','dark');if(btn)btn.textContent='🌙';}else{body.classList.add('light');localStorage.setItem('theme','light');if(btn)btn.textContent='☀️';}}
-(function(){if(localStorage.getItem('theme')==='light'){document.body.classList.add('light');const btn=document.getElementById('theme-btn');if(btn)btn.textContent='☀️';}})();
+function toggleTheme(){const body=document.body;const btn=document.getElementById('theme-btn');if(body.classList.contains('light')){body.classList.remove('light');localStorage.setItem('theme','dark');if(btn)btn.textContent='';}else{body.classList.add('light');localStorage.setItem('theme','light');if(btn)btn.textContent='';}}
+(function(){if(localStorage.getItem('theme')==='light'){document.body.classList.add('light');const btn=document.getElementById('theme-btn');if(btn)btn.textContent='';}})();
 
 const csrfToken="<?= csrfToken() ?>";
 const originalFetch=window.fetch;
@@ -759,7 +759,7 @@ window.fetch=function(url,options={}){options.headers=options.headers||{};option
       <div class="modal-title">MARK ATTENDANCE</div>
       <div style="display:flex;gap:.5rem;align-items:center">
         <button class="btn btn-ghost btn-sm" onclick="markAllAbsent()">Mark Absent: Unmarked</button>
-        <button class="modal-close" onclick="closeModal('teacher-mark-modal')">✕</button>
+        <button class="modal-close" onclick="closeModal('teacher-mark-modal')"></button>
       </div>
     </div>
     <div class="modal-body" style="padding:0">
@@ -776,7 +776,7 @@ window.fetch=function(url,options={}){options.headers=options.headers||{};option
 
 <?php require_once '../../includes/toast.php'; ?>
 <script>
-// ── TEACHER MARK ATTENDANCE ──
+//  TEACHER MARK ATTENDANCE 
 const SESSION_ID = <?= $activeSession ? $activeSession['id'] : 'null' ?>;
 const INST_TYPE  = '<?= $instType ?>';
 
@@ -806,9 +806,9 @@ async function loadTeacherMarkPanel() {
       <td style="color:var(--gold);font-size:.78rem">${s.index_no||'—'}</td>
       <td>
         <div style="display:flex;gap:.3rem;flex-wrap:wrap">
-          <button class="btn btn-sm ${status==='present'?'btn-lec':'btn-ghost'}" onclick="markStudent(${s.id},'present')">✓</button>
+          <button class="btn btn-sm ${status==='present'?'btn-lec':'btn-ghost'}" onclick="markStudent(${s.id},'present')"></button>
           <button class="btn btn-sm ${status==='late'?'btn-gold':'btn-ghost'}" onclick="markStudent(${s.id},'late')">Late</button>
-          <button class="btn btn-sm ${status==='absent'?'btn-danger':'btn-ghost'}" onclick="markStudent(${s.id},'absent')">✗</button>
+          <button class="btn btn-sm ${status==='absent'?'btn-danger':'btn-ghost'}" onclick="markStudent(${s.id},'absent')"></button>
         </div>
       </td>
     </tr>`;

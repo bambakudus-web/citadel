@@ -654,6 +654,30 @@ document.addEventListener('DOMContentLoaded',function(){
           </div>
         </div>
       </div>
+      <?php if(!empty($atRisk)): ?>
+      <div class="card" style="margin-bottom:1.5rem;border-color:rgba(224,92,92,.3)">
+        <div class="card-head" style="border-color:rgba(224,92,92,.2)">
+          <div class="card-head-title" style="color:var(--danger)">⚠ At-Risk Students — Below 75% Attendance</div>
+          <span class="pill pill-red"><?= count($atRisk) ?> students</span>
+        </div>
+        <div class="card-body" style="padding:0;overflow-x:auto">
+          <table class="data-table">
+            <thead><tr><th>Student</th><th>Index No</th><th>Sessions</th><th>Absences</th><th>Rate</th></tr></thead>
+            <tbody>
+            <?php foreach($atRisk as $r): $pct=$r['pct']??0; ?>
+            <tr>
+              <td><?= htmlspecialchars($r['full_name']) ?></td>
+              <td style="color:var(--gold);font-size:.78rem"><?= htmlspecialchars($r['index_no']??'—') ?></td>
+              <td style="color:var(--muted)"><?= $r['sessions'] ?></td>
+              <td style="color:var(--danger)"><?= $r['absences'] ?></td>
+              <td><span class="pill pill-<?= $pct>=50?'gold':'red' ?>"><?= $pct ?>%</span></td>
+            </tr>
+            <?php endforeach; ?>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <?php endif; ?>
       <div class="card" style="margin-bottom:1.5rem" id="charts-card"><div class="card-head"><div class="card-head-title">Attendance <span>Analytics</span></div></div><div class="card-body"><div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem" class="charts-grid"><div><canvas id="chart-attendance-trend" height="200"></canvas></div><div><canvas id="chart-course-rates" height="200"></canvas></div></div></div></div>
     </div>
 

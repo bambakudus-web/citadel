@@ -607,7 +607,7 @@ document.addEventListener('DOMContentLoaded',function(){
       <?php endif; ?>
       <span class="hide-mobile" style="font-size:.75rem;color:var(--muted);white-space:nowrap"><?= date('l, d M Y') ?></span>
       <span class="badge-admin">Boss</span>
-      <button id="theme-btn" onclick="toggleTheme()" style="background:none;border:1px solid var(--border);color:var(--muted);cursor:pointer;padding:.25rem .6rem;border-radius:2px;font-size:.75rem"></button>
+      <button id="theme-btn" onclick="toggleTheme()" style="background:none;border:1px solid var(--border);color:var(--muted);cursor:pointer;padding:.25rem .6rem;border-radius:2px;font-size:.75rem">&#9790;</button>
     </div>
   </div>
 

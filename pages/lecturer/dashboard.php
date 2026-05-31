@@ -531,13 +531,13 @@ document.addEventListener('DOMContentLoaded',function(){
 <div class="main">
   <div class="topbar">
     <div style="display:flex;align-items:center;gap:1rem">
-      <button id="menu-btn" aria-label="Menu" onclick="toggleSidebar()"></button>
+      <button id="menu-btn" aria-label="Menu" onclick="toggleSidebar()">&#9776;</button>
       <div class="topbar-title" id="page-title">LIVE SESSION</div>
     </div>
     <div style="display:flex;align-items:center;gap:1rem">
       <span style="font-size:.75rem;color:var(--muted)"><?= date('l, d M Y') ?></span>
       <span class="badge-lec"><?= terms('lecturer', $instType) ?></span>
-      <button id="theme-btn" onclick="toggleTheme()" style="background:none;border:1px solid var(--border);color:var(--muted);cursor:pointer;padding:.25rem .6rem;border-radius:2px;font-size:.75rem"></button>
+      <button id="theme-btn" onclick="toggleTheme()" style="background:none;border:1px solid var(--border);color:var(--muted);cursor:pointer;padding:.25rem .6rem;border-radius:2px;font-size:.75rem">&#9790;</button>
     </div>
   </div>
 
@@ -742,8 +742,8 @@ setInterval(()=>{fetch(API + '/get_code.php?session_id=<?= $activeSession['id'] 
 setInterval(()=>{fetch(API + '/live_attendance.php?session_id=<?= $activeSession['id'] ?>').then(r=>r.json()).then(data=>{if(!data.rows)return;const tbody=document.getElementById('live-tbody');const pill=document.getElementById('live-pill');const count=document.getElementById('live-count');if(count)count.textContent=data.total;if(pill)pill.textContent=data.total+' present';if(tbody&&data.rows.length>0){const empty=document.getElementById('empty-row');if(empty)empty.remove();tbody.innerHTML=data.rows.map(r=>`<tr><td>${r.full_name}</td><td style="color:var(--gold);font-size:.78rem">${r.index_no}</td><td><span class="pill pill-${r.status==='present'?'green':'gold'}">${r.status}</span></td><td style="color:var(--muted);font-size:.72rem">${r.time}</td></tr>`).join('')}})},10000);
 <?php endif; ?>
 
-function toggleTheme(){const body=document.body;const btn=document.getElementById('theme-btn');if(body.classList.contains('light')){body.classList.remove('light');localStorage.setItem('theme','dark');if(btn)btn.textContent='';}else{body.classList.add('light');localStorage.setItem('theme','light');if(btn)btn.textContent='';}}
-(function(){if(localStorage.getItem('theme')==='light'){document.body.classList.add('light');const btn=document.getElementById('theme-btn');if(btn)btn.textContent='';}})();
+function toggleTheme(){const body=document.body;const btn=document.getElementById('theme-btn');if(body.classList.contains('light')){body.classList.remove('light');localStorage.setItem('theme','dark');if(btn)btn.innerHTML='&#9790;';}else{body.classList.add('light');localStorage.setItem('theme','light');if(btn)btn.innerHTML='&#9790;';}}
+(function(){if(localStorage.getItem('theme')==='light'){document.body.classList.add('light');const btn=document.getElementById('theme-btn');if(btn)btn.innerHTML='&#9790;';}})();
 
 const csrfToken="<?= csrfToken() ?>";
 const originalFetch=window.fetch;

@@ -1088,238 +1088,7 @@ $ttAll = $ttStmt->fetchAll();
   </div>
 </div>
 
-<script>
-//  Navigation 
 
-//  Modals 
-function openModal(id) { document.getElementById(id).classList.add('open'); }
-function closeModal(id) { document.getElementById(id).classList.remove('open'); }
-document.querySelectorAll('.modal-overlay').forEach(o => {
-  o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); });
-});
-
-//  Edit Student 
-function editStudent(id, name, index, email, role, locked, device) {
-  document.getElementById('edit-id').value    = id;
-  document.getElementById('edit-name').value  = name;
-  document.getElementById('edit-index').value = index;
-  document.getElementById('edit-email').value = email;
-  document.getElementById('edit-role').value  = role;
-  document.getElementById('danger-user-id').value  = id;
-  document.getElementById('danger-user-id2').value = id;
-  document.getElementById('danger-remove-btn').onclick = () => confirmDelete(id, 'student');
-  openModal('modal-edit-student');
-}
-
-function confirmDelete(id, type) {
-  if (confirm('Remove this ' + type + '? Cannot be undone.')) {
-    window.location.href = API + '/delete_user.php?id=' + id;
-  }
-}
-
-function filterStudents() {
-  const q = document.getElementById('student-search').value.toLowerCase();
-  document.querySelectorAll('#student-table tbody tr').forEach(tr => {
-    const name = tr.dataset.name || '', index = tr.dataset.index || '';
-    tr.style.display = (name.includes(q) || index.includes(q)) ? '' : 'none';
-  });
-}
-
-function closeSession(id) {
-  if (confirm('Close this session?')) {
-    fetch(API + '/close_session.php?id=' + id).then(() => location.reload());
-  }
-}
-
-//  Semester Management 
-function openAddSemester() {
-  document.getElementById('sem-edit-id').value = '';
-  document.getElementById('sem-name').value    = '';
-  document.getElementById('sem-year').value    = '';
-  document.getElementById('sem-start').value   = '';
-  document.getElementById('sem-end').value     = '';
-  document.getElementById('semester-modal-title').textContent = 'ADD SEMESTER';
-  openModal('modal-add-semester');
-}
-
-function editSemester(id, name, year, no, start, end) {
-  document.getElementById('sem-edit-id').value = id;
-  document.getElementById('sem-name').value    = name;
-  document.getElementById('sem-year').value    = year;
-  document.getElementById('sem-no').value      = no;
-  document.getElementById('sem-start').value   = start;
-  document.getElementById('sem-end').value     = end;
-  document.getElementById('semester-modal-title').textContent = 'EDIT SEMESTER';
-  openModal('modal-add-semester');
-}
-
-function saveSemester() {
-  const id = document.getElementById('sem-edit-id').value;
-  const body = {
-    name: document.getElementById('sem-name').value.trim(),
-    academic_year: document.getElementById('sem-year').value.trim(),
-    semester_no: parseInt(document.getElementById('sem-no').value),
-    start_date: document.getElementById('sem-start').value,
-    end_date: document.getElementById('sem-end').value,
-  };
-  if (!body.name || !body.academic_year || !body.start_date || !body.end_date) { alert('All fields required'); return; }
-  if (id) body.id = id;
-  fetch(API + '/semesters.php', { method: id ? 'PUT' : 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(body) })
-    .then(r => r.json()).then(d => { if (d.success) { closeModal('modal-add-semester'); location.reload(); } else alert(d.error || 'Failed'); });
-}
-
-function setActiveSemester(id, name) {
-  if (!confirm('Set "' + name + '" as the active semester?')) return;
-  fetch(API + '/semesters.php', { method: 'PATCH', headers: {'Content-Type':'application/json'}, body: JSON.stringify({id, action:'set_active'}) })
-    .then(r => r.json()).then(d => { if (d.success) location.reload(); else alert(d.error || 'Failed'); });
-}
-
-//  Course Management 
-function openAddCourse() {
-  document.getElementById('course-edit-id').value = '';
-  document.getElementById('course-code').value    = '';
-  document.getElementById('course-name').value    = '';
-  document.getElementById('course-lecturer').value = '';
-  document.getElementById('course-modal-title').textContent = 'ADD COURSE';
-  openModal('modal-add-course');
-}
-
-function editCourse(id, code, name, lecturerId, credits, programId) {
-  document.getElementById('course-edit-id').value = id;
-  document.getElementById('course-code').value    = code;
-  document.getElementById('course-name').value    = name;
-  document.getElementById('course-credits').value = credits;
-  if (lecturerId) document.getElementById('course-lecturer').value = lecturerId;
-  if (programId) document.getElementById('course-program').value = programId;
-  document.getElementById('course-modal-title').textContent = 'EDIT COURSE';
-  openModal('modal-add-course');
-}
-
-function saveCourse() {
-  const id    = document.getElementById('course-edit-id').value;
-  const semId = <?= $activeSemId ?? 'null' ?>;
-  const body  = {
-    code: document.getElementById('course-code').value.trim().toUpperCase(),
-    name: document.getElementById('course-name').value.trim(),
-    credit_hrs: parseInt(document.getElementById('course-credits').value),
-    lecturer_id: document.getElementById('course-lecturer').value || null,
-    program_id: document.getElementById('course-program').value || null, semester_id: semId,
-    enroll_all: document.getElementById('course-enroll-all').checked ? 1 : 0,
-  };
-  if (!body.code || !body.name) { alert('Code and name required'); return; }
-  if (!id && !semId) { alert('No active semester. Create and activate one first.'); return; }
-  if (id) body.id = id;
-  fetch(API + '/courses.php', { method: id ? 'PUT' : 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(body) })
-    .then(r => r.json()).then(d => { if (d.success) { closeModal('modal-add-course'); location.reload(); } else alert(d.error || 'Failed'); });
-}
-
-function deleteCourse(id, code) {
-  if (!confirm('Delete course ' + code + '?')) return;
-  fetch(API + '/courses.php', { method: 'DELETE', headers: {'Content-Type':'application/json'}, body: JSON.stringify({id}) })
-    .then(r => r.json()).then(d => { if (d.success) location.reload(); else alert(d.error || 'Cannot delete'); });
-}
-
-//  Lecturer Management 
-function openAddLecturer() {
-  document.getElementById('lecturer-edit-id').value = '';
-  document.getElementById('lecturer-name').value    = '';
-  document.getElementById('lecturer-email').value   = '';
-  document.getElementById('lecturer-phone').value   = '';
-  document.getElementById('lecturer-password').value = '';
-  document.getElementById('lecturer-modal-title').textContent = 'ADD LECTURER';
-  openModal('modal-add-lecturer');
-}
-
-function editLecturer(id, name, email, isActive) {
-  document.getElementById('lecturer-edit-id').value = id;
-  document.getElementById('lecturer-name').value    = name;
-  document.getElementById('lecturer-email').value   = email;
-  document.getElementById('lecturer-modal-title').textContent = 'EDIT LECTURER';
-  openModal('modal-add-lecturer');
-}
-
-function saveLecturer() {
-  const id   = document.getElementById('lecturer-edit-id').value;
-  const body = {
-    full_name: document.getElementById('lecturer-name').value.trim(),
-    email: document.getElementById('lecturer-email').value.trim(),
-    phone: document.getElementById('lecturer-phone').value.trim(),
-    role: 'lecturer', department_id: 1, institution_id: 1,
-  };
-  if (!id) body.password = document.getElementById('lecturer-password').value.trim() || 'citadel123';
-  if (!body.full_name || !body.email) { alert('Name and email required'); return; }
-  if (id) body.id = id;
-  fetch(API + '/users.php', { method: id ? 'PUT' : 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(body) })
-    .then(r => r.json()).then(d => { if (d.success) { closeModal('modal-add-lecturer'); location.reload(); } else alert(d.error || 'Failed'); });
-}
-
-function toggleUser(id, isActive) {
-  if (!confirm((isActive ? 'Deactivate' : 'Activate') + ' this user?')) return;
-  fetch(API + '/users.php', { method: 'PATCH', headers: {'Content-Type':'application/json'}, body: JSON.stringify({id}) })
-    .then(r => r.json()).then(d => { if (d.success) location.reload(); else alert(d.error || 'Failed'); });
-}
-
-//  Approvals 
-    if (badge) { badge.style.display = 'inline'; badge.textContent = data.rows.length; }
-    if (countBadge) countBadge.textContent = data.rows.length + ' PENDING';
-    tbody.innerHTML = data.rows.map(r => `
-      <tr>
-        <td>${r.full_name}</td>
-        <td style="color:var(--gold);font-size:.78rem">${r.index_no}</td>
-        <td style="display:flex;gap:.4rem">
-          <img src="../../${r.selfie_url}" style="width:44px;height:44px;border-radius:50%;object-fit:cover;cursor:pointer;border:2px solid var(--steel)" onclick="viewImg('../../'+r.selfie_url,r.full_name+' — Face')">
-          ${r.classroom_url ? `<img src="../../${r.classroom_url}" style="width:44px;height:44px;border-radius:2px;object-fit:cover;cursor:pointer;border:2px solid var(--steel-dim)" onclick="viewImg('../../'+r.classroom_url,r.full_name+' — Classroom')">` : "<span style='color:var(--muted);font-size:.7rem'>No classroom</span>"}
-        </td>
-        <td style="color:var(--muted);font-size:.72rem">${r.submitted_at}</td>
-        <td style="display:flex;gap:.4rem">
-          <button class="btn btn-sm" style="background:rgba(76,175,130,.15);color:var(--success);border:1px solid rgba(76,175,130,.3)" onclick="approveAdmin(${r.id},'approve')"> Approve</button>
-          <button class="btn btn-sm" style="background:rgba(224,92,92,.15);color:var(--danger);border:1px solid rgba(224,92,92,.3)" onclick="approveAdmin(${r.id},'reject')"> Reject</button>
-        </td>
-      </tr>`).join('');
-  }).catch(() => {});
-}
-
-function approveAdmin(id, action) {
-  fetch(API + '/approve_attendance.php', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({attendance_id:id,action}) })
-    .then(r => r.json()).then(() => loadApprovalsAdmin()).catch(() => {});
-}
-
-function viewImg(src, title) {
-  const ov = document.createElement('div');
-  ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:1rem';
-  ov.innerHTML = `<div style="color:var(--gold);font-family:Cinzel,serif;font-size:.85rem">${title}</div><img src="${src}" style="max-width:90vw;max-height:80vh;border-radius:2px"><button onclick="this.parentElement.remove()" style="background:var(--surface);border:1px solid var(--border);color:var(--text);padding:.5rem 1.5rem;cursor:pointer;border-radius:2px">Close</button>`;
-  document.body.appendChild(ov);
-}
-
-function manageDevice(id, name, locked) {
-
-}
-
-function toggleTheme() {
-  const body = document.body, btn = document.getElementById('theme-btn');
-  if (body.classList.contains('light')) { body.classList.remove('light'); localStorage.setItem('theme','dark'); if(btn) btn.textContent=''; }
-  else { body.classList.add('light'); localStorage.setItem('theme','light'); if(btn) btn.textContent=''; }
-}
-(function(){ if(localStorage.getItem('theme')==='light'){ document.body.classList.add('light'); const btn=document.getElementById('theme-btn'); if(btn) btn.textContent=''; } })();
-
-
-
-// CSRF injection
-const csrfToken = "<?= csrfToken() ?>";
-document.querySelectorAll('form').forEach(form => {
-  if (!form.querySelector('[name="csrf_token"]')) {
-    const input = document.createElement('input');
-    input.type = 'hidden'; input.name = 'csrf_token'; input.value = csrfToken;
-    form.appendChild(input);
-  }
-});
-const originalFetch = window.fetch;
-window.fetch = function(url, options = {}) {
-  options.headers = options.headers || {};
-  options.headers['X-CSRF-Token'] = csrfToken;
-  return originalFetch(url, options);
-};
-</script>
 <div class="modal-overlay" id="modal-timetable">
   <div class="modal">
     <div class="modal-head">
@@ -1387,6 +1156,37 @@ window.fetch = function(url, options = {}) {
 </div>
  
 <script>
+
+function openModal(id) {
+  document.getElementById(id).classList.add('open');
+}
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+  document.querySelectorAll('.modal-overlay').forEach(o => {
+    o.addEventListener('click', e => { if(e.target===o) o.classList.remove('open'); });
+  });
+}
+function openAddSemester() {
+  document.getElementById('sem-edit-id').value = '';
+  document.getElementById('sem-name').value = '';
+  document.getElementById('sem-year').value = '';
+  document.getElementById('sem-no').value = '1';
+  document.getElementById('sem-start').value = '';
+  document.getElementById('sem-end').value = '';
+  document.getElementById('semester-modal-title').textContent = 'ADD SEMESTER';
+  openModal('modal-add-semester');
+}
+function editSemester(id, name, year, no, start, end) {
+  document.getElementById('sem-edit-id').value = id;
+  document.getElementById('sem-name').value = name;
+  document.getElementById('sem-year').value = year;
+  document.getElementById('sem-no').value = no;
+  document.getElementById('sem-start').value = start;
+  document.getElementById('sem-end').value = end;
+  document.getElementById('semester-modal-title').textContent = 'EDIT SEMESTER';
+  openModal('modal-add-semester');
+}
+
 function openAddSlot() {
   document.getElementById('tt-edit-id').value = '';
   document.getElementById('tt-day').value     = 'Monday';

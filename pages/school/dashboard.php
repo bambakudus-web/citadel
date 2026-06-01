@@ -1157,6 +1157,46 @@ $ttAll = $ttStmt->fetchAll();
  
 <script>
 
+
+function openAddCourse() {
+  document.getElementById('course-edit-id').value = '';
+  document.getElementById('course-code').value    = '';
+  document.getElementById('course-name').value    = '';
+  document.getElementById('course-lecturer').value = '';
+  document.getElementById('course-modal-title').textContent = 'ADD COURSE';
+  openModal('modal-add-course');
+}
+
+function openAddLecturer() {
+  document.getElementById('lecturer-edit-id').value = '';
+  document.getElementById('lecturer-name').value    = '';
+  document.getElementById('lecturer-email').value   = '';
+  document.getElementById('lecturer-phone').value   = '';
+  document.getElementById('lecturer-password').value = '';
+  document.getElementById('lecturer-modal-title').textContent = 'ADD LECTURER';
+  openModal('modal-add-lecturer');
+}
+
+function toggleTheme() {
+  const body = document.body, btn = document.getElementById('theme-btn');
+  if (body.classList.contains('light')) {
+    body.classList.remove('light');
+    localStorage.setItem('theme','dark');
+    if(btn) btn.textContent='☽';
+  } else {
+    body.classList.add('light');
+    localStorage.setItem('theme','light');
+    if(btn) btn.textContent='☀';
+  }
+}
+(function(){
+  if(localStorage.getItem('theme')==='light'){
+    document.body.classList.add('light');
+    const btn=document.getElementById('theme-btn');
+    if(btn) btn.textContent='☀';
+  }
+})();
+
 function openModal(id) {
   document.getElementById(id).classList.add('open');
 }

@@ -391,24 +391,11 @@ input,select,textarea{font-size:16px!important}
 
 
 </style>
-<script src="/assets/chart.min.js">
+<script src="/assets/chart.min.js"></script>
+<script>
 // Mobile handled in head script
 
-function showSection(name,el){
-  document.querySelectorAll('.page-section').forEach(s=>s.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
-  var sec=document.getElementById('sec-'+name);
-  if(sec)sec.classList.add('active');
-  var title=document.getElementById('page-title');
-  if(title)title.textContent=name.charAt(0).toUpperCase()+name.slice(1);
-  if(el)el.classList.add('active');
-  // Close sidebar on mobile
-  var sb=document.getElementById('sidebar');
-  if(sb)sb.classList.remove('open');
-  var ov=document.getElementById('sidebar-overlay');
-  if(ov)ov.style.display='none';
-  toggleSidebar && document.getElementById("sidebar").classList.contains("open") && toggleSidebar();
-}
+
 </script>
 <script>
 

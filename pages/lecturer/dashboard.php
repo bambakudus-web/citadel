@@ -976,6 +976,26 @@ function updateMarkSummary(students) {
 </script>
 
 <script>
+
+// ── LOADING STATE HELPER ──
+function setLoading(btnId, loading, text) {
+  var btn = document.getElementById(btnId);
+  if (!btn) return;
+  btn.disabled = loading;
+  btn.textContent = loading ? '...' : text;
+}
+function showToastMsg(type, msg) {
+  var t = document.getElementById('toast-container');
+  if (!t) { t = document.createElement('div'); t.id='toast-container';
+    t.style.cssText='position:fixed;bottom:1.5rem;right:1.5rem;z-index:9999;display:flex;flex-direction:column;gap:.5rem';
+    document.body.appendChild(t); }
+  var el = document.createElement('div');
+  el.style.cssText='background:'+(type==='success'?'var(--success)':type==='error'?'var(--danger)':'var(--steel)')+';color:#fff;padding:.7rem 1.2rem;border-radius:2px;font-size:.82rem;animation:fadeIn .3s ease;max-width:300px';
+  el.textContent = msg;
+  t.appendChild(el);
+  setTimeout(function(){ el.remove(); }, 3500);
+}
+
 // ── CA SCORES ──
 const CA_API = (window.API || (window.location.origin + '/api')) + '/ca_scores.php';
 
@@ -1069,19 +1089,29 @@ async function caSaveScores() {
   status.textContent = 'Saving...';
   status.style.color = 'var(--muted)';
 
-  const r = await fetch(CA_API, {
-    method: 'POST',
-    headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({ course_id: courseId, ca_type: caType, max_score: maxScore, semester_id: semId, scores })
-  });
-  const d = await r.json();
-  if (d.success) {
-    status.textContent = '✓ ' + d.saved + ' scores saved';
-    status.style.color = 'var(--success)';
-    caLoadStudents();
-  } else {
-    status.textContent = '✗ ' + (d.error || 'Failed');
+  status.textContent = 'Saving...';
+  status.style.color = 'var(--muted)';
+  try {
+    const r = await fetch(CA_API, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ course_id: courseId, ca_type: caType, max_score: maxScore, semester_id: semId, scores })
+    });
+    const d = await r.json();
+    if (d.success) {
+      status.textContent = '✓ ' + d.saved + ' scores saved';
+      status.style.color = 'var(--success)';
+      showToastMsg('success', d.saved + ' scores saved successfully');
+      caLoadStudents();
+    } else {
+      status.textContent = '✗ ' + (d.error || 'Failed');
+      status.style.color = 'var(--danger)';
+      showToastMsg('error', d.error || 'Failed to save scores');
+    }
+  } catch(e) {
+    status.textContent = '✗ Network error';
     status.style.color = 'var(--danger)';
+    showToastMsg('error', 'Network error. Check connection.');
   }
 }
 </script>

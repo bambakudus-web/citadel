@@ -105,3 +105,33 @@ function getCurrentAttempts(string $key): int {
         return (int)$row['attempts'];
     } catch (Exception $e) { return 0; }
 }
+
+// ── INPUT VALIDATION ──
+function validateLength(string $val, int $min, int $max, string $field): void {
+    $len = mb_strlen(trim($val));
+    if ($len < $min || $len > $max) {
+        header('Content-Type: application/json');
+        echo json_encode(['success' => false, 'error' => "$field must be $min–$max characters."]);
+        exit;
+    }
+}
+
+function requireFields(array $data, array $fields): void {
+    foreach ($fields as $f) {
+        if (!isset($data[$f]) || trim((string)$data[$f]) === '') {
+            header('Content-Type: application/json');
+            echo json_encode(['success' => false, 'error' => "Missing required field: $f"]);
+            exit;
+        }
+    }
+}
+
+function sanitizeInt(mixed $val, int $min = 0, int $max = PHP_INT_MAX): int {
+    $v = (int)$val;
+    if ($v < $min || $v > $max) {
+        header('Content-Type: application/json');
+        echo json_encode(['success' => false, 'error' => "Invalid value: must be $min–$max"]);
+        exit;
+    }
+    return $v;
+}

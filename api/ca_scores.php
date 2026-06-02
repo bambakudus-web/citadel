@@ -99,10 +99,18 @@ if ($method === 'POST') {
     $ca_type    = trim($body['ca_type'] ?? 'CA1');
     $max_score  = (float)($body['max_score'] ?? 100);
     $semester_id = isset($body['semester_id']) ? (int)$body['semester_id'] : null;
-    $scores     = $body['scores'] ?? []; // [{student_id, score, remarks}]
+    $scores     = $body['scores'] ?? [];
 
-    if (!$course_id || empty($scores)) {
-        echo json_encode(['success' => false, 'error' => 'Missing course or scores']); exit;
+    // Validate
+    if (!$course_id) { echo json_encode(['success'=>false,'error'=>'Invalid course']); exit; }
+    if (empty($scores) || !is_array($scores)) { echo json_encode(['success'=>false,'error'=>'No scores provided']); exit; }
+    if ($max_score <= 0 || $max_score > 10000) { echo json_encode(['success'=>false,'error'=>'Invalid max score']); exit; }
+    $allowed_types = ['CA1','CA2','CA3','MID','QUIZ1','QUIZ2','PROJECT','PRACTICAL'];
+    if (!in_array($ca_type, $allowed_types)) { echo json_encode(['success'=>false,'error'=>'Invalid CA type']); exit; }
+    if (count($scores) > 2000) { echo json_encode(['success'=>false,'error'=>'Too many records']); exit; }
+    foreach ($scores as $s) {
+        $sc = (float)($s['score'] ?? 0);
+        if ($sc < 0 || $sc > $max_score) { echo json_encode(['success'=>false,'error'=>'Score out of range for student '.(int)($s['student_id']??0)]); exit; }
     }
 
     $stmt = $pdo->prepare("

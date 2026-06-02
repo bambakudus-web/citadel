@@ -21,7 +21,7 @@ $student = $pdo->prepare("
 $student->execute([$userId]); $student = $student->fetch();
 
 // Active semester
-$activeSem = $pdo->query("SELECT * FROM semesters WHERE is_active=1 AND institution_id=$inst_id LIMIT 1")->fetch();
+$__q = $pdo->prepare("SELECT * FROM semesters WHERE is_active=1 AND institution_id=? LIMIT 1"); $__q->execute([$inst_id]); $activeSem = $__q->fetch();
 $semId = $activeSem['id'] ?? null;
 
 // Enrolled courses with attendance stats

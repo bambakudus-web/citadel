@@ -8,7 +8,7 @@ requireLogin();
 $inst_id = (int)($_SESSION['institution_id'] ?? 1);
 $user   = currentUser();
 $userId = $user['id'];
-$session = $pdo->query("SELECT s.id, s.course_code FROM sessions s JOIN users u ON u.id=s.lecturer_id WHERE s.active_status=1 AND u.institution_id=$inst_id LIMIT 1")->fetch();
+$__q = $pdo->prepare("SELECT s.id, s.course_code FROM sessions s JOIN users u ON u.id=s.lecturer_id WHERE s.active_status=1 AND u.institution_id=? LIMIT 1"); $__q->execute([$inst_id]); $session = $__q->fetch();
 $myRecord = null;
 if ($session) {
     $chk = $pdo->prepare("SELECT status FROM attendance WHERE session_id=? AND student_id=?");

@@ -60,10 +60,10 @@ $user = currentUser();
 //  Stats 
 $inst_id = (int)($_SESSION['institution_id'] ?? 1);
 
-$totalStudents   = $pdo->query("SELECT COUNT(*) FROM users WHERE role='student' AND institution_id=$inst_id")->fetchColumn();
-$totalLecturers  = $pdo->query("SELECT COUNT(*) FROM users WHERE role='lecturer' AND institution_id=$inst_id")->fetchColumn();
-$totalSessions   = $pdo->query("SELECT COUNT(*) FROM sessions s JOIN users u ON u.id=s.lecturer_id WHERE u.institution_id=$inst_id")->fetchColumn();
-$todayAttendance = $pdo->query("SELECT COUNT(*) FROM attendance a JOIN sessions s ON s.id=a.session_id JOIN users u ON u.id=s.lecturer_id WHERE DATE(a.timestamp)=CURDATE() AND u.institution_id=$inst_id")->fetchColumn();
+$__q = $pdo->prepare("SELECT COUNT(*) FROM users WHERE role='student' AND institution_id=?"); $__q->execute([$inst_id]); $totalStudents = $__q->fetchColumn();
+$__q = $pdo->prepare("SELECT COUNT(*) FROM users WHERE role='lecturer' AND institution_id=?"); $__q->execute([$inst_id]); $totalLecturers = $__q->fetchColumn();
+$__q = $pdo->prepare("SELECT COUNT(*) FROM sessions s JOIN users u ON u.id=s.lecturer_id WHERE u.institution_id=?"); $__q->execute([$inst_id]); $totalSessions = $__q->fetchColumn();
+$__q = $pdo->prepare("SELECT COUNT(*) FROM attendance a JOIN sessions s ON s.id=a.session_id JOIN users u ON u.id=s.lecturer_id WHERE DATE(a.timestamp)=CURDATE() AND u.institution_id=?"); $__q->execute([$inst_id]); $todayAttendance = $__q->fetchColumn();
 
 //  Today's timetable 
 $today = date('l');

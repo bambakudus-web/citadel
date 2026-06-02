@@ -11,7 +11,7 @@ $type   = $_GET['type']        ?? 'trend';
 $semId  = (int)($_GET['semester_id'] ?? 0);
 
 if (!$semId) {
-    $row   = $pdo->query("SELECT id FROM semesters WHERE is_active=1 AND institution_id=$inst_id LIMIT 1")->fetch();
+    $__q = $pdo->prepare("SELECT id FROM semesters WHERE is_active=1 AND institution_id=? LIMIT 1"); $__q->execute([$inst_id]); $row = $__q->fetch();
     $semId = $row['id'] ?? null;
 }
 

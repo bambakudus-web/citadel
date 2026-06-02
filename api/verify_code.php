@@ -17,6 +17,14 @@ if (!$inputCode || !$sessionId) {
     exit;
 }
 
+// Rate limit: max 10 attempts per user per 5 minutes
+$rlKey = 'verify_code_' . $userId . '_' . $sessionId;
+if (!checkRateLimit($rlKey, 10, 300)) {
+    $wait = getRateLimitRemaining($rlKey, 300);
+    echo json_encode(['success' => false, 'message' => "Too many attempts. Try again in {$wait}s."]);
+    exit;
+}
+
 // Fetch active session
 $stmt = $pdo->prepare("SELECT * FROM sessions WHERE id=? AND active_status=1");
 $stmt->execute([$sessionId]);
@@ -66,6 +74,7 @@ for ($i = -1; $i <= 1; $i++) {
 if ($valid) {
     // For online sessions, skip device fingerprint — just mark present
     $isOnline = (bool)($session['is_online'] ?? false);
+    resetRateLimit($rlKey);
     echo json_encode([
         'success'   => true,
         'message'   => 'Code verified',

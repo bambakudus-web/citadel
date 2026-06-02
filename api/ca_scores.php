@@ -1,6 +1,7 @@
 <?php
 require_once '../includes/security.php';
 require_once '../includes/db.php';
+require_once '../includes/logger.php';
 require_once '../includes/auth.php';
 header('Content-Type: application/json');
 
@@ -164,7 +165,7 @@ Citadel Academic System";
 Content-Type: text/plain; charset=UTF-8");
                 }
             }
-        } catch (Exception $e) { /* non-fatal */ }
+        } catch (Exception $e) { logError('CA_NOTIFY', $e); }
 
         echo json_encode(['success' => true, 'saved' => count($scores)]);
     } catch (Exception $e) {

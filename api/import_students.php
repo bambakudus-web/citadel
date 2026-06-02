@@ -2,6 +2,7 @@
 // api/import_students.php — Bulk student import via CSV
 require_once '../includes/cors.php';
 require_once '../includes/db.php';
+require_once '../includes/logger.php';
 require_once '../includes/auth.php';
 require_once '../includes/brevo_mail.php';
 
@@ -114,7 +115,7 @@ while (($line = fgetcsv($handle, 1000, ',')) !== false) {
         $inserted++;
         // Send welcome email if real email provided
         if (!empty($email) && strpos($email, '@citadel.edu') === false && strpos($email, '.edu.gh') === false) {
-            try { sendWelcomeEmail($email, $fullName, $indexNo, $indexNo, $instName); } catch(Exception $e2) {}
+            try { sendWelcomeEmail($email, $fullName, $indexNo, $indexNo, $instName); } catch(Exception $e2) { logError('IMPORT_EMAIL', $e2); }
         }
     } catch (Exception $e) {
         $errors[] = "Row $row: $indexNo — " . $e->getMessage();

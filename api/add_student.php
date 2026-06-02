@@ -2,6 +2,7 @@
 // api/add_student.php
 require_once '../includes/cors.php';
 require_once '../includes/db.php';
+require_once '../includes/logger.php';
 require_once '../includes/auth.php';
 require_once '../includes/brevo_mail.php';
 requireLogin();
@@ -25,7 +26,7 @@ if ($email) {
     $instName = $instRow->fetchColumn() ?: 'Citadel';
     sendWelcomeEmail($email, $fullName, $indexNo ?: 'N/A', $indexNo ?: 'your index number', $instName);
 }
-    } catch (Exception $e) {}
+    } catch (Exception $e) { logError('ADD_STUDENT_EMAIL', $e); }
 }
 
 header('Location: ../pages/admin/dashboard.php');

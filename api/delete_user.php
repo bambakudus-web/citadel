@@ -8,7 +8,7 @@ $inst_id = (int)($_SESSION['institution_id'] ?? 1);
 
 $id = (int)($_GET['id'] ?? 0);
 if ($id) {
-    $pdo->prepare("DELETE FROM users WHERE id=? AND role NOT IN ('admin') AND institution_id=$inst_id")->execute([$id]);
+    $pdo->prepare("DELETE FROM users WHERE id=? AND role NOT IN ('admin') AND institution_id=?")->execute([$id, $inst_id]);
 }
 header('Location: ../pages/admin/dashboard.php');
 exit;

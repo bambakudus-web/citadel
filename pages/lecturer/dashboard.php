@@ -12,7 +12,7 @@ $userId = $_SESSION['user_id'];
 
 // Active semester
 $inst_id = (int)($_SESSION['institution_id'] ?? 1);
-$activeSem = $pdo->query("SELECT * FROM semesters WHERE is_active=1 AND institution_id=$inst_id LIMIT 1")->fetch();
+$activeSem = $__q=$pdo->prepare("SELECT * FROM semesters WHERE is_active=1 AND institution_id=? LIMIT 1");$__q->execute([$inst_id]);$__q->fetch();
 $semId     = $activeSem['id'] ?? null;
 $activeSemId = (int)($activeSem['id'] ?? 0);
 
@@ -151,7 +151,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'end_s
             $enrolled = $pdo->prepare("SELECT student_id FROM course_enrollments WHERE course_id=? AND status='active'");
             $enrolled->execute([$sess['course_id']]);
         } else {
-            $enrolled = $pdo->query("SELECT id AS student_id FROM users WHERE role IN ('student','rep') AND is_active=1 AND institution_id=$inst_id");
+            $enrolled=$pdo->prepare("SELECT id AS student_id FROM users WHERE role IN ('student','rep') AND is_active=1 AND institution_id=?");$enrolled->execute([$inst_id]);
         }
         $ins = $pdo->prepare("INSERT IGNORE INTO attendance (session_id, student_id, status, timestamp) VALUES (?,?,'absent',NOW())");
         foreach ($enrolled->fetchAll() as $s) {
@@ -183,7 +183,7 @@ if ($activeSession && $activeSession['course_id']) {
     $ec = $pdo->prepare("SELECT COUNT(*) FROM course_enrollments WHERE course_id=? AND status='active'");
     $ec->execute([$activeSession['course_id']]); $enrolledCount = $ec->fetchColumn();
 } else {
-    $enrolledCount = $pdo->query("SELECT COUNT(*) FROM users WHERE role IN ('student','rep') AND is_active=1 AND institution_id=$inst_id")->fetchColumn();
+    $enrolledCount = $__q=$pdo->prepare("SELECT COUNT(*) FROM users WHERE role IN ('student','rep') AND is_active=1 AND institution_id=?");$__q->execute([$inst_id]);$__q->fetchColumn();
 }
 ?>
 <!DOCTYPE html>

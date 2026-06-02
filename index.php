@@ -86,6 +86,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['_action'] ?? '') === 'logi
     // Clear IP rate limit on success
     try { if(function_exists('clearRateLimit')) clearRateLimit('login_fail_' . md5(($ip ?? '') . date('YmdHi'))); } catch(Exception $e){}
 
+    session_regenerate_id(true);
     $_SESSION['user_id']        = $user['id'];
     $_SESSION['role']           = $user['role'];
     $_SESSION['institution_id'] = $user['institution_id'] ?? 1;

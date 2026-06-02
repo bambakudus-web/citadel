@@ -19,7 +19,7 @@ if ($_SERVER['REQUEST_METHOD']==='POST') {
         elseif ($target === 'pro')    $where .= " AND i.plan='pro'";
         elseif ($target === 'enterprise') $where .= " AND i.plan='enterprise'";
 
-        $rows = $pdo->query("SELECT u.email, u.full_name, i.name AS inst_name FROM users u JOIN institutions i ON i.id=u.institution_id WHERE $where")->fetchAll();
+        $stmt = $pdo->prepare("SELECT u.email, u.full_name, i.name AS inst_name FROM users u JOIN institutions i ON i.id=u.institution_id WHERE " . $where); $stmt->execute($params ?? []); $rows = $stmt->fetchAll();
 
         $sent = 0; $failed = 0;
         foreach ($rows as $r) {

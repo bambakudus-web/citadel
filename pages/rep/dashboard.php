@@ -36,7 +36,7 @@ $__q = $pdo->prepare("SELECT DISTINCT t.course_code, t.course_name FROM timetabl
 
 // Today's timetable
 $today = date('l');
-$todayStmt = $pdo->prepare("SELECT t.*, u.full_name as lecturer_name FROM timetable t JOIN users u ON t.lecturer_id=u.id WHERE t.day_of_week=? AND u.institution_id=$inst_id AND (t.semester_id=? OR t.semester_id IS NULL) ORDER BY t.start_time");
+$todayStmt = $pdo->prepare("SELECT t.*, u.full_name as lecturer_name FROM timetable t JOIN users u ON t.lecturer_id=u.id WHERE t.day_of_week=? AND u.institution_id=? AND (t.semester_id=? OR t.semester_id IS NULL) ORDER BY t.start_time");
 $todayStmt->execute([$today, $activeSemId]); $todayClasses = $todayStmt->fetchAll();
 
 // Active session
@@ -193,7 +193,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($action === 'delete') {
         $id = (int)($_POST['id'] ?? 0);
         if ($id) {
-            $pdo->prepare("DELETE FROM users WHERE id=? AND role='student' AND institution_id=$inst_id")->execute([$id]);
+            $pdo->prepare("DELETE FROM users WHERE id=? AND role='student' AND institution_id=?")->execute([$id]);
             $msg = 'Student removed.'; $msgType = 'success';
         }
     }
@@ -627,7 +627,7 @@ document.addEventListener('DOMContentLoaded',function(){
     <div class="page-section" id="sec-timetable">
       <div class="section-header"><div class="section-title">Class <span>Timetable</span></div></div>
       <?php foreach(['Monday','Tuesday','Wednesday','Thursday','Friday'] as $day):
-        $cls=$pdo->prepare("SELECT t.*,u.full_name as lecturer_name FROM timetable t JOIN users u ON t.lecturer_id=u.id WHERE t.day_of_week=? AND u.institution_id=$inst_id AND (t.semester_id=? OR t.semester_id IS NULL) ORDER BY t.start_time");
+        $cls=$pdo->prepare("SELECT t.*,u.full_name as lecturer_name FROM timetable t JOIN users u ON t.lecturer_id=u.id WHERE t.day_of_week=? AND u.institution_id=? AND (t.semester_id=? OR t.semester_id IS NULL) ORDER BY t.start_time");
         $cls->execute([$day, $activeSemId]); $cls=$cls->fetchAll(); if(empty($cls)) continue; ?>
         <div style="margin-bottom:1.5rem">
           <div style="font-family:'Cinzel',serif;font-size:.78rem;color:var(--rep);letter-spacing:.15em;margin-bottom:.6rem;text-transform:uppercase"><?= $day ?></div>

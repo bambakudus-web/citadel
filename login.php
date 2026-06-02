@@ -3,8 +3,6 @@ session_start();
 header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
 header("Pragma: no-cache");
 header("Expires: 0");
-header("Cache-Control: no-store, no-cache, must-revalidate");
-header("Pragma: no-cache");
 require_once 'includes/db.php';
 
 if (!empty($_SESSION['user_id'])) {
@@ -73,6 +71,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['_action'] ?? '') === 'logi
     }
     $pdo->prepare("UPDATE users SET login_attempts=0 WHERE id=?")->execute([$user['id']]);
 
+    // Prevent session fixation
+    session_regenerate_id(true);
     $_SESSION['user_id']        = $user['id'];
     $_SESSION['role']           = $user['role'];
     $_SESSION['institution_id'] = $user['institution_id'] ?? 1;

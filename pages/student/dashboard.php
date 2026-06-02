@@ -65,7 +65,7 @@ if (!empty($enrolledCourseIds)) {
 
 // Fallback: if no course_id links, use old timetable
 if (empty($todayClasses)) {
-    $stmt = $pdo->prepare("SELECT t.*, u.full_name AS lecturer_name FROM timetable t JOIN users u ON t.lecturer_id=u.id WHERE t.day_of_week=? AND u.institution_id=$inst_id ORDER BY t.start_time");
+    $stmt = $pdo->prepare("SELECT t.*, u.full_name AS lecturer_name FROM timetable t JOIN users u ON t.lecturer_id=u.id WHERE t.day_of_week=? AND u.institution_id=? ORDER BY t.start_time");
     $stmt->execute([$today]); $todayClasses = $stmt->fetchAll();
 }
 
@@ -106,7 +106,7 @@ $recentAtt = $pdo->prepare("
 $recentAtt->execute([$userId]); $recentAtt = $recentAtt->fetchAll();
 
 // Announcements
-$announcements = $pdo->query("SELECT a.message, a.created_at, u.full_name FROM announcements a JOIN users u ON a.rep_id=u.id ORDER BY a.created_at DESC LIMIT 5")->fetchAll();
+$__q = $pdo->prepare("SELECT a.message, a.created_at, u.full_name FROM announcements a JOIN users u ON a.rep_id=u.id WHERE u.institution_id=? ORDER BY a.created_at DESC LIMIT 5"); $__q->execute([$inst_id]); $announcements = $__q->fetchAll();
 
 // Full attendance history
 $hist = $pdo->prepare("SELECT a.*, s.course_code, s.course_name FROM attendance a JOIN sessions s ON a.session_id=s.id WHERE a.student_id=? ORDER BY a.timestamp DESC");

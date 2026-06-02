@@ -824,7 +824,7 @@ document.addEventListener('DOMContentLoaded',function(){
 
 <div id="selfie-overlay" class="overlay-fullscreen">
   <img id="selfie-big" src="" class="img-modal-rep">
-  <div id="selfie-name" style="color:var(--text);font-family:'Cinzel',serif;font-size:.9rem"></div>
+  <div id="selfie-name" class="t-text cinzel-sm"></div>
   <button onclick="closeSelfie()" class="btn-ghost-sm-border">Close</button>
 </div>
 

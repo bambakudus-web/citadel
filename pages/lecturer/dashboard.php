@@ -656,7 +656,7 @@ document.addEventListener('DOMContentLoaded',function(){
             </div>
             <input type="hidden" name="course_code" id="course-code-hidden" value="<?= htmlspecialchars($myCourses[0]['code'] ?? '') ?>">
             <div class="form-field" class="mb-8">
-              <label style="display:flex;align-items:center;gap:.6rem;cursor:pointer">
+              <label class="flex-label-check">
                 <input type="checkbox" name="is_online" id="is-online-chk" value="1" onchange="toggleMeetingLink(this)" class="w-auto-gold">
                 <span class="fs-82"> Online Class Mode</span>
               </label>

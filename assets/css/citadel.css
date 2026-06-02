@@ -263,3 +263,12 @@
 /* Border colours */
 .border-success { border-color: rgba(76,175,130,.3); }
 .border-success-mt { border-color: rgba(76,175,130,.3); margin-top: 1rem; }
+
+/* Label with checkbox */
+.flex-label-check { display: flex; align-items: center; gap: .6rem; cursor: pointer; }
+
+/* Cinzel small */
+.cinzel-sm { color: var(--text); font-family: 'Cinzel', serif; font-size: .9rem; }
+
+/* Card dynamic top border — color set via inline style-top-color only */
+.card-dynamic-top { background: var(--surface); border: 1px solid var(--border); border-top: 2px solid transparent; border-radius: 2px; padding: 1rem; }

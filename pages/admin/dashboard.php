@@ -1842,7 +1842,7 @@ async function adminCALoad() {
     cards.innerHTML = Object.entries(byType).map(([type, v]) => {
       const avg = Math.round(v.total / v.max * 100);
       const col = avg >= 75 ? 'var(--success)' : avg >= 50 ? 'var(--gold)' : 'var(--danger)';
-      return `<div style="background:var(--surface);border:1px solid var(--border);border-top:2px solid ${col};border-radius:2px;padding:1rem">
+      return `<div class="card-dynamic-top" style="border-top-color:${col}">
         <div class="label-muted-upper">${type}</div>
         <div class="fw-700 t-gold">${avg}%</div>
         <div class="t-muted-72">${v.count} entries</div>

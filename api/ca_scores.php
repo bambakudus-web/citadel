@@ -13,6 +13,27 @@ $method = $_SERVER['REQUEST_METHOD'];
 if ($method === 'GET') {
     $type    = $_GET['type'] ?? 'course';
     
+    // Admin fetches all scores
+    if ($type === 'all') {
+        $sem_id  = isset($_GET['semester_id']) ? (int)$_GET['semester_id'] : null;
+        $ca_type = $_GET['ca_type'] ?? null;
+        $sql = "SELECT cs.*, u.full_name, u.index_no,
+                       c.code AS course_code, c.name AS course_name,
+                       l.full_name AS lecturer_name
+                FROM ca_scores cs
+                JOIN users u ON u.id = cs.student_id
+                LEFT JOIN courses c ON c.id = cs.course_id
+                LEFT JOIN users l ON l.id = cs.lecturer_id
+                WHERE cs.institution_id = ?";
+        $params = [$inst_id];
+        if ($sem_id)  { $sql .= " AND cs.semester_id = ?";  $params[] = $sem_id; }
+        if ($ca_type) { $sql .= " AND cs.ca_type = ?";      $params[] = $ca_type; }
+        $sql .= " ORDER BY u.full_name ASC, cs.ca_type ASC";
+        $stmt = $pdo->prepare($sql); $stmt->execute($params);
+        echo json_encode(['success' => true, 'scores' => $stmt->fetchAll()]);
+        exit;
+    }
+
     // Lecturer fetches scores for a course
     if ($type === 'course' && isset($_GET['course_id'])) {
         $course_id  = (int)$_GET['course_id'];
@@ -107,6 +128,36 @@ if ($method === 'POST') {
         }
         $pdo->commit();
         audit('CA_UPLOAD', 'course', $course_id);
+
+        // Notify students their CA scores are available
+        try {
+            $courseName = $pdo->prepare("SELECT name, code FROM courses WHERE id=?");
+            $courseName->execute([$course_id]); $cInfo = $courseName->fetch();
+            foreach ($scores as $s) {
+                $stuRow = $pdo->prepare("SELECT email, full_name FROM users WHERE id=?");
+                $stuRow->execute([(int)$s['student_id']]); $stu = $stuRow->fetch();
+                if ($stu && filter_var($stu['email'], FILTER_VALIDATE_EMAIL)
+                    && strpos($stu['email'], '@citadel.edu') === false) {
+                    $subject = "CA Score Uploaded — " . ($cInfo['code'] ?? '') . " " . $ca_type;
+                    $msg = "Dear {$stu['full_name']},
+
+Your {$ca_type} score for " .
+                           ($cInfo['code'] ?? 'your course') . " — " . ($cInfo['name'] ?? '') .
+                           " has been uploaded.
+
+Score: {$s['score']} / {$body['max_score']}
+
+" .
+                           "Log in to Citadel to view your full CA report.
+
+Citadel Academic System";
+                    @mail($stu['email'], $subject, $msg,
+                        "From: noreply@citadel.edu
+Content-Type: text/plain; charset=UTF-8");
+                }
+            }
+        } catch (Exception $e) { /* non-fatal */ }
+
         echo json_encode(['success' => true, 'saved' => count($scores)]);
     } catch (Exception $e) {
         $pdo->rollBack();

@@ -567,6 +567,9 @@ document.addEventListener('DOMContentLoaded',function(){
     <a class="nav-item" onclick="showSection('locked',this)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Locked Accounts<?php if(!empty($lockedUsers)): ?> <span style="background:var(--danger);color:#fff;font-size:.6rem;padding:.1rem .35rem;border-radius:2px;margin-left:auto"><?= count($lockedUsers) ?></span><?php endif ?>
     </a>
+    <a class="nav-item" onclick="showSection('ca',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>CA Scores
+    </a>
     <a class="nav-item" onclick="showSection('devices',this)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>Device Control
     </a>
@@ -1735,6 +1738,158 @@ async function deleteProgram(id,name){
   if(d.ok){toast('success','Program deleted');setTimeout(()=>location.reload(),800);}
   else toast('error',d.error||'Error');
 }
+
+    <!-- CA SCORES ADMIN -->
+    <div class="page-section" id="sec-ca">
+      <div class="section-header">
+        <div class="section-title">Continuous <span>Assessment</span></div>
+        <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+          <button class="btn btn-ghost btn-sm" onclick="adminCALoad()">Refresh</button>
+          <button class="btn btn-gold btn-sm" onclick="adminCAExport()"> Export CSV</button>
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div class="card" style="margin-bottom:1.5rem">
+        <div class="card-body">
+          <div class="form-row">
+            <div class="form-field">
+              <label>Semester</label>
+              <select id="admin-ca-sem" onchange="adminCALoad()">
+                <option value="">All Semesters</option>
+                <?php foreach($allSemesters as $sem): ?>
+                <option value="<?= $sem['id'] ?>"><?= htmlspecialchars($sem['name']) ?></option>
+                <?php endforeach; ?>
+              </select>
+            </div>
+            <div class="form-field">
+              <label>Course</label>
+              <select id="admin-ca-course" onchange="adminCALoad()">
+                <option value="">All Courses</option>
+                <?php foreach($activeCourses as $ac): ?>
+                <option value="<?= $ac['id'] ?>"><?= htmlspecialchars($ac['code']) ?> — <?= htmlspecialchars($ac['name']) ?></option>
+                <?php endforeach; ?>
+              </select>
+            </div>
+            <div class="form-field">
+              <label>CA Type</label>
+              <select id="admin-ca-type" onchange="adminCALoad()">
+                <option value="">All Types</option>
+                <option>CA1</option><option>CA2</option><option>CA3</option>
+                <option>MID</option><option>QUIZ1</option><option>QUIZ2</option>
+                <option>PROJECT</option><option>PRACTICAL</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Summary cards -->
+      <div id="admin-ca-cards" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1rem;margin-bottom:1.5rem"></div>
+
+      <!-- Scores table -->
+      <div class="card">
+        <div class="card-head">
+          <div class="card-head-title">All CA Scores</div>
+          <span id="admin-ca-count" class="pill pill-steel">0 records</span>
+        </div>
+        <div class="card-body" style="padding:0;overflow-x:auto">
+          <table class="data-table">
+            <thead><tr><th>Student</th><th>ID</th><th>Course</th><th>CA Type</th><th>Score</th><th>Max</th><th>%</th><th>Lecturer</th><th>Date</th></tr></thead>
+            <tbody id="admin-ca-body">
+              <tr><td colspan="9" style="color:var(--muted);text-align:center;padding:2rem">Click Refresh to load scores</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+<script>
+
+// ── ADMIN CA SCORES ──
+async function adminCALoad() {
+  const semId    = document.getElementById('admin-ca-sem')?.value || '';
+  const courseId = document.getElementById('admin-ca-course')?.value || '';
+  const caType   = document.getElementById('admin-ca-type')?.value || '';
+
+  let url = '/api/ca_scores.php?type=course&course_id=' + (courseId || '0');
+  if (semId)    url += '&semester_id=' + semId;
+  if (caType)   url += '&ca_type=' + caType;
+  if (!courseId) url = '/api/ca_scores.php?type=all&inst_id=1' + (semId?'&semester_id='+semId:'') + (caType?'&ca_type='+caType:'');
+
+  const r = await fetch(url);
+  const d = await r.json();
+  const tbody = document.getElementById('admin-ca-body');
+  const cards = document.getElementById('admin-ca-cards');
+  const count = document.getElementById('admin-ca-count');
+
+  if (!d.success || !d.scores?.length) {
+    tbody.innerHTML = '<tr><td colspan="9" style="color:var(--muted);text-align:center;padding:2rem">No scores found.</td></tr>';
+    if (count) count.textContent = '0 records';
+    if (cards) cards.innerHTML = '';
+    return;
+  }
+
+  if (count) count.textContent = d.scores.length + ' records';
+
+  // Summary
+  const byType = {};
+  d.scores.forEach(s => {
+    if (!byType[s.ca_type]) byType[s.ca_type] = { total:0, max:0, count:0 };
+    byType[s.ca_type].total += parseFloat(s.score);
+    byType[s.ca_type].max   += parseFloat(s.max_score);
+    byType[s.ca_type].count++;
+  });
+  if (cards) {
+    cards.innerHTML = Object.entries(byType).map(([type, v]) => {
+      const avg = Math.round(v.total / v.max * 100);
+      const col = avg >= 75 ? 'var(--success)' : avg >= 50 ? 'var(--gold)' : 'var(--danger)';
+      return `<div style="background:var(--surface);border:1px solid var(--border);border-top:2px solid ${col};border-radius:2px;padding:1rem">
+        <div style="font-size:.65rem;color:var(--muted);letter-spacing:.15em;text-transform:uppercase;margin-bottom:.3rem">${type}</div>
+        <div style="font-size:1.5rem;font-weight:700;color:${col}">${avg}%</div>
+        <div style="font-size:.72rem;color:var(--muted)">${v.count} entries</div>
+      </div>`;
+    }).join('');
+  }
+
+  tbody.innerHTML = d.scores.map(s => {
+    const pct  = Math.round(s.score / s.max_score * 100);
+    const pill = pct >= 50 ? 'pill-green' : 'pill-red';
+    return `<tr>
+      <td>${s.full_name || '—'}</td>
+      <td style="color:var(--gold);font-size:.78rem">${s.index_no || '—'}</td>
+      <td style="font-size:.78rem">${s.course_code || '—'}</td>
+      <td><span class="pill pill-steel">${s.ca_type}</span></td>
+      <td style="font-weight:600">${s.score}</td>
+      <td style="color:var(--muted)">${s.max_score}</td>
+      <td><span class="pill ${pill}">${pct}%</span></td>
+      <td style="color:var(--muted);font-size:.78rem">${s.lecturer_name || '—'}</td>
+      <td style="color:var(--muted);font-size:.75rem">${(s.uploaded_at||'').substring(0,10)}</td>
+    </tr>`;
+  }).join('');
+
+  window._adminCAScores = d.scores;
+}
+
+function adminCAExport() {
+  const scores = window._adminCAScores || [];
+  if (!scores.length) { alert('Load scores first'); return; }
+  const headers = ['Student','Index No','Course','CA Type','Score','Max Score','Percentage','Lecturer','Date'];
+  const rows = scores.map(s => [
+    s.full_name, s.index_no, s.course_code, s.ca_type,
+    s.score, s.max_score,
+    Math.round(s.score/s.max_score*100)+'%',
+    s.lecturer_name,
+    (s.uploaded_at||'').substring(0,10)
+  ]);
+  const csv = [headers, ...rows].map(r => r.map(v => '"'+(v||'').toString().replace(/"/g,'""')+'"').join(',')).join('\n');
+  const a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+  a.download = 'ca_scores_' + new Date().toISOString().substring(0,10) + '.csv';
+  a.click();
+}
+
+</script>
 </script>
 </body>
 </html>

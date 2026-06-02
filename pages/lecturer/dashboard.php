@@ -556,6 +556,12 @@ document.addEventListener('DOMContentLoaded',function(){
           <div>
             <div class="code-display-zone">
               <div class="live-badge"><div class="live-dot"></div>Session Active</div>
+              <?php if($activeSession['is_online'] ?? false): ?>
+              <div style="display:inline-flex;align-items:center;gap:.4rem;background:rgba(74,111,165,.15);border:1px solid rgba(74,111,165,.4);border-radius:2px;padding:.25rem .7rem;font-size:.68rem;color:var(--steel);letter-spacing:.12em;text-transform:uppercase;margin-bottom:.5rem"> Online Class</div>
+              <?php if(!empty($activeSession['meeting_link'])): ?>
+              <div style="margin-bottom:.5rem"><a href="<?= htmlspecialchars($activeSession['meeting_link']) ?>" target="_blank" style="font-size:.75rem;color:var(--steel);text-decoration:underline"> <?= htmlspecialchars($activeSession['meeting_link']) ?></a></div>
+              <?php endif; ?>
+              <?php endif; ?>
               <div class="code-course"><?= htmlspecialchars($activeSession['course_code']) ?> · <?= htmlspecialchars($activeSession['course_name'] ?? '') ?></div>
               <div class="code-number" id="live-code"><?= substr($currentCode,0,3).' '.substr($currentCode,3) ?></div>
               <div class="code-timer">

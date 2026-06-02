@@ -53,9 +53,11 @@ $code   = (hexdec(substr($hash, $offset * 2, 8)) & 0x7fffffff) % 1000000;
 $code   = str_pad((string)$code, 6, '0', STR_PAD_LEFT);
 
 echo json_encode([
-    'code'        => $code,
-    'remaining'   => 120 - (time() % 120),
-    'course_name' => $session['course_name'] ?? $session['course_name'],
-    'course_code' => $session['course_code'] ?? $session['course_code'],
-    'semester'    => $session['semester_name'] ?? null,
+    'code'         => $code,
+    'remaining'    => 120 - (time() % 120),
+    'course_name'  => $session['course_name'] ?? $session['course_name'],
+    'course_code'  => $session['course_code'] ?? $session['course_code'],
+    'semester'     => $session['semester_name'] ?? null,
+    'is_online'    => (bool)($session['is_online'] ?? false),
+    'meeting_link' => $session['meeting_link'] ?? null,
 ]);

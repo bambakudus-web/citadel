@@ -64,7 +64,14 @@ for ($i = -1; $i <= 1; $i++) {
 }
 
 if ($valid) {
-    echo json_encode(['success' => true, 'message' => 'Code verified']);
+    // For online sessions, skip device fingerprint — just mark present
+    $isOnline = (bool)($session['is_online'] ?? false);
+    echo json_encode([
+        'success'   => true,
+        'message'   => 'Code verified',
+        'is_online' => $isOnline,
+        'meeting_link' => $session['meeting_link'] ?? null,
+    ]);
 } else {
     echo json_encode(['success' => false, 'message' => 'Invalid code. Please try again.']);
 }

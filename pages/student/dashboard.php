@@ -452,6 +452,9 @@ document.addEventListener('DOMContentLoaded',function(){
     <a class="nav-item" onclick="showSection('stats',this)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>My Stats
     </a>
+    <a class="nav-item" onclick="showSection('ca',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>My CA Scores
+    </a>
   </nav>
   <div class="sidebar-user">
     <div class="u-name"><?= htmlspecialchars($user['full_name'] ?? '') ?></div>
@@ -539,7 +542,26 @@ document.addEventListener('DOMContentLoaded',function(){
               <div style="font-size:.9rem;color:var(--text);font-weight:500"><?= htmlspecialchars($activeSession['course_code']) ?> · <?= htmlspecialchars($activeSession['course_name'] ?? '') ?></div>
             </div>
           </div>
-          <?php if($instType !== 'university'): ?>
+          <?php if($activeSession['is_online'] ?? false): ?>
+          <!-- ONLINE SESSION MODE -->
+          <div style="background:rgba(74,111,165,.08);border:1px solid rgba(74,111,165,.3);border-left:3px solid var(--steel);border-radius:2px;padding:1.2rem 1.4rem;margin-top:1rem;text-align:center">
+            <div style="font-size:.72rem;color:var(--steel);letter-spacing:.15em;text-transform:uppercase;margin-bottom:.4rem"> Online Class</div>
+            <div style="font-size:.85rem;color:var(--text);margin-bottom:.8rem">This is an online session. Enter the code your lecturer shares to mark your attendance.</div>
+            <?php if(!empty($activeSession['meeting_link'])): ?>
+            <a href="<?= htmlspecialchars($activeSession['meeting_link']) ?>" target="_blank" rel="noopener" class="btn btn-steel" style="display:inline-flex;margin-bottom:1rem;justify-content:center">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:.4rem"><path d="M15 10l4.553-2.069A1 1 0 0 1 21 8.868v6.264a1 1 0 0 1-1.447.894L15 14"/><rect x="3" y="6" width="12" height="12" rx="2"/></svg>
+              Join Online Class
+            </a>
+            <?php endif; ?>
+          </div>
+          <div style="margin-top:1rem">
+            <div class="code-inputs">
+              <?php for($i=1;$i<=6;$i++): ?><input type="text" maxlength="1" id="ci<?=$i?>" oninput="codeInput(this,<?=$i?>)" onkeydown="codeBack(event,<?=$i?>)" inputmode="numeric"><?php endfor; ?>
+            </div>
+            <button class="btn btn-gold" id="verify-code-btn" onclick="verifyCode()" style="width:100%;justify-content:center;padding:.85rem;margin-top:1rem" disabled>Verify Code</button>
+            <div id="code-error" style="color:var(--danger);font-size:.78rem;margin-top:.6rem;text-align:center;display:none"></div>
+          </div>
+          <?php elseif($instType !== 'university'): ?>
           <div class="pending-card" style="border-color:rgba(76,175,130,.3);margin-top:1rem">
             <div class="pending-icon"></div>
             <div class="pending-title" style="color:var(--success)">Class in Progress</div>
@@ -856,6 +878,70 @@ window.fetch=function(url,options={}){options.headers=options.headers||{};option
 // Mobile handled in head script
 
 </script>
+
+<script>
+// ── STUDENT CA SCORES ──
+const CA_API_STU = (window.location.origin) + '/api/ca_scores.php';
+
+async function loadMyCA() {
+  const semId = document.getElementById('ca-sem-filter')?.value || '';
+  const url   = CA_API_STU + '?type=student' + (semId ? '&semester_id=' + semId : '');
+  const r     = await fetch(url);
+  const d     = await r.json();
+  const tbody = document.getElementById('ca-scores-body');
+  const cards = document.getElementById('ca-summary-cards');
+
+  if (!d.success || !d.scores.length) {
+    tbody.innerHTML = '<tr><td colspan="7" style="color:var(--muted);text-align:center;padding:2rem">No CA scores uploaded yet.</td></tr>';
+    if (cards) cards.innerHTML = '';
+    return;
+  }
+
+  // Build table
+  tbody.innerHTML = d.scores.map(s => {
+    const pct  = Math.round(s.score / s.max_score * 100);
+    const pill = pct >= 50 ? 'pill-green' : 'pill-red';
+    return `<tr>
+      <td><div style="font-weight:500">${s.course_code}</div><div style="font-size:.75rem;color:var(--muted)">${s.course_name}</div></td>
+      <td><span class="pill pill-steel">${s.ca_type}</span></td>
+      <td style="font-weight:600;color:var(--gold)">${s.score}</td>
+      <td style="color:var(--muted)">${s.max_score}</td>
+      <td><span class="pill ${pill}">${pct}%</span></td>
+      <td style="color:var(--muted);font-size:.78rem">${s.remarks || '—'}</td>
+      <td style="color:var(--muted);font-size:.75rem">${s.uploaded_at?.substring(0,10) || '—'}</td>
+    </tr>`;
+  }).join('');
+
+  // Summary cards — group by course
+  if (cards) {
+    const courses = {};
+    d.scores.forEach(s => {
+      if (!courses[s.course_code]) courses[s.course_code] = { name: s.course_name, total: 0, max: 0, count: 0 };
+      courses[s.course_code].total += parseFloat(s.score);
+      courses[s.course_code].max   += parseFloat(s.max_score);
+      courses[s.course_code].count++;
+    });
+    cards.innerHTML = Object.entries(courses).map(([code, c]) => {
+      const avg = Math.round(c.total / c.max * 100);
+      const col = avg >= 75 ? 'var(--success)' : avg >= 50 ? 'var(--gold)' : 'var(--danger)';
+      return `<div style="background:var(--surface);border:1px solid var(--border);border-radius:2px;padding:1rem;border-top:2px solid ${col}">
+        <div style="font-size:.65rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-bottom:.3rem">${code}</div>
+        <div style="font-size:1.6rem;font-weight:700;color:${col}">${avg}%</div>
+        <div style="font-size:.72rem;color:var(--muted)">${c.count} assessment${c.count>1?'s':''} · ${c.total}/${c.max}</div>
+      </div>`;
+    }).join('');
+  }
+}
+
+// Auto-load when CA section is opened
+document.addEventListener('DOMContentLoaded', function() {
+  const caNav = document.querySelector('[onclick*="showSection('ca'"]');
+  if (caNav) caNav.addEventListener('click', function() {
+    setTimeout(loadMyCA, 100);
+  });
+});
+</script>
+
 <?php require_once '../../includes/toast.php'; ?>
 </body>
 </html>

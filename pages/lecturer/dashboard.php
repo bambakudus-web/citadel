@@ -104,8 +104,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'start
         $progRow->execute([$cId]); $progRow = $progRow->fetch();
         $progId = $progRow['program_id'] ?? null;
     }
-    $ins = $pdo->prepare("INSERT INTO sessions (course_code, course_name, course_id, semester_id, lecturer_id, secret_key, start_time, active_status, program_id) VALUES (?,?,?,?,?,?,NOW(),1,?)");
-    $ins->execute([$courseCode, $courseName, $courseId ?: null, $semId, $userId, $secretKey]);
+    $isOnline    = isset($_POST['is_online']) ? 1 : 0;
+    $meetingLink = trim($_POST['meeting_link'] ?? '');
+    $ins = $pdo->prepare("INSERT INTO sessions (course_code, course_name, course_id, semester_id, lecturer_id, secret_key, start_time, active_status, program_id, is_online, meeting_link) VALUES (?,?,?,?,?,?,NOW(),1,?,?,?)");
+    $ins->execute([$courseCode, $courseName, $courseId ?: null, $semId, $userId, $secretKey, $progId, $isOnline, $meetingLink ?: null]);
     $newSessionId = $pdo->lastInsertId();
 
     // Notify enrolled students via email
@@ -629,6 +631,16 @@ document.addEventListener('DOMContentLoaded',function(){
               </div>
             </div>
             <input type="hidden" name="course_code" id="course-code-hidden" value="<?= htmlspecialchars($myCourses[0]['code'] ?? '') ?>">
+            <div class="form-field" style="margin-bottom:.8rem">
+              <label style="display:flex;align-items:center;gap:.6rem;cursor:pointer">
+                <input type="checkbox" name="is_online" id="is-online-chk" value="1" onchange="toggleMeetingLink(this)" style="width:auto;accent-color:var(--gold)">
+                <span style="font-size:.82rem;color:var(--text)"> Online Class Mode</span>
+              </label>
+            </div>
+            <div class="form-field" id="meeting-link-field" style="display:none">
+              <label>Meeting Link (Zoom / Google Meet)</label>
+              <input type="text" name="meeting_link" placeholder="https://meet.google.com/...">
+            </div>
             <button type="submit" class="btn btn-lec" style="width:100%;justify-content:center;padding:.8rem" <?= empty($myCourses) ? 'disabled' : '' ?>>Start Attendance Session</button>
           </form>
         </div>
@@ -720,6 +732,11 @@ document.addEventListener('DOMContentLoaded',function(){
 </div>
 
 <script>
+
+function toggleMeetingLink(chk) {
+  var f = document.getElementById('meeting-link-field');
+  if (f) f.style.display = chk.checked ? 'block' : 'none';
+}
 
 function fillCourseName(){
   const sel=document.getElementById('course-sel');
@@ -856,6 +873,193 @@ function updateMarkSummary(students) {
   const total = students.length;
   const el = document.getElementById('mark-summary');
   if (el) el.textContent = `${marked} of ${total} marked`;
+}
+
+    <!-- CA SCORES SECTION -->
+    <div class="page-section" id="sec-ca">
+      <div class="section-header">
+        <div class="section-title">Continuous <span>Assessment</span></div>
+      </div>
+
+      <!-- Course + CA Type selector -->
+      <div class="card" style="margin-bottom:1.5rem">
+        <div class="card-body">
+          <div class="form-row" style="margin-bottom:1rem">
+            <div class="form-field">
+              <label>Select Course</label>
+              <select id="ca-course-sel" onchange="caLoadStudents()">
+                <option value="">-- Choose Course --</option>
+                <?php foreach($myCourses as $mc): ?>
+                <option value="<?= $mc['id'] ?>" data-sem="<?= $mc['semester_id'] ?? '' ?>">
+                  <?= htmlspecialchars($mc['code']) ?> — <?= htmlspecialchars($mc['name']) ?>
+                </option>
+                <?php endforeach; ?>
+              </select>
+            </div>
+            <div class="form-field">
+              <label>CA Type</label>
+              <select id="ca-type-sel" onchange="caLoadStudents()">
+                <option value="CA1">CA 1</option>
+                <option value="CA2">CA 2</option>
+                <option value="CA3">CA 3</option>
+                <option value="MID">Mid-Semester Exam</option>
+                <option value="QUIZ1">Quiz 1</option>
+                <option value="QUIZ2">Quiz 2</option>
+                <option value="PROJECT">Project</option>
+                <option value="PRACTICAL">Practical</option>
+              </select>
+            </div>
+            <div class="form-field">
+              <label>Max Score</label>
+              <input type="number" id="ca-max-score" value="100" min="1" max="1000" style="width:100%">
+            </div>
+          </div>
+          <button class="btn btn-lec btn-sm" onclick="caLoadStudents()">Load Students</button>
+        </div>
+      </div>
+
+      <!-- Students score table -->
+      <div class="card" id="ca-table-card" style="display:none">
+        <div class="card-head">
+          <div class="card-head-title" id="ca-table-title">Enter Scores</div>
+          <div style="display:flex;gap:.5rem">
+            <button class="btn btn-ghost btn-sm" onclick="caFillAll()">Fill All</button>
+            <button class="btn btn-lec btn-sm" onclick="caSaveScores()">Save All Scores</button>
+          </div>
+        </div>
+        <div class="card-body" style="padding:0;overflow-x:auto">
+          <table class="data-table">
+            <thead><tr><th>Student</th><th>ID</th><th>Score</th><th>Remarks</th></tr></thead>
+            <tbody id="ca-students-body"></tbody>
+          </table>
+        </div>
+        <div style="padding:1rem 1.4rem;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+          <span id="ca-save-status" style="font-size:.78rem;color:var(--muted)"></span>
+          <button class="btn btn-lec" onclick="caSaveScores()">Save All Scores</button>
+        </div>
+      </div>
+
+      <!-- Existing scores viewer -->
+      <div class="card" style="margin-top:1.5rem" id="ca-existing-card" style="display:none">
+        <div class="card-head"><div class="card-head-title">Uploaded Scores</div></div>
+        <div class="card-body" style="padding:0;overflow-x:auto">
+          <table class="data-table">
+            <thead><tr><th>Student</th><th>ID</th><th>CA Type</th><th>Score</th><th>Max</th><th>%</th><th>Remarks</th></tr></thead>
+            <tbody id="ca-existing-body"><tr><td colspan="7" style="color:var(--muted)">Select a course to view scores.</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+</script>
+
+<script>
+// ── CA SCORES ──
+const CA_API = (window.API || (window.location.origin + '/api')) + '/ca_scores.php';
+
+async function caLoadStudents() {
+  const courseId = document.getElementById('ca-course-sel').value;
+  const caType   = document.getElementById('ca-type-sel').value;
+  const maxScore = document.getElementById('ca-max-score').value;
+  if (!courseId) return;
+
+  const opt = document.getElementById('ca-course-sel').selectedOptions[0];
+  const semId = opt ? opt.dataset.sem : '';
+
+  // Load students
+  const r = await fetch(CA_API + '?type=students&course_id=' + courseId);
+  const d = await r.json();
+  if (!d.success) { alert(d.error || 'Failed to load students'); return; }
+
+  // Load existing scores for this CA type
+  const r2 = await fetch(CA_API + '?type=course&course_id=' + courseId + '&ca_type=' + caType + (semId ? '&semester_id=' + semId : ''));
+  const d2 = await r2.json();
+  const existing = {};
+  if (d2.success) d2.scores.forEach(s => existing[s.student_id] = s);
+
+  // Build table
+  const tbody = document.getElementById('ca-students-body');
+  if (!d.students.length) {
+    tbody.innerHTML = '<tr><td colspan="4" style="color:var(--muted)">No enrolled students found.</td></tr>';
+  } else {
+    tbody.innerHTML = d.students.map(s => {
+      const ex = existing[s.id] || {};
+      return `<tr>
+        <td>${s.full_name}</td>
+        <td style="color:var(--gold);font-size:.78rem">${s.index_no || '—'}</td>
+        <td><input type="number" id="ca-score-${s.id}" value="${ex.score ?? ''}" min="0" max="${maxScore}" step="0.5" style="width:80px;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:.3rem .5rem;border-radius:2px;font-size:.85rem"></td>
+        <td><input type="text" id="ca-rem-${s.id}" value="${ex.remarks || ''}" placeholder="Optional" style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:.3rem .5rem;border-radius:2px;font-size:.82rem"></td>
+      </tr>`;
+    }).join('');
+  }
+
+  document.getElementById('ca-table-card').style.display = 'block';
+  document.getElementById('ca-table-title').textContent = caType + ' Scores — ' + (opt ? opt.textContent.trim() : '');
+
+  // Existing scores table
+  const r3 = await fetch(CA_API + '?type=course&course_id=' + courseId + (semId ? '&semester_id=' + semId : ''));
+  const d3 = await r3.json();
+  const eb = document.getElementById('ca-existing-body');
+  document.getElementById('ca-existing-card').style.display = 'block';
+  if (d3.success && d3.scores.length) {
+    eb.innerHTML = d3.scores.map(s => `<tr>
+      <td>${s.full_name}</td>
+      <td style="color:var(--gold);font-size:.78rem">${s.index_no || '—'}</td>
+      <td><span class="pill pill-steel">${s.ca_type}</span></td>
+      <td>${s.score}</td>
+      <td style="color:var(--muted)">${s.max_score}</td>
+      <td><span class="pill ${(s.score/s.max_score*100)>=50?'pill-green':'pill-red'}">${Math.round(s.score/s.max_score*100)}%</span></td>
+      <td style="color:var(--muted);font-size:.78rem">${s.remarks || '—'}</td>
+    </tr>`).join('');
+  } else {
+    eb.innerHTML = '<tr><td colspan="7" style="color:var(--muted)">No scores uploaded yet.</td></tr>';
+  }
+
+  window._caStudents = d.students;
+  window._caSemId    = semId;
+}
+
+function caFillAll() {
+  const val = prompt('Fill all empty scores with:');
+  if (val === null) return;
+  (window._caStudents || []).forEach(s => {
+    const el = document.getElementById('ca-score-' + s.id);
+    if (el && el.value === '') el.value = val;
+  });
+}
+
+async function caSaveScores() {
+  const courseId = document.getElementById('ca-course-sel').value;
+  const caType   = document.getElementById('ca-type-sel').value;
+  const maxScore = parseFloat(document.getElementById('ca-max-score').value) || 100;
+  const semId    = window._caSemId || null;
+  if (!courseId) { alert('Select a course first'); return; }
+
+  const scores = (window._caStudents || []).map(s => ({
+    student_id: s.id,
+    score:      parseFloat(document.getElementById('ca-score-' + s.id)?.value || 0),
+    remarks:    document.getElementById('ca-rem-' + s.id)?.value || '',
+  })).filter(s => document.getElementById('ca-score-' + s.student_id)?.value !== '');
+
+  if (!scores.length) { alert('No scores to save'); return; }
+
+  const status = document.getElementById('ca-save-status');
+  status.textContent = 'Saving...';
+  status.style.color = 'var(--muted)';
+
+  const r = await fetch(CA_API, {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ course_id: courseId, ca_type: caType, max_score: maxScore, semester_id: semId, scores })
+  });
+  const d = await r.json();
+  if (d.success) {
+    status.textContent = '✓ ' + d.saved + ' scores saved';
+    status.style.color = 'var(--success)';
+    caLoadStudents();
+  } else {
+    status.textContent = '✗ ' + (d.error || 'Failed');
+    status.style.color = 'var(--danger)';
+  }
 }
 </script>
 </body>

@@ -204,6 +204,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
 <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
 <title>Citadel — Rep Dashboard</title>
+<link rel="stylesheet" href="/assets/css/citadel.css">
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -522,7 +523,7 @@ document.addEventListener('DOMContentLoaded',function(){
 
 <body>
 <div class="layout">
-<div id="sidebar-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:400;backdrop-filter:blur(2px)"></div>
+<div id="sidebar-overlay" class="overlay-sidebar"></div>
 <aside class="sidebar" id="sidebar">
   <div class="sidebar-brand">
     <svg viewBox="0 0 52 52" fill="none"><polygon points="26,2 50,14 50,38 26,50 2,38 2,14" fill="none" stroke="#c9a84c" stroke-width="1.5"/><polygon points="26,9 43,18 43,34 26,43 9,34 9,18" fill="none" stroke="#c9a84c" stroke-width="0.8" opacity="0.5"/><rect x="20" y="20" width="12" height="14" rx="1" fill="none" stroke="#5a9f7a" stroke-width="1.5"/><circle cx="26" cy="25" r="2" fill="#c9a84c"/><line x1="26" y1="27" x2="26" y2="31" stroke="#5a9f7a" stroke-width="1.5"/></svg>
@@ -543,7 +544,7 @@ document.addEventListener('DOMContentLoaded',function(){
     </a>
     <a class="nav-item" id="approvals-nav" onclick="showSection('approvals',this)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-      Approvals<?php if($pendingCount>0): ?><span style="background:var(--warning);color:#060910;font-size:.6rem;font-weight:700;padding:.15rem .45rem;border-radius:2px;margin-left:.4rem"><?= $pendingCount ?></span><?php endif; ?>
+      Approvals<?php if($pendingCount>0): ?><span class="badge-warning"><?= $pendingCount ?></span><?php endif; ?>
     </a>
     <a class="nav-item" onclick="showSection('history',this)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/></svg>Session History
@@ -568,14 +569,14 @@ document.addEventListener('DOMContentLoaded',function(){
 
 <div class="main">
   <div class="topbar">
-    <div style="display:flex;align-items:center;gap:1rem">
+    <div class="flex-center">
       <button id="menu-btn" aria-label="Menu" onclick="toggleSidebar()">&#9776;</button>
       <div class="topbar-title" id="page-title">OVERVIEW</div>
     </div>
-    <div style="display:flex;align-items:center;gap:1rem">
-      <span style="font-size:.75rem;color:var(--muted)"><?= date('l, d M Y') ?></span>
+    <div class="flex-center">
+      <span class="t-muted-75"><?= date('l, d M Y') ?></span>
       <span class="badge-rep"><?= terms('rep', $instType) ?></span>
-      <button id="theme-btn" onclick="toggleTheme()" style="background:none;border:1px solid var(--border);color:var(--muted);cursor:pointer;padding:.25rem .6rem;border-radius:2px;font-size:.75rem">&#9790;</button>
+      <button id="theme-btn" onclick="toggleTheme()" class="theme-btn">&#9790;</button>
     </div>
   </div>
 
@@ -588,34 +589,34 @@ document.addEventListener('DOMContentLoaded',function(){
         <div class="stat-card green"><div class="stat-label">Class Size</div><div class="stat-value"><?= $totalStudents ?></div><div class="stat-sub">Your assigned students</div></div>
         <div class="stat-card gold"><div class="stat-label">Today's Records</div><div class="stat-value"><?= $todayAttendance ?></div><div class="stat-sub"><?= date('d M Y') ?></div></div>
         <div class="stat-card steel"><div class="stat-label">Active Session</div><div class="stat-value"><?= $activeSession ? '1' : '0' ?></div><div class="stat-sub"><?= $activeSession ? 'Live now' : 'None running' ?></div></div>
-        <?php if($pendingCount>0): ?><div class="stat-card warn"><div class="stat-label">Pending Approvals</div><div class="stat-value"><?= $pendingCount ?></div><div class="stat-sub"><a href="#" onclick="showSection('approvals',document.getElementById('approvals-nav'));return false" style="color:var(--warning)">Review now →</a></div></div><?php endif; ?>
+        <?php if($pendingCount>0): ?><div class="stat-card warn"><div class="stat-label">Pending Approvals</div><div class="stat-value"><?= $pendingCount ?></div><div class="stat-sub"><a href="#" onclick="showSection('approvals',document.getElementById('approvals-nav'));return false" class="t-warning">Review now →</a></div></div><?php endif; ?>
       </div>
       <div class="two-col">
         <div class="card">
           <div class="card-head"><div class="card-head-title">Today — <?= $today ?></div><span class="pill pill-rep"><?= count($todayClasses) ?> classes</span></div>
           <div class="card-body">
-            <?php if(empty($todayClasses)): ?><p style="color:var(--muted);font-size:.83rem">No classes today.</p>
+            <?php if(empty($todayClasses)): ?><p class="t-muted-83">No classes today.</p>
             <?php else: ?>
-              <div style="display:flex;flex-direction:column;gap:.5rem">
+              <div class="flex-col-gap5">
                 <?php foreach($todayClasses as $c): ?>
-                  <div class="tt-item" style="margin-bottom:0">
+                  <div class="tt-item" class="mb-0">
                     <div class="tt-time"><?= substr($c['start_time'],0,5) ?> – <?= substr($c['end_time'],0,5) ?></div>
-                    <div><div style="font-size:.7rem;color:var(--muted)"><?= htmlspecialchars($c['course_code']) ?></div><div style="font-size:.85rem"><?= htmlspecialchars($c['course_name']) ?></div><div style="font-size:.72rem;color:var(--muted)"> <?= htmlspecialchars($c['room']??'') ?> · <?= htmlspecialchars($c['lecturer_name']??'') ?></div></div>
+                    <div><div class="t-muted-72"><?= htmlspecialchars($c['course_code']) ?></div><div class="fs-85"><?= htmlspecialchars($c['course_name']) ?></div><div class="t-muted-72"> <?= htmlspecialchars($c['room']??'') ?> · <?= htmlspecialchars($c['lecturer_name']??'') ?></div></div>
                   </div>
                 <?php endforeach; ?>
               </div>
-              <?php if($activeSession): ?><button class="btn btn-rep" style="width:100%;justify-content:center;margin-top:1rem" onclick="showSection('session',document.getElementById('session-nav'))">View Live Code →</button>
-              <?php else: ?><button class="btn btn-gold" style="width:100%;justify-content:center;margin-top:1rem" onclick="showSection('session',document.getElementById('session-nav'))">Start Session →</button><?php endif; ?>
+              <?php if($activeSession): ?><button class="btn btn-rep" class="btn-full-mt" onclick="showSection('session',document.getElementById('session-nav'))">View Live Code →</button>
+              <?php else: ?><button class="btn btn-gold" class="btn-full-mt" onclick="showSection('session',document.getElementById('session-nav'))">Start Session →</button><?php endif; ?>
             <?php endif; ?>
           </div>
         </div>
         <div class="card">
           <div class="card-head"><div class="card-head-title">Recent Attendance</div></div>
-          <div class="card-body" style="padding:0;overflow-x:auto">
+          <div class="card-body" class="tbl-scroll">
             <table class="data-table"><thead><tr><th>Student</th><th>Course</th><th>Status</th><th>Time</th></tr></thead><tbody>
-            <?php if(empty($recentAtt)): ?><tr><td colspan="4" style="color:var(--muted)">No records yet.</td></tr>
+            <?php if(empty($recentAtt)): ?><tr><td colspan="4" class="t-muted">No records yet.</td></tr>
             <?php else: foreach($recentAtt as $r): ?>
-              <tr><td><?= htmlspecialchars($r['full_name']) ?><br><small style="color:var(--muted)"><?= $r['index_no'] ?></small></td><td style="color:var(--gold);font-size:.78rem"><?= $r['course_code'] ?></td><td><span class="pill pill-<?= $r['status']==='present'?'green':($r['status']==='late'?'gold':($r['status']==='pending'?'warn':'red')) ?>"><?= $r['status'] ?></span></td><td style="color:var(--muted);font-size:.72rem;white-space:nowrap"><?= date('H:i',strtotime($r['timestamp'])) ?></td></tr>
+              <tr><td><?= htmlspecialchars($r['full_name']) ?><br><small class="t-muted"><?= $r['index_no'] ?></small></td><td class="t-gold-78"><?= $r['course_code'] ?></td><td><span class="pill pill-<?= $r['status']==='present'?'green':($r['status']==='late'?'gold':($r['status']==='pending'?'warn':'red')) ?>"><?= $r['status'] ?></span></td><td class="t-nowrap-72"><?= date('H:i',strtotime($r['timestamp'])) ?></td></tr>
             <?php endforeach; endif; ?>
             </tbody></table>
           </div>
@@ -629,10 +630,10 @@ document.addEventListener('DOMContentLoaded',function(){
       <?php foreach(['Monday','Tuesday','Wednesday','Thursday','Friday'] as $day):
         $cls=$pdo->prepare("SELECT t.*,u.full_name as lecturer_name FROM timetable t JOIN users u ON t.lecturer_id=u.id WHERE t.day_of_week=? AND u.institution_id=? AND (t.semester_id=? OR t.semester_id IS NULL) ORDER BY t.start_time");
         $cls->execute([$day, $activeSemId]); $cls=$cls->fetchAll(); if(empty($cls)) continue; ?>
-        <div style="margin-bottom:1.5rem">
-          <div style="font-family:'Cinzel',serif;font-size:.78rem;color:var(--rep);letter-spacing:.15em;margin-bottom:.6rem;text-transform:uppercase"><?= $day ?></div>
-          <div style="display:flex;flex-direction:column;gap:.5rem"><?php foreach($cls as $c): ?>
-            <div class="tt-item"><div class="tt-time"><?= substr($c['start_time'],0,5) ?> – <?= substr($c['end_time'],0,5) ?></div><div style="flex:1"><div style="font-size:.7rem;color:var(--muted)"><?= htmlspecialchars($c['course_code']) ?></div><div style="font-size:.85rem"><?= htmlspecialchars($c['course_name']) ?></div><div style="font-size:.72rem;color:var(--muted)"> <?= htmlspecialchars($c['room']??'') ?> · <?= htmlspecialchars($c['lecturer_name']??'') ?></div></div></div>
+        <div class="mb-15">
+          <div class="tt-day-label-rep"><?= $day ?></div>
+          <div class="flex-col-gap5"><?php foreach($cls as $c): ?>
+            <div class="tt-item"><div class="tt-time"><?= substr($c['start_time'],0,5) ?> – <?= substr($c['end_time'],0,5) ?></div><div class="flex-1"><div class="t-muted-72"><?= htmlspecialchars($c['course_code']) ?></div><div class="fs-85"><?= htmlspecialchars($c['course_name']) ?></div><div class="t-muted-72"> <?= htmlspecialchars($c['room']??'') ?> · <?= htmlspecialchars($c['lecturer_name']??'') ?></div></div></div>
           <?php endforeach; ?></div>
         </div>
       <?php endforeach; ?>
@@ -653,24 +654,24 @@ document.addEventListener('DOMContentLoaded',function(){
               <div class="code-number" id="live-code"><?= substr($currentCode,0,3).' '.substr($currentCode,3) ?></div>
               <div class="code-timer">
                 <div class="ring-wrap"><svg viewBox="0 0 54 54"><circle class="ring-track" cx="27" cy="27" r="24"/><circle class="ring-fill" id="ring-fill" cx="27" cy="27" r="24" stroke-dashoffset="0"/></svg><div class="ring-num" id="ring-num"><?= $timeRemaining ?></div></div>
-                <div style="font-size:.72rem;color:var(--muted)">seconds until<br>code refreshes</div>
+                <div class="t-muted-72">seconds until<br>code refreshes</div>
               </div>
-              <p style="font-size:.72rem;color:var(--muted)">Show this code to the class.</p>
+              <p class="t-muted-72">Show this code to the class.</p>
             </div>
             <div class="attend-counter">
               <div class="counter-item"><div class="counter-value" id="live-count"><?= count($liveAttendance) ?></div><div class="counter-label">Approved</div></div>
-              <div class="counter-item"><div class="counter-value" style="color:var(--warning)" id="pending-count"><?= $pendingCount ?></div><div class="counter-label">Pending</div></div>
+              <div class="counter-item"><div class="counter-value" class="t-warning" id="pending-count"><?= $pendingCount ?></div><div class="counter-label">Pending</div></div>
               <div class="counter-item"><div class="counter-value"><?= $enrolledCount ?></div><div class="counter-label">Total</div></div>
             </div>
           </div>
           <div class="card">
             <div class="card-head"><div class="card-head-title">Approved Students</div><span class="pill pill-green" id="live-pill"><?= count($liveAttendance) ?> present</span></div>
-            <div class="card-body" style="padding:0;max-height:400px;overflow-y:auto;overflow-x:auto">
+            <div class="card-body" class="tbl-scroll-h">
               <table class="data-table"><thead><tr><th>Student</th><th>Index</th><th>Status</th><th>Time</th></tr></thead>
               <tbody id="live-tbody">
-                <?php if(empty($liveAttendance)): ?><tr id="empty-row"><td colspan="4" style="color:var(--muted)">No approved students yet...</td></tr>
+                <?php if(empty($liveAttendance)): ?><tr id="empty-row"><td colspan="4" class="t-muted">No approved students yet...</td></tr>
                 <?php else: foreach($liveAttendance as $a): ?>
-                  <tr><td><?= htmlspecialchars($a['full_name']) ?></td><td style="color:var(--gold);font-size:.78rem"><?= $a['index_no'] ?></td><td><span class="pill pill-green"><?= $a['status'] ?></span></td><td style="color:var(--muted);font-size:.72rem"><?= date('H:i',strtotime($a['timestamp'])) ?></td></tr>
+                  <tr><td><?= htmlspecialchars($a['full_name']) ?></td><td class="t-gold-78"><?= $a['index_no'] ?></td><td><span class="pill pill-green"><?= $a['status'] ?></span></td><td class="t-muted-72"><?= date('H:i',strtotime($a['timestamp'])) ?></td></tr>
                 <?php endforeach; endif; ?>
               </tbody></table>
             </div>
@@ -679,22 +680,22 @@ document.addEventListener('DOMContentLoaded',function(){
       <?php else: ?>
         <div class="section-header"><div class="section-title">Start <span>Session</span></div></div>
         <?php if(!empty($todayClasses)): ?>
-          <p style="font-size:.82rem;color:var(--muted);margin-bottom:1rem">Quick start from today's schedule:</p>
-          <div style="display:flex;flex-wrap:wrap;gap:.7rem;margin-bottom:2rem">
+          <p class="t-muted-78 mb-10">Quick start from today's schedule:</p>
+          <div class="flex-gap7-wrap">
             <?php foreach($todayClasses as $tc): ?>
-              <form method="POST" style="display:inline"><input type="hidden" name="csrf_token" value="<?= csrfToken() ?>"><input type="hidden" name="action" value="start_session"><input type="hidden" name="course_code" value="<?= htmlspecialchars($tc['course_code']) ?>"><input type="hidden" name="course_name" value="<?= htmlspecialchars($tc['course_name']) ?>"><button type="submit" class="btn btn-rep"> <?= htmlspecialchars($tc['course_code']) ?> · <?= substr($tc['start_time'],0,5) ?>–<?= substr($tc['end_time'],0,5) ?></button></form>
+              <form method="POST" class="d-inline"><input type="hidden" name="csrf_token" value="<?= csrfToken() ?>"><input type="hidden" name="action" value="start_session"><input type="hidden" name="course_code" value="<?= htmlspecialchars($tc['course_code']) ?>"><input type="hidden" name="course_name" value="<?= htmlspecialchars($tc['course_name']) ?>"><button type="submit" class="btn btn-rep"> <?= htmlspecialchars($tc['course_code']) ?> · <?= substr($tc['start_time'],0,5) ?>–<?= substr($tc['end_time'],0,5) ?></button></form>
             <?php endforeach; ?>
           </div>
         <?php endif; ?>
         <div class="start-form">
-          <p style="font-size:.78rem;color:var(--muted);margin-bottom:1.2rem">Or start manually:</p>
+          <p class="t-muted-75 mb-12">Or start manually:</p>
           <form method="POST"><input type="hidden" name="csrf_token" value="<?= csrfToken() ?>"><input type="hidden" name="action" value="start_session">
             <div class="form-row">
               <div class="form-field"><label>Course Code</label><select name="course_code" id="course-sel" onchange="fillName()"><?php $courses=!empty($repCourses)?$repCourses:array_map(fn($c)=>['code'=>$c['course_code'],'name'=>$c['course_name'],'id'=>null],$allCourses);foreach($courses as $ac): ?><option value="<?= htmlspecialchars($ac['course_code']??$ac['code']) ?>" data-name="<?= htmlspecialchars($ac['course_name']??$ac['name']) ?>" data-id="<?= $ac['id']??'' ?>"><?= htmlspecialchars($ac['course_code']??$ac['code']) ?></option><?php endforeach; ?></select></div>
               <div class="form-field"><label>Course Name</label><input type="text" name="course_name" id="course-name" value="<?= htmlspecialchars($courses[0]['course_name']??$courses[0]['name']??'') ?>"></div>
             </div>
             <input type="hidden" name="course_id" id="course-id-hidden" value="<?= $courses[0]['id']??'' ?>">
-            <button type="submit" class="btn btn-rep" style="width:100%;justify-content:center;padding:.8rem">Start Attendance Session</button>
+            <button type="submit" class="btn btn-rep" class="btn btn-lec btn-full-center">Start Attendance Session</button>
           </form>
         </div>
       <?php endif; ?>
@@ -704,11 +705,11 @@ document.addEventListener('DOMContentLoaded',function(){
     <div class="page-section" id="sec-approvals">
       <div class="section-header"><div class="section-title">Pending <span>Approvals</span></div><span class="pill pill-warn" id="approvals-count-badge"><?= $pendingCount ?> pending</span></div>
       <?php if(!$activeSession): ?>
-        <div class="card"><div class="card-body" style="color:var(--muted);text-align:center;padding:2rem">No active session. Start a session to see pending approvals.</div></div>
+        <div class="card"><div class="card-body" class="tbl-empty">No active session. Start a session to see pending approvals.</div></div>
       <?php else: ?>
-        <div class="card"><div class="card-body" style="padding:0;overflow-x:auto">
+        <div class="card"><div class="card-body" class="tbl-scroll">
           <table class="data-table"><thead><tr><th>Student</th><th class="hide-mobile">Index</th><th>Photos</th><th class="hide-mobile">Submitted</th><th>Actions</th></tr></thead>
-          <tbody id="approvals-tbody"><tr><td colspan="5" style="color:var(--muted);padding:1.5rem">Loading...</td></tr></tbody>
+          <tbody id="approvals-tbody"><tr><td colspan="5" class="empty-state">Loading...</td></tr></tbody>
           </table>
         </div></div>
       <?php endif; ?>
@@ -717,13 +718,13 @@ document.addEventListener('DOMContentLoaded',function(){
     <!-- SESSION HISTORY -->
     <div class="page-section" id="sec-history">
       <div class="section-header"><div class="section-title">Session <span>History</span></div><a href="../../api/export_attendance.php" class="btn btn-rep btn-sm"> Export All CSV</a></div>
-      <div class="card"><div class="card-body" style="padding:0;overflow-x:auto">
+      <div class="card"><div class="card-body" class="tbl-scroll">
         <table class="data-table"><thead><tr><th>Course</th><th>Date</th><th>Present</th><th class="hide-mobile">Late</th><th>Absent</th><th>Export</th></tr></thead><tbody>
-        <?php if(empty($sessionHistory)): ?><tr><td colspan="6" style="color:var(--muted)">No past sessions yet.</td></tr>
+        <?php if(empty($sessionHistory)): ?><tr><td colspan="6" class="t-muted">No past sessions yet.</td></tr>
         <?php else: foreach($sessionHistory as $sh): ?>
           <tr>
-            <td><strong><?= htmlspecialchars($sh['course_code']) ?></strong><br><small style="color:var(--muted)"><?= htmlspecialchars($sh['course_name']) ?></small></td>
-            <td style="color:var(--muted);font-size:.72rem;white-space:nowrap"><?= date('d M Y H:i',strtotime($sh['start_time'])) ?></td>
+            <td><strong><?= htmlspecialchars($sh['course_code']) ?></strong><br><small class="t-muted"><?= htmlspecialchars($sh['course_name']) ?></small></td>
+            <td class="t-nowrap-72"><?= date('d M Y H:i',strtotime($sh['start_time'])) ?></td>
             <td><span class="pill pill-green"><?= $sh['present_count'] ?></span></td>
             <td class="hide-mobile"><span class="pill pill-gold"><?= $sh['late_count'] ?></span></td>
             <td><span class="pill pill-red"><?= $sh['absent_count'] ?></span></td>
@@ -738,17 +739,17 @@ document.addEventListener('DOMContentLoaded',function(){
     <div class="page-section" id="sec-students">
       <div class="section-header"><div class="section-title">Class <span>Registry</span></div><button class="btn btn-rep" onclick="openModal('modal-add')">+ Add Student</button></div>
       <div class="filter-bar"><input type="text" id="s-search" placeholder="Search name or index number..." oninput="filterStudents()"></div>
-      <div class="card"><div class="card-body" style="padding:0;overflow-x:auto">
+      <div class="card"><div class="card-body" class="tbl-scroll">
         <table class="data-table" id="s-table"><thead><tr><th>#</th><th>Index No.</th><th>Full Name</th><th class="hide-mobile">Role</th><th class="hide-mobile">Attendance</th><th>Actions</th></tr></thead>
         <tbody>
           <?php foreach($students as $i=>$s): ?>
             <tr data-name="<?= strtolower($s['full_name']) ?>" data-index="<?= $s['index_no'] ?>">
-              <td style="color:var(--muted)"><?= $i+1 ?></td>
-              <td style="color:var(--gold);font-size:.78rem"><?= htmlspecialchars($s['index_no']) ?></td>
+              <td class="t-muted"><?= $i+1 ?></td>
+              <td class="t-gold-78"><?= htmlspecialchars($s['index_no']) ?></td>
               <td><?= htmlspecialchars($s['full_name']) ?></td>
               <td class="hide-mobile"><span class="pill pill-<?= $s['role']==='rep'?'rep':'steel' ?>"><?= $s['role'] ?></span></td>
               <?php $pct=$s['attendance_pct']??0; $color=$pct>=75?'var(--success)':($pct>=50?'var(--warning)':'var(--danger)'); ?>
-              <td class="hide-mobile"><div style="display:flex;align-items:center;gap:.5rem"><div style="width:60px;height:5px;background:var(--border);border-radius:3px"><div style="width:<?= min($pct,100) ?>%;height:100%;background:<?= $color ?>;border-radius:3px"></div></div><span style="font-size:.75rem;color:<?= $color ?>;font-weight:600"><?= $pct ?>%</span><?php if($pct<75&&$s['total_sessions']>3): ?><span style="color:var(--danger)"></span><?php endif; ?></div></td>
+              <td class="hide-mobile"><div class="flex-gap5-align"><div class="progress-wrap"><div style="width:<?= min($pct,100) ?>%;height:100%;background:<?= $color ?>;border-radius:3px"></div></div><span style="font-size:.75rem;color:<?= $color ?>;font-weight:600"><?= $pct ?>%</span><?php if($pct<75&&$s['total_sessions']>3): ?><span class="t-danger"></span><?php endif; ?></div></td>
               <td>
                 <button class="btn btn-ghost btn-sm" onclick="openEdit(<?= $s['id'] ?>,'<?= htmlspecialchars(addslashes($s['full_name'])) ?>','<?= $s['index_no'] ?>','<?= $s['email'] ?>')">Edit</button>
                 <?php if($s['role']!=='rep'): ?><button class="btn btn-danger btn-sm" onclick="confirmDel(<?= $s['id'] ?>)">Remove</button><?php endif; ?>
@@ -761,13 +762,13 @@ document.addEventListener('DOMContentLoaded',function(){
 
     <!-- ATTENDANCE -->
     <div class="page-section" id="sec-attendance">
-      <div class="section-header"><div class="section-title">Attendance <span>Records</span></div><div style="display:flex;gap:.6rem;flex-wrap:wrap"><a href="../../api/export_attendance.php" class="btn btn-rep btn-sm"> Export All</a><a href="../../api/export_attendance.php?from=<?= date('Y-m-d') ?>&to=<?= date('Y-m-d') ?>" class="btn btn-ghost btn-sm"> Today</a></div></div>
-      <div class="card"><div class="card-body" style="padding:0;overflow-x:auto">
+      <div class="section-header"><div class="section-title">Attendance <span>Records</span></div><div class="flex-gap6-wrap"><a href="../../api/export_attendance.php" class="btn btn-rep btn-sm"> Export All</a><a href="../../api/export_attendance.php?from=<?= date('Y-m-d') ?>&to=<?= date('Y-m-d') ?>" class="btn btn-ghost btn-sm"> Today</a></div></div>
+      <div class="card"><div class="card-body" class="tbl-scroll">
         <table class="data-table"><thead><tr><th>Student</th><th class="hide-mobile">Index</th><th class="hide-mobile">Course</th><th>Status</th><th>Time</th></tr></thead><tbody>
         <?php $__qa=$pdo->prepare("SELECT a.*,u.full_name,u.index_no,s.course_code FROM attendance a JOIN users u ON a.student_id=u.id JOIN sessions s ON a.session_id=s.id WHERE u.institution_id=? ORDER BY a.timestamp DESC LIMIT 100");$__qa->execute([$inst_id]);$allAtt=$__qa->fetchAll();
-        if(empty($allAtt)): ?><tr><td colspan="5" style="color:var(--muted)">No records yet.</td></tr>
+        if(empty($allAtt)): ?><tr><td colspan="5" class="t-muted">No records yet.</td></tr>
         <?php else: foreach($allAtt as $r): ?>
-          <tr><td><?= htmlspecialchars($r['full_name']) ?></td><td class="hide-mobile" style="color:var(--gold);font-size:.78rem"><?= $r['index_no'] ?></td><td class="hide-mobile"><?= $r['course_code'] ?></td><td><span class="pill pill-<?= $r['status']==='present'?'green':($r['status']==='late'?'gold':($r['status']==='pending'?'warn':'red')) ?>"><?= $r['status'] ?></span></td><td style="color:var(--muted);font-size:.75rem;white-space:nowrap"><?= date('d M Y H:i',strtotime($r['timestamp'])) ?></td></tr>
+          <tr><td><?= htmlspecialchars($r['full_name']) ?></td><td class="hide-mobile" class="t-gold-78"><?= $r['index_no'] ?></td><td class="hide-mobile"><?= $r['course_code'] ?></td><td><span class="pill pill-<?= $r['status']==='present'?'green':($r['status']==='late'?'gold':($r['status']==='pending'?'warn':'red')) ?>"><?= $r['status'] ?></span></td><td class="t-nowrap-72"><?= date('d M Y H:i',strtotime($r['timestamp'])) ?></td></tr>
         <?php endforeach; endif; ?>
         </tbody></table>
       </div></div>
@@ -776,19 +777,19 @@ document.addEventListener('DOMContentLoaded',function(){
     <!-- ANNOUNCEMENTS -->
     <div class="page-section" id="sec-announce">
       <div class="section-header"><div class="section-title">Class <span>Announcements</span></div></div>
-      <div class="card" style="margin-bottom:1.5rem"><div class="card-head"><div class="card-head-title">Post Announcement</div></div><div class="card-body">
+      <div class="card" class="mb-15"><div class="card-head"><div class="card-head-title">Post Announcement</div></div><div class="card-body">
         <form method="POST"><input type="hidden" name="csrf_token" value="<?= csrfToken() ?>"><input type="hidden" name="action" value="announce">
-          <div style="background:var(--surface2);border:1px solid var(--border);border-left:3px solid var(--rep);padding:1rem 1.2rem;border-radius:2px;margin-bottom:1rem">
-            <textarea name="message" placeholder="Type a message to the class..." style="width:100%;background:transparent;border:none;color:var(--text);font-family:'DM Sans',sans-serif;font-size:.88rem;resize:vertical;outline:none;min-height:80px" required></textarea>
+          <div class="announce-card">
+            <textarea name="message" placeholder="Type a message to the class..." class="textarea-bare" required></textarea>
           </div>
           <button type="submit" class="btn btn-rep">Post to Class</button>
         </form>
       </div></div>
-      <div class="card"><div class="card-head"><div class="card-head-title">Recent Announcements</div></div><div class="card-body" style="padding:0;overflow-x:auto">
+      <div class="card"><div class="card-head"><div class="card-head-title">Recent Announcements</div></div><div class="card-body" class="tbl-scroll">
         <table class="data-table"><thead><tr><th>Message</th><th>Date</th></tr></thead><tbody>
         <?php $ann=$pdo->query("SELECT a.*,u.full_name FROM announcements a JOIN users u ON a.rep_id=u.id ORDER BY a.created_at DESC LIMIT 20")->fetchAll();
-        if(empty($ann)): ?><tr><td colspan="2" style="color:var(--muted)">No announcements yet.</td></tr>
-        <?php else: foreach($ann as $a): ?><tr><td><?= htmlspecialchars($a['message']) ?></td><td style="color:var(--muted);font-size:.72rem;white-space:nowrap"><?= date('d M Y H:i',strtotime($a['created_at'])) ?></td></tr><?php endforeach; endif; ?>
+        if(empty($ann)): ?><tr><td colspan="2" class="t-muted">No announcements yet.</td></tr>
+        <?php else: foreach($ann as $a): ?><tr><td><?= htmlspecialchars($a['message']) ?></td><td class="t-nowrap-72"><?= date('d M Y H:i',strtotime($a['created_at'])) ?></td></tr><?php endforeach; endif; ?>
         </tbody></table>
       </div></div>
     </div>
@@ -803,7 +804,7 @@ document.addEventListener('DOMContentLoaded',function(){
     <div class="modal-body"><form method="POST"><input type="hidden" name="csrf_token" value="<?= csrfToken() ?>"><input type="hidden" name="action" value="add">
       <div class="form-row"><div class="form-field"><label>Full Name</label><input type="text" name="full_name" required placeholder="Surname, Firstname"></div><div class="form-field"><label>Index Number</label><input type="text" name="index_no" required placeholder="52430540000"></div></div>
       <div class="form-row"><div class="form-field"><label>Email (optional)</label><input type="email" name="email" placeholder="auto-generated if blank"></div><div class="form-field"><label>WhatsApp</label><input type="text" name="phone" placeholder="+233XXXXXXXXX"></div></div>
-      <button type="submit" class="btn btn-rep" style="width:100%">Add Student</button>
+      <button type="submit" class="btn btn-rep" class="w-full">Add Student</button>
     </form></div>
   </div>
 </div>
@@ -814,17 +815,17 @@ document.addEventListener('DOMContentLoaded',function(){
     <div class="modal-body"><form method="POST"><input type="hidden" name="csrf_token" value="<?= csrfToken() ?>"><input type="hidden" name="action" value="edit"><input type="hidden" name="id" id="e-id">
       <div class="form-row"><div class="form-field"><label>Full Name</label><input type="text" name="full_name" id="e-name" required></div><div class="form-field"><label>Index Number</label><input type="text" name="index_no" id="e-index" required></div></div>
       <div class="form-field"><label>Email</label><input type="email" name="email" id="e-email"></div>
-      <button type="submit" class="btn btn-rep" style="width:100%">Save Changes</button>
+      <button type="submit" class="btn btn-rep" class="w-full">Save Changes</button>
     </form></div>
   </div>
 </div>
 
 <form method="POST" id="del-form"><input type="hidden" name="csrf_token" value="<?= csrfToken() ?>"><input type="hidden" name="action" value="delete"><input type="hidden" name="id" id="del-id"></form>
 
-<div id="selfie-overlay" style="display:none;position:fixed;inset:0;z-index:999;background:rgba(0,0,0,.92);align-items:center;justify-content:center;flex-direction:column;gap:1rem">
-  <img id="selfie-big" src="" style="max-width:90%;max-height:70vh;border-radius:4px;border:2px solid var(--border)">
+<div id="selfie-overlay" class="overlay-fullscreen">
+  <img id="selfie-big" src="" class="img-modal-rep">
   <div id="selfie-name" style="color:var(--text);font-family:'Cinzel',serif;font-size:.9rem"></div>
-  <button onclick="closeSelfie()" style="color:var(--text);background:none;border:1px solid var(--border);padding:.5rem 1.5rem;cursor:pointer;border-radius:2px">Close</button>
+  <button onclick="closeSelfie()" class="btn-ghost-sm-border">Close</button>
 </div>
 
 <script>
@@ -847,7 +848,7 @@ function updateRing(){if(!ringFill)return;const offset=150.8*(1-timeLeft/120);ri
 updateRing();
 setInterval(()=>{timeLeft--;if(timeLeft<0)timeLeft=119;updateRing()},1000);
 setInterval(()=>{fetch(API + '/get_code.php?session_id=<?= $activeSession['id'] ?>').then(r=>r.json()).then(d=>{if(d.code){const el=document.getElementById('live-code');if(el)el.textContent=d.code.slice(0,3)+' '+d.code.slice(3)}})},120000);
-setInterval(()=>{fetch(API + '/live_attendance.php?session_id=<?= $activeSession['id'] ?>').then(r=>r.json()).then(data=>{if(!data.rows)return;const tbody=document.getElementById('live-tbody');const pill=document.getElementById('live-pill');const count=document.getElementById('live-count');if(count)count.textContent=data.total;if(pill)pill.textContent=data.total+' present';if(tbody&&data.rows.length>0){const empty=document.getElementById('empty-row');if(empty)empty.remove();tbody.innerHTML=data.rows.map(r=>`<tr><td>${r.full_name}</td><td style="color:var(--gold);font-size:.78rem">${r.index_no}</td><td><span class="pill pill-${r.status==='present'?'green':'gold'}">${r.status}</span></td><td style="color:var(--muted);font-size:.72rem">${r.time}</td></tr>`).join('')}})},10000);
+setInterval(()=>{fetch(API + '/live_attendance.php?session_id=<?= $activeSession['id'] ?>').then(r=>r.json()).then(data=>{if(!data.rows)return;const tbody=document.getElementById('live-tbody');const pill=document.getElementById('live-pill');const count=document.getElementById('live-count');if(count)count.textContent=data.total;if(pill)pill.textContent=data.total+' present';if(tbody&&data.rows.length>0){const empty=document.getElementById('empty-row');if(empty)empty.remove();tbody.innerHTML=data.rows.map(r=>`<tr><td>${r.full_name}</td><td class="t-gold-78">${r.index_no}</td><td><span class="pill pill-${r.status==='present'?'green':'gold'}">${r.status}</span></td><td class="t-muted-72">${r.time}</td></tr>`).join('')}})},10000);
 
 function loadApprovals(){
   fetch(API + '/pending_approvals.php?session_id=<?= $activeSession['id'] ?>').then(r=>r.json()).then(data=>{
@@ -857,17 +858,17 @@ function loadApprovals(){
     if(badge)badge.textContent=data.total+' pending';
     if(pendingCount)pendingCount.textContent=data.total;
     if(!tbody)return;
-    if(!data.rows||data.rows.length===0){tbody.innerHTML='<tr><td colspan="5" style="color:var(--muted);padding:1.5rem">No pending approvals. </td></tr>';return}
+    if(!data.rows||data.rows.length===0){tbody.innerHTML='<tr><td colspan="5" class="empty-state">No pending approvals. </td></tr>';return}
     tbody.innerHTML=data.rows.map(r=>`
       <tr id="arow-${r.id}">
-        <td style="font-weight:500">${r.full_name}</td>
-        <td class="hide-mobile" style="color:var(--gold);font-size:.78rem">${r.index_no}</td>
-        <td style="display:flex;gap:.4rem">
+        <td class="fw-500">${r.full_name}</td>
+        <td class="hide-mobile" class="t-gold-78">${r.index_no}</td>
+        <td class="flex-gap4">
           <img src="${r.selfie_url}" class="selfie-thumb" onclick="viewSelfie('${r.selfie_url}','${r.full_name} — Face')" title="Face photo">
-          ${r.classroom_url?`<img src="../../${r.classroom_url}" class="selfie-thumb" onclick="viewSelfie('../../${r.classroom_url}','${r.full_name} — Classroom')" title="Classroom" style="border-color:var(--steel)">`:'<span style="color:var(--muted);font-size:.7rem">No classroom</span>'}
+          ${r.classroom_url?`<img src="../../${r.classroom_url}" class="selfie-thumb" onclick="viewSelfie('../../${r.classroom_url}','${r.full_name} — Classroom')" title="Classroom" class="border-steel">`:'<span class="t-muted-72">No classroom</span>'}
         </td>
-        <td class="hide-mobile" style="color:var(--muted);font-size:.72rem">${r.submitted_at||r.time||''}</td>
-        <td style="display:flex;gap:.4rem;flex-wrap:wrap">
+        <td class="hide-mobile" class="t-muted-72">${r.submitted_at||r.time||''}</td>
+        <td class="flex-gap4-wrap">
           <button class="btn btn-rep btn-sm" onclick="approveAtt(${r.id},'approve')"> Approve</button>
           <button class="btn btn-danger btn-sm" onclick="approveAtt(${r.id},'reject')"> Reject</button>
         </td>

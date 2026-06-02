@@ -117,6 +117,7 @@ $hist->execute([$userId]); $hist = $hist->fetchAll();
 <head>
 <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
 <title>Citadel — Student Portal</title>
+<link rel="stylesheet" href="/assets/css/citadel.css">
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -442,7 +443,7 @@ document.addEventListener('DOMContentLoaded',function(){
 
 <body>
 <div class="layout">
-<div id="sidebar-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:400;backdrop-filter:blur(2px)"></div>
+<div id="sidebar-overlay" class="overlay-sidebar"></div>
 <aside class="sidebar" id="sidebar">
   <div class="sidebar-brand">
     <svg viewBox="0 0 52 52" fill="none"><polygon points="26,2 50,14 50,38 26,50 2,38 2,14" fill="none" stroke="#c9a84c" stroke-width="1.5"/><polygon points="26,9 43,18 43,34 26,43 9,34 9,18" fill="none" stroke="#c9a84c" stroke-width="0.8" opacity="0.5"/><rect x="20" y="20" width="12" height="14" rx="1" fill="none" stroke="#4a6fa5" stroke-width="1.5"/><circle cx="26" cy="25" r="2" fill="#c9a84c"/><line x1="26" y1="27" x2="26" y2="31" stroke="#4a6fa5" stroke-width="1.5"/></svg>
@@ -482,14 +483,14 @@ document.addEventListener('DOMContentLoaded',function(){
 
 <div class="main">
   <div class="topbar">
-    <div style="display:flex;align-items:center;gap:1rem">
+    <div class="flex-center">
       <button id="menu-btn" aria-label="Menu" onclick="toggleSidebar()">&#9776;</button>
       <div class="topbar-title" id="page-title">OVERVIEW</div>
     </div>
-    <div style="display:flex;align-items:center;gap:1rem">
-      <span style="font-size:.75rem;color:var(--muted)"><?= date('l, d M Y') ?></span>
+    <div class="flex-center">
+      <span class="t-muted-75"><?= date('l, d M Y') ?></span>
       <span class="badge">Student</span>
-      <button id="theme-btn" onclick="toggleTheme()" style="background:none;border:1px solid var(--border);color:var(--muted);cursor:pointer;padding:.25rem .6rem;border-radius:2px;font-size:.75rem">&#9790;</button>
+      <button id="theme-btn" onclick="toggleTheme()" class="theme-btn">&#9790;</button>
     </div>
   </div>
 
@@ -506,32 +507,32 @@ document.addEventListener('DOMContentLoaded',function(){
         <div class="card">
           <div class="card-head"><div class="card-head-title">Today — <?= $today ?></div></div>
           <div class="card-body">
-            <?php if(empty($todayClasses)): ?><p style="color:var(--muted);font-size:.83rem">No classes today.</p>
+            <?php if(empty($todayClasses)): ?><p class="t-muted-83">No classes today.</p>
             <?php else: ?><div class="tt-grid"><?php foreach($todayClasses as $c): ?>
               <div class="tt-item">
                 <div class="tt-time"><?= substr($c['start_time'],0,5) ?> – <?= substr($c['end_time'],0,5) ?></div>
                 <div class="tt-info"><div class="code"><?= htmlspecialchars($c['course_code']) ?></div><div class="name"><?= htmlspecialchars($c['course_name']) ?></div><div class="room"> <?= htmlspecialchars($c['room'] ?? '') ?> · <?= htmlspecialchars($c['lecturer_name'] ?? '') ?></div></div>
               </div>
             <?php endforeach; ?></div>
-            <?php if($activeSession): ?><button class="btn btn-gold" style="width:100%;justify-content:center;margin-top:1rem" onclick="showSection('mark',document.getElementById('mark-nav'))">Mark Attendance Now →</button><?php endif; ?>
+            <?php if($activeSession): ?><button class="btn btn-gold" class="btn-full-mt" onclick="showSection('mark',document.getElementById('mark-nav'))">Mark Attendance Now →</button><?php endif; ?>
             <?php endif; ?>
           </div>
         </div>
         <div class="card">
           <div class="card-head"><div class="card-head-title">Recent Records</div></div>
-          <div class="card-body" style="padding:0">
+          <div class="card-body" class="card-pad-0">
             <table class="data-table"><thead><tr><th><?= terms('course', $instType) ?></th><th>Status</th><th>Date</th></tr></thead><tbody>
-            <?php if(empty($recentAtt)): ?><tr><td colspan="3" style="color:var(--muted)">No records yet.</td></tr>
+            <?php if(empty($recentAtt)): ?><tr><td colspan="3" class="t-muted">No records yet.</td></tr>
             <?php else: foreach($recentAtt as $r): ?>
-              <tr><td><?= htmlspecialchars($r['course_code']) ?></td><td><span class="pill pill-<?= $r['status']==='present'?'green':($r['status']==='late'?'gold':($r['status']==='pending'?'pending':'red')) ?>"><?= $r['status'] ?></span></td><td style="color:var(--muted);font-size:.72rem"><?= date('d M',strtotime($r['timestamp'])) ?></td></tr>
+              <tr><td><?= htmlspecialchars($r['course_code']) ?></td><td><span class="pill pill-<?= $r['status']==='present'?'green':($r['status']==='late'?'gold':($r['status']==='pending'?'pending':'red')) ?>"><?= $r['status'] ?></span></td><td class="t-muted-72"><?= date('d M',strtotime($r['timestamp'])) ?></td></tr>
             <?php endforeach; endif; ?>
             </tbody></table>
           </div>
         </div>
       </div>
-      <div class="card"><div class="card-head"><div class="card-head-title"> Announcements</div></div><div class="card-body" style="padding:0"><table class="data-table"><thead><tr><th>Message</th><th class="hide-mobile">From</th><th class="hide-mobile">Date</th></tr></thead><tbody id="ann-list">
-      <?php if(empty($announcements)): ?><tr><td colspan="3" style="color:var(--muted)">No announcements yet.</td></tr>
-      <?php else: foreach($announcements as $ann): ?><tr><td><?= htmlspecialchars($ann['message']) ?></td><td style="color:var(--gold);font-size:.75rem"><?= htmlspecialchars($ann['full_name']) ?></td><td style="color:var(--muted);font-size:.72rem"><?= date('d M H:i',strtotime($ann['created_at'])) ?></td></tr><?php endforeach; endif; ?>
+      <div class="card"><div class="card-head"><div class="card-head-title"> Announcements</div></div><div class="card-body" class="card-pad-0"><table class="data-table"><thead><tr><th>Message</th><th class="hide-mobile">From</th><th class="hide-mobile">Date</th></tr></thead><tbody id="ann-list">
+      <?php if(empty($announcements)): ?><tr><td colspan="3" class="t-muted">No announcements yet.</td></tr>
+      <?php else: foreach($announcements as $ann): ?><tr><td><?= htmlspecialchars($ann['message']) ?></td><td class="t-gold-75"><?= htmlspecialchars($ann['full_name']) ?></td><td class="t-muted-72"><?= date('d M H:i',strtotime($ann['created_at'])) ?></td></tr><?php endforeach; endif; ?>
       </tbody></table></div></div>
     </div>
 
@@ -543,87 +544,87 @@ document.addEventListener('DOMContentLoaded',function(){
             <div class="pending-icon"></div>
             <div class="pending-title">Awaiting Approval</div>
             <div class="pending-sub">Your attendance for <strong><?= htmlspecialchars($activeSession['course_code'] ?? '') ?></strong> is pending.<br><?= $instType==='university' ? 'The Course Rep will review shortly.' : 'Your teacher will mark you shortly.' ?></div>
-            <?php if($myPending['selfie_url']): ?><img src="<?= strpos($myPending['selfie_url'],'data:')===0 ? htmlspecialchars($myPending['selfie_url']) : '../../'.htmlspecialchars($myPending['selfie_url']) ?>" style="width:80px;height:80px;object-fit:cover;border-radius:50%;border:2px solid var(--warning);margin:1.2rem auto 0;display:block"><?php endif; ?>
+            <?php if($myPending['selfie_url']): ?><img src="<?= strpos($myPending['selfie_url'],'data:')===0 ? htmlspecialchars($myPending['selfie_url']) : '../../'.htmlspecialchars($myPending['selfie_url']) ?>" class="selfie-img"><?php endif; ?>
           </div>
         <?php elseif ($myRecord && $myRecord['status'] !== 'pending'): ?>
-          <div class="pending-card" style="border-color:rgba(76,175,130,.3)">
+          <div class="pending-card" class="border-success">
             <div class="pending-icon"><?= $myRecord['status']==='present'?'':'' ?></div>
-            <div class="pending-title" style="color:var(--success)">Marked <?= ucfirst($myRecord['status']) ?></div>
+            <div class="pending-title" class="t-success">Marked <?= ucfirst($myRecord['status']) ?></div>
             <div class="pending-sub">You have been marked <strong><?= $myRecord['status'] ?></strong> for <?= htmlspecialchars($activeSession['course_code'] ?? '') ?>.</div>
           </div>
         <?php elseif ($activeSession): ?>
           <div class="session-active-card">
             <div class="live-dot"></div>
             <div>
-              <div style="font-size:.72rem;color:var(--success);letter-spacing:.15em;text-transform:uppercase">Session Active</div>
-              <div style="font-size:.9rem;color:var(--text);font-weight:500"><?= htmlspecialchars($activeSession['course_code']) ?> · <?= htmlspecialchars($activeSession['course_name'] ?? '') ?></div>
+              <div class="fs-72 t-success">Session Active</div>
+              <div class="fw-500-text9"><?= htmlspecialchars($activeSession['course_code']) ?> · <?= htmlspecialchars($activeSession['course_name'] ?? '') ?></div>
             </div>
           </div>
           <?php if($activeSession['is_online'] ?? false): ?>
           <!-- ONLINE SESSION MODE -->
-          <div style="background:rgba(74,111,165,.08);border:1px solid rgba(74,111,165,.3);border-left:3px solid var(--steel);border-radius:2px;padding:1.2rem 1.4rem;margin-top:1rem;text-align:center">
-            <div style="font-size:.72rem;color:var(--steel);letter-spacing:.15em;text-transform:uppercase;margin-bottom:.4rem"> Online Class</div>
-            <div style="font-size:.85rem;color:var(--text);margin-bottom:.8rem">This is an online session. Enter the code your lecturer shares to mark your attendance.</div>
+          <div class="online-banner">
+            <div class="fs-72 mb-5"> Online Class</div>
+            <div class="fs-85 mb-8">This is an online session. Enter the code your lecturer shares to mark your attendance.</div>
             <?php if(!empty($activeSession['meeting_link'])): ?>
-            <a href="<?= htmlspecialchars($activeSession['meeting_link']) ?>" target="_blank" rel="noopener" class="btn btn-steel" style="display:inline-flex;margin-bottom:1rem;justify-content:center">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:.4rem"><path d="M15 10l4.553-2.069A1 1 0 0 1 21 8.868v6.264a1 1 0 0 1-1.447.894L15 14"/><rect x="3" y="6" width="12" height="12" rx="2"/></svg>
+            <a href="<?= htmlspecialchars($activeSession['meeting_link']) ?>" target="_blank" rel="noopener" class="btn btn-steel" class="flex-inline-mb10">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mr-4"><path d="M15 10l4.553-2.069A1 1 0 0 1 21 8.868v6.264a1 1 0 0 1-1.447.894L15 14"/><rect x="3" y="6" width="12" height="12" rx="2"/></svg>
               Join Online Class
             </a>
             <?php endif; ?>
           </div>
-          <div style="margin-top:1rem">
+          <div class="mt-10">
             <div class="code-inputs">
               <?php for($i=1;$i<=6;$i++): ?><input type="text" maxlength="1" id="ci<?=$i?>" oninput="codeInput(this,<?=$i?>)" onkeydown="codeBack(event,<?=$i?>)" inputmode="numeric"><?php endfor; ?>
             </div>
-            <button class="btn btn-gold" id="verify-code-btn" onclick="verifyCode()" style="width:100%;justify-content:center;padding:.85rem;margin-top:1rem" disabled>Verify Code</button>
-            <div id="code-error" style="color:var(--danger);font-size:.78rem;margin-top:.6rem;text-align:center;display:none"></div>
+            <button class="btn btn-gold" id="verify-code-btn" onclick="verifyCode()" class="btn btn-gold btn-full-center mt-10" disabled>Verify Code</button>
+            <div id="code-error" class="err-inline"></div>
           </div>
           <?php elseif($instType !== 'university'): ?>
-          <div class="pending-card" style="border-color:rgba(76,175,130,.3);margin-top:1rem">
+          <div class="pending-card" class="border-success-mt">
             <div class="pending-icon"></div>
-            <div class="pending-title" style="color:var(--success)">Class in Progress</div>
+            <div class="pending-title" class="t-success">Class in Progress</div>
             <div class="pending-sub">Your teacher is marking attendance. You will be marked automatically.</div>
           </div>
           <?php else: ?>
           <div class="step-indicator">
             <div class="step-dot active" id="dot-code"></div>
-            <div class="step-dot" id="dot-selfie" style="margin-left:.3rem"></div>
-            <div class="step-dot" id="dot-class" style="margin-left:.3rem"></div>
-            <span id="step-label" style="margin-left:.5rem">Step 1: Enter the 6-digit code</span>
+            <div class="step-dot" id="dot-selfie" class="ml-3"></div>
+            <div class="step-dot" id="dot-class" class="ml-3"></div>
+            <span id="step-label" class="ml-5">Step 1: Enter the 6-digit code</span>
           </div>
           <div id="step-code-section">
             <div class="timer-strip">
-              <span style="font-size:.68rem;color:var(--muted);letter-spacing:.1em">CODE EXPIRES IN</span>
+              <span class="t-muted-72">CODE EXPIRES IN</span>
               <div class="timer-bar"><div class="timer-fill" id="timer-fill"></div></div>
               <div class="timer-num" id="timer-num">120</div>
             </div>
             <div class="code-inputs">
               <?php for($i=1;$i<=6;$i++): ?><input type="text" maxlength="1" id="ci<?=$i?>" oninput="codeInput(this,<?=$i?>)" onkeydown="codeBack(event,<?=$i?>)" inputmode="numeric"><?php endfor; ?>
             </div>
-            <button class="btn btn-gold" id="verify-code-btn" onclick="verifyCode()" style="width:100%;justify-content:center;padding:.85rem" disabled>Verify Code</button>
-            <div id="code-error" style="color:var(--danger);font-size:.78rem;margin-top:.6rem;text-align:center;display:none"></div>
+            <button class="btn btn-gold" id="verify-code-btn" onclick="verifyCode()" class="btn btn-gold btn-full-center" disabled>Verify Code</button>
+            <div id="code-error" class="err-inline"></div>
           </div>
-          <div id="step-selfie-section" style="display:none">
-            <div style="text-align:center;margin-bottom:1rem">
-              <div id="step-main-heading" style="font-size:.72rem;color:var(--gold);letter-spacing:.15em;text-transform:uppercase">Step 2: Take Your Selfie</div>
-              <div id="step-main-sub" style="font-size:.78rem;color:var(--muted);margin-top:.3rem">Position your face clearly in the oval</div>
+          <div id="step-selfie-section" class="d-none">
+            <div class="text-center-mb">
+              <div id="step-main-heading" class="fs-72 t-gold">Step 2: Take Your Selfie</div>
+              <div id="step-main-sub" class="t-muted-78 mt-3">Position your face clearly in the oval</div>
             </div>
             <div class="camera-wrap"><video id="video-preview" autoplay playsinline muted></video><div class="face-guide"><div class="face-oval"></div></div></div>
             <canvas id="capture-canvas"></canvas>
-            <img id="selfie-preview" class="selfie-preview" style="display:none">
-            <div style="display:flex;gap:.8rem;margin-top:1rem">
-              <button class="btn btn-ghost" id="retake-btn" onclick="retakeSelfie()" style="flex:1;justify-content:center;display:none">Retake</button>
-              <button class="btn btn-gold" id="capture-btn" onclick="captureSelfie()" style="flex:1;justify-content:center"> Capture Selfie</button>
-              <button class="btn btn-gold" id="submit-btn" onclick="submitAttendance()" style="flex:1;justify-content:center;display:none">Submit →</button>
+            <img id="selfie-preview" class="selfie-preview" class="d-none">
+            <div class="flex-gap8-mt10">
+              <button class="btn btn-ghost" id="retake-btn" onclick="retakeSelfie()" class="flex-1-center-none">Retake</button>
+              <button class="btn btn-gold" id="capture-btn" onclick="captureSelfie()" class="flex-1-center"> Capture Selfie</button>
+              <button class="btn btn-gold" id="submit-btn" onclick="submitAttendance()" class="flex-1-center-none">Submit →</button>
             </div>
-            <div id="submit-error" style="color:var(--danger);font-size:.78rem;margin-top:.6rem;text-align:center;display:none"></div>
+            <div id="submit-error" class="err-inline"></div>
           </div>
           <?php endif; ?>
         <?php else: ?>
           <div class="no-session-card">
-            <div style="font-size:2rem;margin-bottom:1rem"></div>
-            <div style="font-family:'Cinzel',serif;font-size:.9rem;color:var(--muted);letter-spacing:.1em">NO ACTIVE SESSION</div>
-            <div style="font-size:.82rem;color:var(--muted);margin-top:.5rem">Wait for your lecturer or course rep to start an attendance session.</div>
+            <div class="large-icon"></div>
+            <div class="cinzel-muted">NO ACTIVE SESSION</div>
+            <div class="t-muted-78 mt-5">Wait for your lecturer or course rep to start an attendance session.</div>
           </div>
         <?php endif; ?>
       </div>
@@ -631,21 +632,21 @@ document.addEventListener('DOMContentLoaded',function(){
 
     <!-- MY COURSES -->
     <div class="page-section" id="sec-courses">
-      <div class="section-title">My <span>Courses</span><?php if($activeSem): ?><span style="font-size:.65rem;color:var(--muted);font-family:'DM Sans',sans-serif;letter-spacing:.1em;margin-left:.8rem"><?= htmlspecialchars($activeSem['name']) ?></span><?php endif; ?></div>
+      <div class="section-title">My <span>Courses</span><?php if($activeSem): ?><span class="sem-label"><?= htmlspecialchars($activeSem['name']) ?></span><?php endif; ?></div>
       <?php if(empty($enrolledCourses)): ?>
-        <div class="card"><div class="card-body" style="color:var(--muted)">No courses enrolled this semester. Contact admin.</div></div>
+        <div class="card"><div class="card-body" class="t-muted">No courses enrolled this semester. Contact admin.</div></div>
       <?php else: ?>
-        <div class="card"><div class="card-body" style="padding:0;overflow-x:auto">
+        <div class="card"><div class="card-body" class="tbl-scroll">
           <table class="data-table"><thead><tr><th>Code</th><th>Course Name</th><th class="hide-mobile">Lecturer</th><th>Attended</th><th>Rate</th></tr></thead><tbody>
           <?php foreach($enrolledCourses as $c):
             $pct=$c['total_sessions']>0?round(($c['attended']/$c['total_sessions'])*100):0;
             $color=$pct>=75?'var(--success)':($pct>=50?'var(--warning)':'var(--danger)'); ?>
             <tr>
-              <td style="color:var(--gold);font-weight:600"><?= htmlspecialchars($c['code']) ?></td>
+              <td class="fw-600 t-gold"><?= htmlspecialchars($c['code']) ?></td>
               <td><?= htmlspecialchars($c['name']) ?></td>
-              <td class="hide-mobile" style="color:var(--muted);font-size:.78rem"><?= htmlspecialchars($c['lecturer_name'] ?? '—') ?></td>
+              <td class="hide-mobile" class="t-muted-78"><?= htmlspecialchars($c['lecturer_name'] ?? '—') ?></td>
               <td><?= $c['attended'] ?> / <?= $c['total_sessions'] ?></td>
-              <td><span style="color:<?= $color ?>;font-weight:600"><?= $pct ?>%</span><?php if($pct<75&&$c['total_sessions']>3): ?> <span style="color:var(--danger)"></span><?php endif; ?></td>
+              <td><span style="color:<?= $color ?>;font-weight:600"><?= $pct ?>%</span><?php if($pct<75&&$c['total_sessions']>3): ?> <span class="t-danger"></span><?php endif; ?></td>
             </tr>
           <?php endforeach; ?>
           </tbody></table>
@@ -667,26 +668,26 @@ document.addEventListener('DOMContentLoaded',function(){
           $dayCls=$dq->fetchAll();
         }
         if(empty($dayCls)) continue; ?>
-        <div style="margin-bottom:1.5rem">
-          <div style="font-family:'Cinzel',serif;font-size:.78rem;color:var(--gold);letter-spacing:.15em;margin-bottom:.6rem"><?= strtoupper($day) ?></div>
+        <div class="mb-15">
+          <div class="cinzel-gold-tt"><?= strtoupper($day) ?></div>
           <div class="tt-grid"><?php foreach($dayCls as $c): ?>
             <div class="tt-item"><div class="tt-time"><?= substr($c['start_time'],0,5) ?> – <?= substr($c['end_time'],0,5) ?></div><div class="tt-info"><div class="code"><?= htmlspecialchars($c['course_code']) ?></div><div class="name"><?= htmlspecialchars($c['course_name']) ?></div><div class="room"> <?= htmlspecialchars($c['room']??'') ?> · <?= htmlspecialchars($c['lecturer_name']??'') ?></div></div></div>
           <?php endforeach; ?></div>
         </div>
       <?php endforeach; ?>
-      <?php if(empty($enrolledCourseIds)): ?><p style="color:var(--muted);font-size:.83rem">No enrolled courses found.</p><?php endif; ?>
+      <?php if(empty($enrolledCourseIds)): ?><p class="t-muted-83">No enrolled courses found.</p><?php endif; ?>
     </div>
 
     <!-- HISTORY -->
     <div class="page-section" id="sec-history">
       <div class="section-title">My <span>History</span></div>
-      <div class="card"><div class="card-body" style="padding:0;overflow-x:auto">
+      <div class="card"><div class="card-body" class="tbl-scroll">
         <table class="data-table"><thead><tr><th>Course</th><th>Status</th><th>Date & Time</th></tr></thead><tbody>
-        <?php if(empty($hist)): ?><tr><td colspan="3" style="color:var(--muted)">No records yet.</td></tr>
+        <?php if(empty($hist)): ?><tr><td colspan="3" class="t-muted">No records yet.</td></tr>
         <?php else: foreach($hist as $r): ?>
-          <tr><td><strong><?= htmlspecialchars($r['course_code']) ?></strong><br><span style="color:var(--muted);font-size:.72rem"><?= htmlspecialchars($r['course_name']) ?></span></td>
+          <tr><td><strong><?= htmlspecialchars($r['course_code']) ?></strong><br><span class="t-muted-72"><?= htmlspecialchars($r['course_name']) ?></span></td>
           <td><span class="pill pill-<?= $r['status']==='present'?'green':($r['status']==='late'?'gold':($r['status']==='pending'?'pending':'red')) ?>"><?= $r['status'] ?></span></td>
-          <td style="color:var(--muted);font-size:.72rem;white-space:nowrap"><?= date('d M Y',strtotime($r['timestamp'])) ?><br><?= date('H:i',strtotime($r['timestamp'])) ?></td></tr>
+          <td class="t-nowrap-72"><?= date('d M Y',strtotime($r['timestamp'])) ?><br><?= date('H:i',strtotime($r['timestamp'])) ?></td></tr>
         <?php endforeach; endif; ?>
         </tbody></table>
       </div></div>
@@ -694,19 +695,19 @@ document.addEventListener('DOMContentLoaded',function(){
 
     <!-- STATS -->
     <div class="page-section" id="sec-stats">
-      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.8rem;margin-bottom:1.8rem">
-        <div class="section-title" style="margin-bottom:0">My <span>Stats</span></div>
-        <a href="../../api/attendance_certificate.php" class="btn btn-gold" style="font-size:.72rem;padding:.3rem .7rem"> Download Certificate</a>
+      <div class="section-header-flex">
+        <div class="section-title" class="mb-0">My <span>Stats</span></div>
+        <a href="../../api/attendance_certificate.php" class="btn btn-gold" class="fs-72"> Download Certificate</a>
       </div>
       <?php if(empty($enrolledCourses)): ?>
-        <p style="color:var(--muted);font-size:.83rem">No attendance data yet.</p>
+        <p class="t-muted-83">No attendance data yet.</p>
       <?php else: foreach($enrolledCourses as $c):
         $pct=$c['total_sessions']>0?round(($c['attended']/$c['total_sessions'])*100):0;
         $color=$pct>=75?'var(--success)':($pct>=50?'var(--warning)':'var(--danger)'); ?>
         <div class="course-bar">
           <div class="course-bar-label"><span><?= htmlspecialchars($c['code']) ?> · <?= htmlspecialchars($c['name']) ?></span><span style="color:<?= $color ?>;font-weight:600"><?= $pct ?>%</span></div>
           <div class="bar-track"><div class="bar-fill" style="width:<?= $pct ?>%;background:<?= $color ?>"></div></div>
-          <div style="font-size:.68rem;color:var(--muted);margin-top:.2rem"><?= $c['attended'] ?> / <?= $c['total_sessions'] ?> sessions</div>
+          <div class="t-muted-72 mt-3"><?= $c['attended'] ?> / <?= $c['total_sessions'] ?> sessions</div>
         </div>
       <?php endforeach; endif; ?>
     </div>
@@ -868,9 +869,9 @@ async function submitAttendance() {
     const data = await res.json();
     if (data.success) {
       document.getElementById('step-selfie-section').innerHTML = `
-        <div class="pending-card" style="margin-top:1rem;border-color:rgba(76,175,130,.3)">
+        <div class="pending-card" class="card card-success-border">
           <div class="pending-icon"></div>
-          <div class="pending-title" style="color:var(--success)">AI Verified & Submitted!</div>
+          <div class="pending-title" class="t-success">AI Verified & Submitted!</div>
           <div class="pending-sub">Your attendance has been verified and submitted successfully.</div>
         </div>`;
     } else {
@@ -909,7 +910,7 @@ async function loadMyCA() {
   const cards = document.getElementById('ca-summary-cards');
 
   if (!d.success || !d.scores.length) {
-    tbody.innerHTML = '<tr><td colspan="7" style="color:var(--muted);text-align:center;padding:2rem">No CA scores uploaded yet.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="7" class="tbl-empty">No CA scores uploaded yet.</td></tr>';
     if (cards) cards.innerHTML = '';
     return;
   }
@@ -919,13 +920,13 @@ async function loadMyCA() {
     const pct  = Math.round(s.score / s.max_score * 100);
     const pill = pct >= 50 ? 'pill-green' : 'pill-red';
     return `<tr>
-      <td><div style="font-weight:500">${s.course_code}</div><div style="font-size:.75rem;color:var(--muted)">${s.course_name}</div></td>
+      <td><div class="fw-500">${s.course_code}</div><div class="t-muted-75">${s.course_name}</div></td>
       <td><span class="pill pill-steel">${s.ca_type}</span></td>
-      <td style="font-weight:600;color:var(--gold)">${s.score}</td>
-      <td style="color:var(--muted)">${s.max_score}</td>
+      <td class="fw-600 t-gold">${s.score}</td>
+      <td class="t-muted">${s.max_score}</td>
       <td><span class="pill ${pill}">${pct}%</span></td>
-      <td style="color:var(--muted);font-size:.78rem">${s.remarks || '—'}</td>
-      <td style="color:var(--muted);font-size:.75rem">${s.uploaded_at?.substring(0,10) || '—'}</td>
+      <td class="t-muted-78">${s.remarks || '—'}</td>
+      <td class="t-muted-75">${s.uploaded_at?.substring(0,10) || '—'}</td>
     </tr>`;
   }).join('');
 
@@ -941,10 +942,10 @@ async function loadMyCA() {
     cards.innerHTML = Object.entries(courses).map(([code, c]) => {
       const avg = Math.round(c.total / c.max * 100);
       const col = avg >= 75 ? 'var(--success)' : avg >= 50 ? 'var(--gold)' : 'var(--danger)';
-      return `<div style="background:var(--surface);border:1px solid var(--border);border-radius:2px;padding:1rem;border-top:2px solid ${col}">
-        <div style="font-size:.65rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-bottom:.3rem">${code}</div>
-        <div style="font-size:1.6rem;font-weight:700;color:${col}">${avg}%</div>
-        <div style="font-size:.72rem;color:var(--muted)">${c.count} assessment${c.count>1?'s':''} · ${c.total}/${c.max}</div>
+      return `<div class="card card-dynamic-top">
+        <div class="label-muted-upper">${code}</div>
+        <div class="fw-700 t-gold">${avg}%</div>
+        <div class="t-muted-72">${c.count} assessment${c.count>1?'s':''} · ${c.total}/${c.max}</div>
       </div>`;
     }).join('');
   }

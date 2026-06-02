@@ -191,6 +191,7 @@ if ($activeSession && $activeSession['course_id']) {
 <head>
 <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
 <title>Citadel — Lecturer</title>
+<link rel="stylesheet" href="/assets/css/citadel.css">
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -514,7 +515,7 @@ document.addEventListener('DOMContentLoaded',function(){
 
 <body>
 <div class="layout">
-<div id="sidebar-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:400;backdrop-filter:blur(2px)"></div>
+<div id="sidebar-overlay" class="overlay-sidebar"></div>
 <aside class="sidebar" id="sidebar">
   <div class="sidebar-brand">
     <svg viewBox="0 0 52 52" fill="none"><polygon points="26,2 50,14 50,38 26,50 2,38 2,14" fill="none" stroke="#c9a84c" stroke-width="1.5"/><polygon points="26,9 43,18 43,34 26,43 9,34 9,18" fill="none" stroke="#c9a84c" stroke-width="0.8" opacity="0.5"/><rect x="20" y="20" width="12" height="14" rx="1" fill="none" stroke="#8a6fd4" stroke-width="1.5"/><circle cx="26" cy="25" r="2" fill="#c9a84c"/><line x1="26" y1="27" x2="26" y2="31" stroke="#8a6fd4" stroke-width="1.5"/></svg>
@@ -549,14 +550,14 @@ document.addEventListener('DOMContentLoaded',function(){
 
 <div class="main">
   <div class="topbar">
-    <div style="display:flex;align-items:center;gap:1rem">
+    <div class="flex-center">
       <button id="menu-btn" aria-label="Menu" onclick="toggleSidebar()">&#9776;</button>
       <div class="topbar-title" id="page-title">LIVE SESSION</div>
     </div>
-    <div style="display:flex;align-items:center;gap:1rem">
-      <span style="font-size:.75rem;color:var(--muted)"><?= date('l, d M Y') ?></span>
+    <div class="flex-center">
+      <span class="t-muted-75"><?= date('l, d M Y') ?></span>
       <span class="badge-lec"><?= terms('lecturer', $instType) ?></span>
-      <button id="theme-btn" onclick="toggleTheme()" style="background:none;border:1px solid var(--border);color:var(--muted);cursor:pointer;padding:.25rem .6rem;border-radius:2px;font-size:.75rem">&#9790;</button>
+      <button id="theme-btn" onclick="toggleTheme()" class="theme-btn">&#9790;</button>
     </div>
   </div>
 
@@ -574,9 +575,9 @@ document.addEventListener('DOMContentLoaded',function(){
             <div class="code-display-zone">
               <div class="live-badge"><div class="live-dot"></div>Session Active</div>
               <?php if($activeSession['is_online'] ?? false): ?>
-              <div style="display:inline-flex;align-items:center;gap:.4rem;background:rgba(74,111,165,.15);border:1px solid rgba(74,111,165,.4);border-radius:2px;padding:.25rem .7rem;font-size:.68rem;color:var(--steel);letter-spacing:.12em;text-transform:uppercase;margin-bottom:.5rem"> Online Class</div>
+              <div class="online-badge-pill"> Online Class</div>
               <?php if(!empty($activeSession['meeting_link'])): ?>
-              <div style="margin-bottom:.5rem"><a href="<?= htmlspecialchars($activeSession['meeting_link']) ?>" target="_blank" style="font-size:.75rem;color:var(--steel);text-decoration:underline"> <?= htmlspecialchars($activeSession['meeting_link']) ?></a></div>
+              <div class="mb-5"><a href="<?= htmlspecialchars($activeSession['meeting_link']) ?>" target="_blank" class="meeting-link"> <?= htmlspecialchars($activeSession['meeting_link']) ?></a></div>
               <?php endif; ?>
               <?php endif; ?>
               <div class="code-course"><?= htmlspecialchars($activeSession['course_code']) ?> · <?= htmlspecialchars($activeSession['course_name'] ?? '') ?></div>
@@ -588,27 +589,27 @@ document.addEventListener('DOMContentLoaded',function(){
                 </div>
                 <div class="timer-text">seconds until<br>code refreshes</div>
               </div>
-              <p style="font-size:.72rem;color:var(--muted)">Show this code to the class. Refreshes every 2 minutes.</p>
+              <p class="t-muted-72">Show this code to the class. Refreshes every 2 minutes.</p>
             </div>
-            <div class="attend-counter" style="margin-top:1rem">
+            <div class="attend-counter" class="mt-10">
               <div class="counter-item"><div class="counter-value" id="live-count"><?= count($liveAttendance) ?></div><div class="counter-label">Marked</div></div>
               <div class="counter-item"><div class="counter-value"><?= $enrolledCount ?></div><div class="counter-label">Enrolled</div></div>
-              <div class="counter-item"><div class="counter-value" style="color:var(--danger)"><?= max(0, $enrolledCount - count($liveAttendance)) ?></div><div class="counter-label">Absent</div></div>
+              <div class="counter-item"><div class="counter-value" class="t-danger"><?= max(0, $enrolledCount - count($liveAttendance)) ?></div><div class="counter-label">Absent</div></div>
             </div>
             <?php if ($instType !== 'university'): ?>
-            <div style="margin-top:1rem">
-              <button class="btn btn-lec" style="width:100%" onclick="loadTeacherMarkPanel()"> Mark Attendance from List</button>
+            <div class="mt-10">
+              <button class="btn btn-lec" class="w-full" onclick="loadTeacherMarkPanel()"> Mark Attendance from List</button>
             </div>
             <?php endif; ?>
           </div>
           <div class="card">
             <div class="card-head"><div class="card-head-title">Live Attendance</div><span class="pill pill-green" id="live-pill"><?= count($liveAttendance) ?> present</span></div>
-            <div class="card-body" style="padding:0;max-height:420px;overflow-y:auto">
+            <div class="card-body" class="tbl-scroll-h">
               <table class="data-table"><thead><tr><th>Student</th><th><?= terms('index_no', $instType) ?></th><th>Status</th><th>Time</th></tr></thead>
               <tbody id="live-tbody">
-                <?php if(empty($liveAttendance)): ?><tr id="empty-row"><td colspan="4" style="color:var(--muted)">Waiting for students...</td></tr>
+                <?php if(empty($liveAttendance)): ?><tr id="empty-row"><td colspan="4" class="t-muted">Waiting for students...</td></tr>
                 <?php else: foreach($liveAttendance as $a): ?>
-                  <tr><td><?= htmlspecialchars($a['full_name']) ?></td><td style="color:var(--gold);font-size:.78rem"><?= $a['index_no'] ?></td><td><span class="pill pill-<?= $a['status']==='present'?'green':'gold' ?>"><?= $a['status'] ?></span></td><td style="color:var(--muted);font-size:.72rem"><?= date('H:i',strtotime($a['timestamp'])) ?></td></tr>
+                  <tr><td><?= htmlspecialchars($a['full_name']) ?></td><td class="t-gold-78"><?= $a['index_no'] ?></td><td><span class="pill pill-<?= $a['status']==='present'?'green':'gold' ?>"><?= $a['status'] ?></span></td><td class="t-muted-72"><?= date('H:i',strtotime($a['timestamp'])) ?></td></tr>
                 <?php endforeach; endif; ?>
               </tbody></table>
             </div>
@@ -617,10 +618,10 @@ document.addEventListener('DOMContentLoaded',function(){
       <?php else: ?>
         <div class="section-header"><div class="section-title">Start <span>Session</span></div></div>
         <?php if (!empty($todayClasses)): ?>
-          <p style="font-size:.82rem;color:var(--muted);margin-bottom:1rem">Quick start from today's schedule:</p>
-          <div style="display:flex;flex-wrap:wrap;gap:.7rem;margin-bottom:2rem">
+          <p class="t-muted-78 mb-10">Quick start from today's schedule:</p>
+          <div class="flex-gap7-wrap">
             <?php foreach ($todayClasses as $tc): ?>
-              <form method="POST" style="display:inline">
+              <form method="POST" class="d-inline">
                 <input type="hidden" name="csrf_token" value="<?= csrfToken() ?>">
                 <input type="hidden" name="action" value="start_session">
                 <input type="hidden" name="course_id" value="<?= $tc['course_id'] ?? '' ?>">
@@ -632,7 +633,7 @@ document.addEventListener('DOMContentLoaded',function(){
           </div>
         <?php endif; ?>
         <div class="start-form">
-          <p style="font-size:.78rem;color:var(--muted);margin-bottom:1.2rem">Or start a manual session:</p>
+          <p class="t-muted-75 mb-12">Or start a manual session:</p>
           <form method="POST">
             <input type="hidden" name="csrf_token" value="<?= csrfToken() ?>">
             <input type="hidden" name="action" value="start_session">
@@ -654,17 +655,17 @@ document.addEventListener('DOMContentLoaded',function(){
               </div>
             </div>
             <input type="hidden" name="course_code" id="course-code-hidden" value="<?= htmlspecialchars($myCourses[0]['code'] ?? '') ?>">
-            <div class="form-field" style="margin-bottom:.8rem">
+            <div class="form-field" class="mb-8">
               <label style="display:flex;align-items:center;gap:.6rem;cursor:pointer">
-                <input type="checkbox" name="is_online" id="is-online-chk" value="1" onchange="toggleMeetingLink(this)" style="width:auto;accent-color:var(--gold)">
-                <span style="font-size:.82rem;color:var(--text)"> Online Class Mode</span>
+                <input type="checkbox" name="is_online" id="is-online-chk" value="1" onchange="toggleMeetingLink(this)" class="w-auto-gold">
+                <span class="fs-82"> Online Class Mode</span>
               </label>
             </div>
-            <div class="form-field" id="meeting-link-field" style="display:none">
+            <div class="form-field" id="meeting-link-field" class="d-none">
               <label>Meeting Link (Zoom / Google Meet)</label>
               <input type="text" name="meeting_link" placeholder="https://meet.google.com/...">
             </div>
-            <button type="submit" class="btn btn-lec" style="width:100%;justify-content:center;padding:.8rem" <?= empty($myCourses) ? 'disabled' : '' ?>>Start Attendance Session</button>
+            <button type="submit" class="btn btn-lec" class="btn btn-lec btn-full-center" <?= empty($myCourses) ? 'disabled' : '' ?>>Start Attendance Session</button>
           </form>
         </div>
       <?php endif; ?>
@@ -672,9 +673,9 @@ document.addEventListener('DOMContentLoaded',function(){
 
     <!--  MY COURSES  -->
     <div class="page-section" id="sec-courses">
-      <div class="section-header"><div class="section-title">My <span>Courses</span><?php if($activeSem): ?><span style="font-size:.65rem;color:var(--muted);font-family:'DM Sans',sans-serif;letter-spacing:.1em;margin-left:.8rem"><?= htmlspecialchars($activeSem['name']) ?></span><?php endif; ?></div></div>
+      <div class="section-header"><div class="section-title">My <span>Courses</span><?php if($activeSem): ?><span class="sem-label"><?= htmlspecialchars($activeSem['name']) ?></span><?php endif; ?></div></div>
       <?php if (empty($myCourses)): ?>
-        <div class="card"><div class="card-body" style="color:var(--muted)">No courses assigned to you this semester. Contact admin.</div></div>
+        <div class="card"><div class="card-body" class="t-muted">No courses assigned to you this semester. Contact admin.</div></div>
       <?php else: ?>
         <div class="course-cards">
           <?php foreach ($myCourses as $c): ?>
@@ -682,7 +683,7 @@ document.addEventListener('DOMContentLoaded',function(){
               <div class="course-card-code"><?= htmlspecialchars($c['code']) ?></div>
               <div class="course-card-name"><?= htmlspecialchars($c['name']) ?></div>
               <div class="course-card-meta"><?= $c['enrolled_count'] ?> students enrolled · <?= $c['credit_hrs'] ?> credit hrs</div>
-              <form method="POST" style="margin-top:.8rem">
+              <form method="POST" class="mt-8">
                 <input type="hidden" name="csrf_token" value="<?= csrfToken() ?>">
                 <input type="hidden" name="action" value="start_session">
                 <input type="hidden" name="course_id" value="<?= $c['id'] ?>">
@@ -699,10 +700,10 @@ document.addEventListener('DOMContentLoaded',function(){
     <!--  PAST SESSIONS  -->
     <div class="page-section" id="sec-history">
       <div class="section-header"><div class="section-title">Past <span>Sessions</span></div></div>
-      <div class="card"><div class="card-body" style="padding:0;overflow-x:auto">
+      <div class="card"><div class="card-body" class="tbl-scroll">
         <table class="data-table"><thead><tr><th>Course</th><th>Date</th><th>Duration</th><th>Attended</th><th>Rate</th><th>Status</th></tr></thead>
         <tbody>
-          <?php if(empty($pastSessions)): ?><tr><td colspan="6" style="color:var(--muted)">No sessions yet.</td></tr>
+          <?php if(empty($pastSessions)): ?><tr><td colspan="6" class="t-muted">No sessions yet.</td></tr>
           <?php else: foreach($pastSessions as $ps):
             $dur='—';
             if($ps['end_time']){$mins=(strtotime($ps['end_time'])-strtotime($ps['start_time']))/60;$dur=round($mins).' min';}
@@ -710,8 +711,8 @@ document.addEventListener('DOMContentLoaded',function(){
             $rate = round(($ps['attended']/$total)*100);
           ?>
             <tr>
-              <td style="color:var(--gold);font-size:.78rem"><?= htmlspecialchars($ps['course_code']) ?></td>
-              <td style="color:var(--muted);font-size:.78rem"><?= date('d M Y H:i',strtotime($ps['start_time'])) ?></td>
+              <td class="t-gold-78"><?= htmlspecialchars($ps['course_code']) ?></td>
+              <td class="t-muted-78"><?= date('d M Y H:i',strtotime($ps['start_time'])) ?></td>
               <td><?= $dur ?></td>
               <td><?= $ps['attended'] ?> / <?= $ps['enrolled_count'] ?></td>
               <td><span style="color:<?= $rate>=75?'var(--success)':($rate>=50?'var(--warning)':'var(--danger)') ?>;font-weight:600"><?= $rate ?>%</span></td>
@@ -732,10 +733,10 @@ document.addEventListener('DOMContentLoaded',function(){
         <?php foreach($dayCls as $c): ?>
           <div class="tt-item">
             <div class="tt-time"><?= substr($c['start_time'],0,5) ?> – <?= substr($c['end_time'],0,5) ?></div>
-            <div style="flex:1">
-              <div style="font-size:.7rem;color:var(--muted);letter-spacing:.1em"><?= htmlspecialchars($c['course_code']) ?></div>
-              <div style="font-size:.85rem;color:var(--text)"><?= htmlspecialchars($c['course_name']) ?></div>
-              <div style="font-size:.72rem;color:var(--muted)"> <?= htmlspecialchars($c['room'] ?? '') ?></div>
+            <div class="flex-1">
+              <div class="t-muted-72"><?= htmlspecialchars($c['course_code']) ?></div>
+              <div class="fs-85"><?= htmlspecialchars($c['course_name']) ?></div>
+              <div class="t-muted-72"> <?= htmlspecialchars($c['room'] ?? '') ?></div>
             </div>
             <form method="POST">
               <input type="hidden" name="csrf_token" value="<?= csrfToken() ?>">
@@ -779,7 +780,7 @@ function updateRing(){if(!ringFill)return;const offset=circumference*(1-timeLeft
 updateRing();
 setInterval(()=>{timeLeft--;if(timeLeft<0)timeLeft=119;updateRing()},1000);
 setInterval(()=>{fetch(API + '/get_code.php?session_id=<?= $activeSession['id'] ?>').then(r=>r.json()).then(d=>{if(d.code){const el=document.getElementById('live-code');if(el)el.textContent=d.code.slice(0,3)+' '+d.code.slice(3)}})},120000);
-setInterval(()=>{fetch(API + '/live_attendance.php?session_id=<?= $activeSession['id'] ?>').then(r=>r.json()).then(data=>{if(!data.rows)return;const tbody=document.getElementById('live-tbody');const pill=document.getElementById('live-pill');const count=document.getElementById('live-count');if(count)count.textContent=data.total;if(pill)pill.textContent=data.total+' present';if(tbody&&data.rows.length>0){const empty=document.getElementById('empty-row');if(empty)empty.remove();tbody.innerHTML=data.rows.map(r=>`<tr><td>${r.full_name}</td><td style="color:var(--gold);font-size:.78rem">${r.index_no}</td><td><span class="pill pill-${r.status==='present'?'green':'gold'}">${r.status}</span></td><td style="color:var(--muted);font-size:.72rem">${r.time}</td></tr>`).join('')}})},10000);
+setInterval(()=>{fetch(API + '/live_attendance.php?session_id=<?= $activeSession['id'] ?>').then(r=>r.json()).then(data=>{if(!data.rows)return;const tbody=document.getElementById('live-tbody');const pill=document.getElementById('live-pill');const count=document.getElementById('live-count');if(count)count.textContent=data.total;if(pill)pill.textContent=data.total+' present';if(tbody&&data.rows.length>0){const empty=document.getElementById('empty-row');if(empty)empty.remove();tbody.innerHTML=data.rows.map(r=>`<tr><td>${r.full_name}</td><td class="t-gold-78">${r.index_no}</td><td><span class="pill pill-${r.status==='present'?'green':'gold'}">${r.status}</span></td><td class="t-muted-72">${r.time}</td></tr>`).join('')}})},10000);
 <?php endif; ?>
 
 function toggleTheme(){const body=document.body;const btn=document.getElementById('theme-btn');if(body.classList.contains('light')){body.classList.remove('light');localStorage.setItem('theme','dark');if(btn)btn.innerHTML='&#9790;';}else{body.classList.add('light');localStorage.setItem('theme','light');if(btn)btn.innerHTML='&#9790;';}}
@@ -794,21 +795,21 @@ window.fetch=function(url,options={}){options.headers=options.headers||{};option
 </script>
 <!-- Teacher Mark Panel -->
 <div class="modal-overlay" id="teacher-mark-modal">
-  <div class="modal" style="max-width:600px">
+  <div class="modal" class="max-w-600">
     <div class="modal-head">
       <div class="modal-title">MARK ATTENDANCE</div>
-      <div style="display:flex;gap:.5rem;align-items:center">
+      <div class="flex-gap5-align">
         <button class="btn btn-ghost btn-sm" onclick="markAllAbsent()">Mark Absent: Unmarked</button>
         <button class="modal-close" onclick="closeModal('teacher-mark-modal')"></button>
       </div>
     </div>
-    <div class="modal-body" style="padding:0">
-      <div id="teacher-mark-list" style="max-height:60vh;overflow-y:auto">
-        <div style="padding:2rem;text-align:center;color:var(--muted)">Loading students...</div>
+    <div class="modal-body" class="card-pad-0">
+      <div id="teacher-mark-list" class="mh-60vh">
+        <div class="tbl-empty">Loading students...</div>
       </div>
     </div>
-    <div style="padding:1rem;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
-      <span id="mark-summary" style="font-size:.8rem;color:var(--muted)"></span>
+    <div class="card-footer">
+      <span id="mark-summary" class="t-muted-78"></span>
       <button class="btn btn-lec" onclick="closeModal('teacher-mark-modal')">Done</button>
     </div>
   </div>
@@ -833,19 +834,19 @@ async function loadTeacherMarkPanel() {
   
   const list = document.getElementById('teacher-mark-list');
   if (!d.students.length) {
-    list.innerHTML = '<div style="padding:2rem;text-align:center;color:var(--muted)">No students enrolled in this course.</div>';
+    list.innerHTML = '<div class="tbl-empty">No students enrolled in this course.</div>';
     return;
   }
   
-  let html = '<table class="data-table" style="min-width:0"><thead><tr><th>Name</th><th>ID</th><th>Status</th></tr></thead><tbody>';
+  let html = '<table class="data-table" class="min-w-0"><thead><tr><th>Name</th><th>ID</th><th>Status</th></tr></thead><tbody>';
   d.students.forEach(s => {
     const status = s.status || 'none';
     const colors = {present:'pill-green', late:'pill-gold', absent:'pill-red', none:''};
     html += `<tr id="mrow-${s.id}">
       <td>${s.full_name}</td>
-      <td style="color:var(--gold);font-size:.78rem">${s.index_no||'—'}</td>
+      <td class="t-gold-78">${s.index_no||'—'}</td>
       <td>
-        <div style="display:flex;gap:.3rem;flex-wrap:wrap">
+        <div class="flex-gap3-wrap">
           <button class="btn btn-sm ${status==='present'?'btn-lec':'btn-ghost'}" onclick="markStudent(${s.id},'present')"></button>
           <button class="btn btn-sm ${status==='late'?'btn-gold':'btn-ghost'}" onclick="markStudent(${s.id},'late')">Late</button>
           <button class="btn btn-sm ${status==='absent'?'btn-danger':'btn-ghost'}" onclick="markStudent(${s.id},'absent')"></button>
@@ -905,9 +906,9 @@ function updateMarkSummary(students) {
       </div>
 
       <!-- Course + CA Type selector -->
-      <div class="card" style="margin-bottom:1.5rem">
+      <div class="card" class="mb-15">
         <div class="card-body">
-          <div class="form-row" style="margin-bottom:1rem">
+          <div class="form-row" class="mb-10">
             <div class="form-field">
               <label>Select Course</label>
               <select id="ca-course-sel" onchange="caLoadStudents()">
@@ -934,7 +935,7 @@ function updateMarkSummary(students) {
             </div>
             <div class="form-field">
               <label>Max Score</label>
-              <input type="number" id="ca-max-score" value="100" min="1" max="1000" style="width:100%">
+              <input type="number" id="ca-max-score" value="100" min="1" max="1000" class="w-full">
             </div>
           </div>
           <button class="btn btn-lec btn-sm" onclick="caLoadStudents()">Load Students</button>
@@ -942,33 +943,33 @@ function updateMarkSummary(students) {
       </div>
 
       <!-- Students score table -->
-      <div class="card" id="ca-table-card" style="display:none">
+      <div class="card" id="ca-table-card" class="d-none">
         <div class="card-head">
           <div class="card-head-title" id="ca-table-title">Enter Scores</div>
-          <div style="display:flex;gap:.5rem">
+          <div class="flex-gap5">
             <button class="btn btn-ghost btn-sm" onclick="caFillAll()">Fill All</button>
             <button class="btn btn-lec btn-sm" onclick="caSaveScores()">Save All Scores</button>
           </div>
         </div>
-        <div class="card-body" style="padding:0;overflow-x:auto">
+        <div class="card-body" class="tbl-scroll">
           <table class="data-table">
             <thead><tr><th>Student</th><th>ID</th><th>Score</th><th>Remarks</th></tr></thead>
             <tbody id="ca-students-body"></tbody>
           </table>
         </div>
-        <div style="padding:1rem 1.4rem;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
-          <span id="ca-save-status" style="font-size:.78rem;color:var(--muted)"></span>
+        <div class="card-footer">
+          <span id="ca-save-status" class="t-muted-78"></span>
           <button class="btn btn-lec" onclick="caSaveScores()">Save All Scores</button>
         </div>
       </div>
 
       <!-- Existing scores viewer -->
-      <div class="card" style="margin-top:1.5rem" id="ca-existing-card" style="display:none">
+      <div class="card" class="mt-15" id="ca-existing-card" class="d-none">
         <div class="card-head"><div class="card-head-title">Uploaded Scores</div></div>
-        <div class="card-body" style="padding:0;overflow-x:auto">
+        <div class="card-body" class="tbl-scroll">
           <table class="data-table">
             <thead><tr><th>Student</th><th>ID</th><th>CA Type</th><th>Score</th><th>Max</th><th>%</th><th>Remarks</th></tr></thead>
-            <tbody id="ca-existing-body"><tr><td colspan="7" style="color:var(--muted)">Select a course to view scores.</td></tr></tbody>
+            <tbody id="ca-existing-body"><tr><td colspan="7" class="t-muted">Select a course to view scores.</td></tr></tbody>
           </table>
         </div>
       </div>
@@ -1022,15 +1023,15 @@ async function caLoadStudents() {
   // Build table
   const tbody = document.getElementById('ca-students-body');
   if (!d.students.length) {
-    tbody.innerHTML = '<tr><td colspan="4" style="color:var(--muted)">No enrolled students found.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="4" class="t-muted">No enrolled students found.</td></tr>';
   } else {
     tbody.innerHTML = d.students.map(s => {
       const ex = existing[s.id] || {};
       return `<tr>
         <td>${s.full_name}</td>
-        <td style="color:var(--gold);font-size:.78rem">${s.index_no || '—'}</td>
-        <td><input type="number" id="ca-score-${s.id}" value="${ex.score ?? ''}" min="0" max="${maxScore}" step="0.5" style="width:80px;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:.3rem .5rem;border-radius:2px;font-size:.85rem"></td>
-        <td><input type="text" id="ca-rem-${s.id}" value="${ex.remarks || ''}" placeholder="Optional" style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:.3rem .5rem;border-radius:2px;font-size:.82rem"></td>
+        <td class="t-gold-78">${s.index_no || '—'}</td>
+        <td><input type="number" id="ca-score-${s.id}" value="${ex.score ?? ''}" min="0" max="${maxScore}" step="0.5" class="input-score"></td>
+        <td><input type="text" id="ca-rem-${s.id}" value="${ex.remarks || ''}" placeholder="Optional" class="input-rem"></td>
       </tr>`;
     }).join('');
   }
@@ -1046,15 +1047,15 @@ async function caLoadStudents() {
   if (d3.success && d3.scores.length) {
     eb.innerHTML = d3.scores.map(s => `<tr>
       <td>${s.full_name}</td>
-      <td style="color:var(--gold);font-size:.78rem">${s.index_no || '—'}</td>
+      <td class="t-gold-78">${s.index_no || '—'}</td>
       <td><span class="pill pill-steel">${s.ca_type}</span></td>
       <td>${s.score}</td>
-      <td style="color:var(--muted)">${s.max_score}</td>
+      <td class="t-muted">${s.max_score}</td>
       <td><span class="pill ${(s.score/s.max_score*100)>=50?'pill-green':'pill-red'}">${Math.round(s.score/s.max_score*100)}%</span></td>
-      <td style="color:var(--muted);font-size:.78rem">${s.remarks || '—'}</td>
+      <td class="t-muted-78">${s.remarks || '—'}</td>
     </tr>`).join('');
   } else {
-    eb.innerHTML = '<tr><td colspan="7" style="color:var(--muted)">No scores uploaded yet.</td></tr>';
+    eb.innerHTML = '<tr><td colspan="7" class="t-muted">No scores uploaded yet.</td></tr>';
   }
 
   window._caStudents = d.students;

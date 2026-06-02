@@ -176,6 +176,7 @@ $timeRemaining = 120 - (time() % 120);
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
 <title>Citadel — Boss Dashboard</title>
+<link rel="stylesheet" href="/assets/css/citadel.css">
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -495,7 +496,7 @@ document.addEventListener('DOMContentLoaded',function(){
 <div class="layout">
 
 <!--  Sidebar  -->
-<div id="sidebar-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:400;backdrop-filter:blur(2px)"></div>
+<div id="sidebar-overlay" class="overlay-sidebar"></div>
 <aside class="sidebar" id="sidebar">
   <div class="sidebar-brand">
     <svg viewBox="0 0 52 52" fill="none">
@@ -549,7 +550,7 @@ document.addEventListener('DOMContentLoaded',function(){
     </a>
     <a class="nav-item" onclick="showSection('approvals',this)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-      Approvals<span id="pending-badge" style="background:var(--warning);color:#060910;font-size:.6rem;font-weight:700;padding:.15rem .45rem;border-radius:2px;margin-left:.4rem;display:none">0</span>
+      Approvals<span id="pending-badge" class="badge-warning-hide">0</span>
     </a>
     <a class="nav-item" onclick="showSection('history',this)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/></svg>Session History
@@ -562,7 +563,7 @@ document.addEventListener('DOMContentLoaded',function(){
       <?= $activeSession ? ' Live Session' : 'Live Session' ?>
     </a>
     <a class="nav-item" onclick="showSection('locked',this)">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Locked Accounts<?php if(!empty($lockedUsers)): ?> <span style="background:var(--danger);color:#fff;font-size:.6rem;padding:.1rem .35rem;border-radius:2px;margin-left:auto"><?= count($lockedUsers) ?></span><?php endif ?>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Locked Accounts<?php if(!empty($lockedUsers)): ?> <span class="badge-danger-ml"><?= count($lockedUsers) ?></span><?php endif ?>
     </a>
     <a class="nav-item" onclick="showSection('ca',this)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>CA Scores
@@ -572,7 +573,7 @@ document.addEventListener('DOMContentLoaded',function(){
     </a>
   </nav>
   <div class="sidebar-footer">
-    Logged in as <strong style="color:var(--text)"><?= htmlspecialchars($user['full_name'] ?? 'Admin') ?></strong><br>
+    Logged in as <strong class="t-text"><?= htmlspecialchars($user['full_name'] ?? 'Admin') ?></strong><br>
     <div class="sidebar-user-actions"><a href="../../change_password.php" class="btn-pwd"> Password</a><a href="../../logout.php" class="btn-out">Sign Out</a></div>
   </div>
 </aside>
@@ -580,21 +581,21 @@ document.addEventListener('DOMContentLoaded',function(){
 <!--  Main  -->
 <div class="main">
   <div class="topbar">
-    <div style="display:flex;align-items:center;gap:1rem">
+    <div class="flex-center">
       <button onclick="document.getElementById('sidebar').classList.toggle('open');
     var ov=document.getElementById('sidebar-overlay');
-    if(ov)ov.classList.toggle('open',document.getElementById('sidebar').classList.contains('open'))" style="background:none;border:none;color:var(--muted);cursor:pointer" id="menu-btn">
+    if(ov)ov.classList.toggle('open',document.getElementById('sidebar').classList.contains('open'))" class="btn-icon-only" id="menu-btn">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
       </button>
       <div class="topbar-title" id="page-title">OVERVIEW</div>
     </div>
     <div class="topbar-right">
       <?php if($activeSemester): ?>
-      <span class="hide-mobile" style="font-size:.7rem;color:var(--gold);border:1px solid var(--gold-dim);padding:.2rem .6rem;border-radius:2px;white-space:nowrap"><?= htmlspecialchars($activeSemester['name']) ?></span>
+      <span class="hide-mobile" class="sem-badge"><?= htmlspecialchars($activeSemester['name']) ?></span>
       <?php endif; ?>
-      <span class="hide-mobile" style="font-size:.75rem;color:var(--muted);white-space:nowrap"><?= date('l, d M Y') ?></span>
+      <span class="hide-mobile" class="t-nowrap-72"><?= date('l, d M Y') ?></span>
       <span class="badge-admin">Boss</span>
-      <button id="theme-btn" onclick="toggleTheme()" style="background:none;border:1px solid var(--border);color:var(--muted);cursor:pointer;padding:.25rem .6rem;border-radius:2px;font-size:.75rem">&#9790;</button>
+      <button id="theme-btn" onclick="toggleTheme()" class="theme-btn">&#9790;</button>
     </div>
   </div>
 
@@ -612,7 +613,7 @@ document.addEventListener('DOMContentLoaded',function(){
         <div class="card">
           <div class="card-head"><div class="card-head-title">Today — <?= $today ?></div><span class="pill pill-steel"><?= count($todayClasses) ?> classes</span></div>
           <div class="card-body">
-            <?php if(empty($todayClasses)): ?><p style="color:var(--muted);font-size:.83rem">No classes scheduled today.</p>
+            <?php if(empty($todayClasses)): ?><p class="t-muted-83">No classes scheduled today.</p>
             <?php else: ?><div class="tt-grid"><?php foreach($todayClasses as $c): ?>
               <div class="tt-item">
                 <div class="tt-time"><?= substr($c['start_time'],0,5) ?> – <?= substr($c['end_time'],0,5) ?></div>
@@ -627,36 +628,36 @@ document.addEventListener('DOMContentLoaded',function(){
         </div>
         <div class="card">
           <div class="card-head"><div class="card-head-title">Recent Activity</div></div>
-          <div class="card-body" style="padding:0;overflow-x:auto">
+          <div class="card-body" class="tbl-scroll">
             <table class="data-table"><thead><tr><th>Student</th><th>Course</th><th>Status</th><th>Time</th></tr></thead><tbody>
-            <?php if(empty($recentActivity)): ?><tr><td colspan="4" style="color:var(--muted)">No activity yet.</td></tr>
+            <?php if(empty($recentActivity)): ?><tr><td colspan="4" class="t-muted">No activity yet.</td></tr>
             <?php else: foreach($recentActivity as $r): ?>
               <tr>
-                <td><?= htmlspecialchars($r['full_name']) ?><br><small style="color:var(--muted)"><?= $r['index_no'] ?></small></td>
+                <td><?= htmlspecialchars($r['full_name']) ?><br><small class="t-muted"><?= $r['index_no'] ?></small></td>
                 <td><?= htmlspecialchars($r['course_code']) ?></td>
                 <td><span class="pill pill-<?= $r['status']==='present'?'green':($r['status']==='late'?'gold':'red') ?>"><?= $r['status'] ?></span></td>
-                <td style="color:var(--muted);font-size:.75rem"><?= date('H:i',strtotime($r['timestamp'])) ?></td>
+                <td class="t-muted-75"><?= date('H:i',strtotime($r['timestamp'])) ?></td>
               </tr>
             <?php endforeach; endif; ?></tbody></table>
           </div>
         </div>
       </div>
       <?php if(!empty($atRisk)): ?>
-      <div class="card" style="margin-bottom:1.5rem;border-color:rgba(224,92,92,.3)">
-        <div class="card-head" style="border-color:rgba(224,92,92,.2)">
-          <div class="card-head-title" style="color:var(--danger)"> At-Risk Students — Below 75% Attendance</div>
+      <div class="card" class="card card-danger">
+        <div class="card-head" class="card-danger-border">
+          <div class="card-head-title" class="t-danger"> At-Risk Students — Below 75% Attendance</div>
           <span class="pill pill-red"><?= count($atRisk) ?> students</span>
         </div>
-        <div class="card-body" style="padding:0;overflow-x:auto">
+        <div class="card-body" class="tbl-scroll">
           <table class="data-table">
             <thead><tr><th>Student</th><th>Index No</th><th>Sessions</th><th>Absences</th><th>Rate</th></tr></thead>
             <tbody>
             <?php foreach($atRisk as $r): $pct=$r['pct']??0; ?>
             <tr>
               <td><?= htmlspecialchars($r['full_name']) ?></td>
-              <td style="color:var(--gold);font-size:.78rem"><?= htmlspecialchars($r['index_no']??'—') ?></td>
-              <td style="color:var(--muted)"><?= $r['sessions'] ?></td>
-              <td style="color:var(--danger)"><?= $r['absences'] ?></td>
+              <td class="t-gold-78"><?= htmlspecialchars($r['index_no']??'—') ?></td>
+              <td class="t-muted"><?= $r['sessions'] ?></td>
+              <td class="t-danger"><?= $r['absences'] ?></td>
               <td><span class="pill pill-<?= $pct>=50?'gold':'red' ?>"><?= $pct ?>%</span></td>
             </tr>
             <?php endforeach; ?>
@@ -665,7 +666,7 @@ document.addEventListener('DOMContentLoaded',function(){
         </div>
       </div>
       <?php endif; ?>
-      <div class="card" style="margin-bottom:1.5rem" id="charts-card"><div class="card-head"><div class="card-head-title">Attendance <span>Analytics</span></div></div><div class="card-body"><div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem" class="charts-grid"><div><canvas id="chart-attendance-trend" height="200"></canvas></div><div><canvas id="chart-course-rates" height="200"></canvas></div></div></div></div>
+      <div class="card" class="mb-15" id="charts-card"><div class="card-head"><div class="card-head-title">Attendance <span>Analytics</span></div></div><div class="card-body"><div class="grid-2col" class="charts-grid"><div><canvas id="chart-attendance-trend" height="200"></canvas></div><div><canvas id="chart-course-rates" height="200"></canvas></div></div></div></div>
     </div>
 
      <!--  TIMETABLE  -->
@@ -693,17 +694,17 @@ $ttAll = $ttStmt->fetchAll();
         $dayCls = array_filter($ttAll, fn($c) => $c['day_of_week'] === $day);
         if (empty($dayCls)) continue;
       ?>
-        <div style="margin-bottom:1.5rem">
-          <div style="font-family:'Cinzel',serif;font-size:.8rem;color:var(--gold);letter-spacing:.15em;margin-bottom:.6rem;text-transform:uppercase"><?= $day ?></div>
+        <div class="mb-15">
+          <div class="tt-day-label"><?= $day ?></div>
           <div class="tt-grid"><?php foreach($dayCls as $c): ?>
             <div class="tt-item">
               <div class="tt-time"><?= substr($c['start_time'],0,5) ?> – <?= substr($c['end_time'],0,5) ?></div>
-              <div class="tt-course" style="flex:1">
+              <div class="tt-course" class="flex-1">
                 <div class="tt-course-code"><?= htmlspecialchars($c['course_code']) ?></div>
                 <div class="tt-course-name"><?= htmlspecialchars($c['course_name']) ?></div>
                 <div class="tt-room"> <?= htmlspecialchars($c['room'] ?? '') ?> · <?= htmlspecialchars($c['lecturer_name'] ?? '—') ?></div>
               </div>
-              <div style="display:flex;gap:.4rem;flex-shrink:0">
+              <div class="flex-gap4-shrink0">
                 <button class="btn btn-ghost btn-sm" onclick="editSlot(<?= $c['id'] ?>,'<?= $c['day_of_week'] ?>','<?= substr($c['start_time'],0,5) ?>','<?= substr($c['end_time'],0,5) ?>','<?= htmlspecialchars(addslashes($c['course_code'])) ?>','<?= htmlspecialchars(addslashes($c['course_name'])) ?>','<?= htmlspecialchars(addslashes($c['room'] ?? '')) ?>',<?= $c['lecturer_id'] ?? 'null' ?>)">Edit</button>
                 <button class="btn btn-danger btn-sm" onclick="deleteSlot(<?= $c['id'] ?>,'<?= htmlspecialchars(addslashes($c['course_code'])) ?>')">Del</button>
               </div>
@@ -712,7 +713,7 @@ $ttAll = $ttStmt->fetchAll();
         </div>
       <?php endforeach; ?>
       <?php if (empty($ttAll)): ?>
-        <div class="card"><div class="card-body" style="color:var(--muted)">No timetable slots yet. Click "+ Add Slot" to get started.</div></div>
+        <div class="card"><div class="card-body" class="t-muted">No timetable slots yet. Click "+ Add Slot" to get started.</div></div>
       <?php endif; ?>
     </div>
 
@@ -723,30 +724,30 @@ $ttAll = $ttStmt->fetchAll();
         <button class="btn btn-gold" onclick="openAddSemester()">+ New Semester</button>
       </div>
       <?php if($activeSemester): ?>
-      <div style="background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.25);border-radius:2px;padding:1rem 1.4rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:1rem">
+      <div class="info-gold">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
         <div>
-          <div style="font-size:.7rem;color:var(--gold);letter-spacing:.15em;text-transform:uppercase">Active Semester</div>
-          <div style="font-size:.95rem;color:var(--text);font-weight:500"><?= htmlspecialchars($activeSemester['name']) ?></div>
-          <div style="font-size:.72rem;color:var(--muted)"><?= $activeSemester['start_date'] ?> → <?= $activeSemester['end_date'] ?></div>
+          <div class="label-gold-upper">Active Semester</div>
+          <div class="fw-500-text"><?= htmlspecialchars($activeSemester['name']) ?></div>
+          <div class="t-muted-72"><?= $activeSemester['start_date'] ?> → <?= $activeSemester['end_date'] ?></div>
         </div>
       </div>
       <?php endif; ?>
-      <div class="card"><div class="card-body" style="padding:0;overflow-x:auto">
+      <div class="card"><div class="card-body" class="tbl-scroll">
         <table class="data-table"><thead><tr><th>Semester</th><th class="hide-mobile">Academic Year</th><th class="hide-mobile">Dates</th><th class="hide-mobile">Courses</th><th>Status</th><th>Actions</th></tr></thead><tbody>
         <?php foreach($allSemesters as $sem): ?>
         <tr>
-          <td style="max-width:120px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"><?= htmlspecialchars($sem['name']) ?></td>
-          <td class="hide-mobile" style="color:var(--gold);font-size:.78rem"><?= $sem['academic_year'] ?> · Sem <?= $sem['semester_no'] ?></td>
-          <td class="hide-mobile" style="color:var(--muted);font-size:.75rem"><?= $sem['start_date'] ?> → <?= $sem['end_date'] ?></td>
+          <td class="t-truncate"><?= htmlspecialchars($sem['name']) ?></td>
+          <td class="hide-mobile" class="t-gold-78"><?= $sem['academic_year'] ?> · Sem <?= $sem['semester_no'] ?></td>
+          <td class="hide-mobile" class="t-muted-75"><?= $sem['start_date'] ?> → <?= $sem['end_date'] ?></td>
           <td class="hide-mobile"><span class="pill pill-steel"><?= $sem['course_count'] ?> courses</span></td>
           <td><?= $sem['is_active'] ? '<span class="pill pill-green">Active</span>' : '<span class="pill pill-red">Inactive</span>' ?></td>
-          <td><div style="display:flex;flex-direction:column;gap:.3rem">
+          <td><div class="flex-col-gap3">
             <?php if(!$sem['is_active']): ?><button class="btn btn-gold btn-sm" onclick="setActiveSemester(<?= $sem['id'] ?>,'<?= htmlspecialchars(addslashes($sem['name'])) ?>')">Set Active</button><?php endif; ?>
             <button class="btn btn-ghost btn-sm" onclick="editSemester(<?= $sem['id'] ?>,'<?= htmlspecialchars(addslashes($sem['name'])) ?>','<?= $sem['academic_year'] ?>',<?= $sem['semester_no'] ?>,'<?= $sem['start_date'] ?>','<?= $sem['end_date'] ?>')">Edit</button>
           </div></td>
         </tr>
-        <?php endforeach; if(empty($allSemesters)): ?><tr><td colspan="6" style="color:var(--muted)">No semesters yet.</td></tr><?php endif; ?>
+        <?php endforeach; if(empty($allSemesters)): ?><tr><td colspan="6" class="t-muted">No semesters yet.</td></tr><?php endif; ?>
         </tbody></table>
       </div></div>
     </div>
@@ -757,7 +758,7 @@ $ttAll = $ttStmt->fetchAll();
         <div class="section-title"><?= terms('program', $instType) ?> <span>Management</span></div>
         <button class="btn btn-gold" onclick="openAddProgram()">+ Add Program</button>
       </div>
-      <div class="card"><div class="card-body" style="padding:0;overflow-x:auto">
+      <div class="card"><div class="card-body" class="tbl-scroll">
         <table class="data-table"><thead><tr><th>Program Name</th><th>Code</th><th class="hide-mobile">Department</th><th class="hide-mobile">Duration</th><th class="hide-mobile">Students</th><th>Actions</th></tr></thead><tbody>
         <?php foreach($allPrograms as $p): ?>
         <?php
@@ -767,17 +768,17 @@ $ttAll = $ttStmt->fetchAll();
           $pDept->execute([$p['department_id']]); $pDeptName = $pDept->fetchColumn();
         ?>
         <tr>
-          <td style="font-weight:500"><?= htmlspecialchars($p['name']) ?></td>
-          <td style="color:var(--gold);font-size:.82rem"><?= htmlspecialchars($p['code']) ?></td>
-          <td class="hide-mobile" style="color:var(--muted)"><?= htmlspecialchars($pDeptName ?? '—') ?></td>
-          <td class="hide-mobile" style="color:var(--muted)"><?= $p['duration_yrs'] ?> yr<?= $p['duration_yrs']>1?'s':'' ?></td>
+          <td class="fw-500"><?= htmlspecialchars($p['name']) ?></td>
+          <td class="t-gold-82"><?= htmlspecialchars($p['code']) ?></td>
+          <td class="hide-mobile" class="t-muted"><?= htmlspecialchars($pDeptName ?? '—') ?></td>
+          <td class="hide-mobile" class="t-muted"><?= $p['duration_yrs'] ?> yr<?= $p['duration_yrs']>1?'s':'' ?></td>
           <td class="hide-mobile"><span class="pill pill-steel"><?= $pCount ?> students</span></td>
-          <td style="display:flex;gap:.4rem;flex-wrap:wrap">
+          <td class="flex-gap4-wrap">
             <button class="btn btn-ghost btn-sm" onclick="editProgram(<?= $p['id'] ?>,'<?= htmlspecialchars(addslashes($p['name'])) ?>','<?= htmlspecialchars(addslashes($p['code'])) ?>',<?= $p['department_id'] ?>,<?= $p['duration_yrs'] ?>)">Edit</button>
             <button class="btn btn-danger btn-sm" onclick="deleteProgram(<?= $p['id'] ?>,'<?= htmlspecialchars(addslashes($p['name'])) ?>')">Delete</button>
           </td>
         </tr>
-        <?php endforeach; if(empty($allPrograms)): ?><tr><td colspan="6" style="color:var(--muted)">No programs yet. Add one to get started.</td></tr><?php endif; ?>
+        <?php endforeach; if(empty($allPrograms)): ?><tr><td colspan="6" class="t-muted">No programs yet. Add one to get started.</td></tr><?php endif; ?>
         </tbody></table>
       </div></div>
     </div>
@@ -785,24 +786,24 @@ $ttAll = $ttStmt->fetchAll();
     <!--  COURSES  -->
     <div class="page-section" id="sec-courses">
       <div class="section-header">
-        <div class="section-title"><?= terms('course', $instType) ?> <span>Management</span><?php if($activeSemester): ?><span style="font-size:.65rem;color:var(--muted);font-family:'DM Sans',sans-serif;letter-spacing:.1em;margin-left:.8rem"><?= htmlspecialchars($activeSemester['name']) ?></span><?php endif; ?></div>
+        <div class="section-title"><?= terms('course', $instType) ?> <span>Management</span><?php if($activeSemester): ?><span class="sem-label"><?= htmlspecialchars($activeSemester['name']) ?></span><?php endif; ?></div>
         <button class="btn btn-gold" onclick="openAddCourse()">+ Add Course</button>
       </div>
-      <div class="card"><div class="card-body" style="padding:0;overflow-x:auto">
+      <div class="card"><div class="card-body" class="tbl-scroll">
         <table class="data-table"><thead><tr><th>Code</th><th>Course Name</th><th class="hide-mobile">Lecturer</th><th class="hide-mobile">Enrolled</th><th class="hide-mobile">Credits</th><th>Actions</th></tr></thead><tbody>
         <?php foreach($activeCourses as $c): ?>
         <tr>
-          <td style="color:var(--gold);font-size:.82rem;font-weight:600"><?= htmlspecialchars($c['code']) ?></td>
+          <td class="t-gold-82-fw6"><?= htmlspecialchars($c['code']) ?></td>
           <td><?= htmlspecialchars($c['name']) ?></td>
-          <td class="hide-mobile"><?= $c['lecturer_name'] ? htmlspecialchars($c['lecturer_name']) : '<span style="color:var(--muted);font-size:.75rem">— unassigned —</span>' ?></td>
+          <td class="hide-mobile"><?= $c['lecturer_name'] ? htmlspecialchars($c['lecturer_name']) : '<span class="t-muted-75">— unassigned —</span>' ?></td>
           <td class="hide-mobile"><span class="pill pill-steel"><?= $c['enrolled_count'] ?> students</span></td>
-          <td class="hide-mobile" style="color:var(--muted)"><?= $c['credit_hrs'] ?> cr</td>
-          <td style="display:flex;gap:.4rem;flex-wrap:wrap">
+          <td class="hide-mobile" class="t-muted"><?= $c['credit_hrs'] ?> cr</td>
+          <td class="flex-gap4-wrap">
             <button class="btn btn-ghost btn-sm" onclick="editCourse(<?= $c['id'] ?>,'<?= htmlspecialchars(addslashes($c['code'])) ?>','<?= htmlspecialchars(addslashes($c['name'])) ?>',<?= $c['lecturer_id'] ?? 'null' ?>,<?= $c['credit_hrs'] ?>,<?= $c['program_id'] ?? 'null' ?>)">Edit</button>
             <button class="btn btn-danger btn-sm" onclick="deleteCourse(<?= $c['id'] ?>,'<?= htmlspecialchars(addslashes($c['code'])) ?>')">Delete</button>
           </td>
         </tr>
-        <?php endforeach; if(empty($activeCourses)): ?><tr><td colspan="6" style="color:var(--muted)">No courses for this semester yet.</td></tr><?php endif; ?>
+        <?php endforeach; if(empty($activeCourses)): ?><tr><td colspan="6" class="t-muted">No courses for this semester yet.</td></tr><?php endif; ?>
         </tbody></table>
       </div></div>
     </div>
@@ -813,21 +814,21 @@ $ttAll = $ttStmt->fetchAll();
         <div class="section-title"><?= terms('lecturer', $instType) ?> <span>Registry</span></div>
         <button class="btn btn-gold" onclick="openAddLecturer()">+ Add Lecturer</button>
       </div>
-      <div class="card"><div class="card-body" style="padding:0;overflow-x:auto">
+      <div class="card"><div class="card-body" class="tbl-scroll">
         <table class="data-table"><thead><tr><th>Full Name</th><th class="hide-mobile">Email</th><th class="hide-mobile">Department</th><th class="hide-mobile">Courses</th><th>Status</th><th>Actions</th></tr></thead><tbody>
         <?php foreach($allLecturers as $l): ?>
         <tr>
           <td><?= htmlspecialchars($l['full_name']) ?></td>
-          <td class="hide-mobile" style="color:var(--muted);font-size:.78rem"><?= $l['email'] ?></td>
+          <td class="hide-mobile" class="t-muted-78"><?= $l['email'] ?></td>
           <td class="hide-mobile"><?= htmlspecialchars($l['department_name'] ?? '—') ?></td>
           <td class="hide-mobile"><span class="pill pill-steel"><?= $l['assigned_courses'] ?> assigned</span></td>
           <td><?= $l['is_active'] ? '<span class="pill pill-green">Active</span>' : '<span class="pill pill-red">Inactive</span>' ?></td>
-          <td style="display:flex;gap:.4rem;flex-wrap:wrap">
+          <td class="flex-gap4-wrap">
             <button class="btn btn-ghost btn-sm" onclick="editLecturer(<?= $l['id'] ?>,'<?= htmlspecialchars(addslashes($l['full_name'])) ?>','<?= $l['email'] ?>',<?= $l['is_active'] ?>)">Edit</button>
             <button class="btn btn-ghost btn-sm" onclick="toggleUser(<?= $l['id'] ?>,<?= $l['is_active'] ?>)"><?= $l['is_active'] ? 'Deactivate' : 'Activate' ?></button>
           </td>
         </tr>
-        <?php endforeach; if(empty($allLecturers)): ?><tr><td colspan="6" style="color:var(--muted)">No lecturers yet.</td></tr><?php endif; ?>
+        <?php endforeach; if(empty($allLecturers)): ?><tr><td colspan="6" class="t-muted">No lecturers yet.</td></tr><?php endif; ?>
         </tbody></table>
       </div></div>
     </div>
@@ -840,21 +841,21 @@ $ttAll = $ttStmt->fetchAll();
         <button class="btn btn-ghost" onclick="openModal('modal-import-csv')"> Import CSV</button>
       </div>
       <div class="filter-bar"><input type="text" id="student-search" placeholder="Search name or index number..." oninput="filterStudents()"></div>
-      <div class="card"><div class="card-body" style="padding:0;overflow-x:auto">
+      <div class="card"><div class="card-body" class="tbl-scroll">
         <table class="data-table" id="student-table">
           <thead><tr><th>#</th><th>Index No.</th><th>Full Name</th><th class="hide-mobile">Email</th><th class="hide-mobile">Role</th><th class="hide-mobile">Attendance</th><th>Actions</th></tr></thead>
           <tbody>
           <?php foreach($students as $i=>$s): ?>
             <tr data-name="<?= strtolower($s['full_name']) ?>" data-index="<?= $s['index_no'] ?>">
-              <td style="color:var(--muted)"><?= $i+1 ?></td>
-              <td style="color:var(--gold);font-size:.8rem"><?= $s['index_no'] ?></td>
+              <td class="t-muted"><?= $i+1 ?></td>
+              <td class="t-gold-80"><?= $s['index_no'] ?></td>
               <td><?= htmlspecialchars($s['full_name']) ?></td>
-              <td class="hide-mobile" style="color:var(--muted);font-size:.78rem"><?= $s['email'] ?></td>
+              <td class="hide-mobile" class="t-muted-78"><?= $s['email'] ?></td>
               <td class="hide-mobile"><span class="pill pill-<?= $s['role']==='rep'?'gold':'steel' ?>"><?= $s['role'] ?></span></td>
               <?php $pct=$s['attendance_pct']??0; $color=$pct>=75?'var(--success)':($pct>=50?'var(--warning)':'var(--danger)'); ?>
-              <td class="hide-mobile"><div style="display:flex;align-items:center;gap:.5rem"><div style="width:60px;height:5px;background:var(--border);border-radius:3px"><div style="width:<?= min($pct,100) ?>%;height:100%;background:<?= $color ?>;border-radius:3px"></div></div><span style="font-size:.75rem;color:<?= $color ?>;font-weight:600"><?= $pct ?>%</span><?php if($pct<75&&$s['total_sessions']>3): ?><span title="Below 75%" style="color:var(--danger);font-size:.8rem"></span><?php endif; ?></div></td>
+              <td class="hide-mobile"><div class="flex-gap5-align"><div class="progress-wrap"><div style="width:<?= min($pct,100) ?>%;height:100%;background:<?= $color ?>;border-radius:3px"></div></div><span style="font-size:.75rem;color:<?= $color ?>;font-weight:600"><?= $pct ?>%</span><?php if($pct<75&&$s['total_sessions']>3): ?><span title="Below 75%" class="t-danger-80"></span><?php endif; ?></div></td>
               <td>
-                <a href="../../api/attendance_certificate.php?student_id=<?= $s['id'] ?>" class="btn btn-ghost btn-sm" style="text-decoration:none"> Cert</a>
+                <a href="../../api/attendance_certificate.php?student_id=<?= $s['id'] ?>" class="btn btn-ghost btn-sm" class="t-no-decor"> Cert</a>
                 <button class="btn btn-ghost btn-sm" onclick="editStudent(<?= $s['id'] ?>,'<?= htmlspecialchars(addslashes($s['full_name'])) ?>','<?= $s['index_no'] ?>','<?= $s['email'] ?>','<?= $s['role'] ?>',<?= $s['is_locked'] ?>,'<?= $s['device_fingerprint']?'registered':'none' ?>')">Edit</button>
               </td>
             </tr>
@@ -867,14 +868,14 @@ $ttAll = $ttStmt->fetchAll();
     <!--  SESSIONS  -->
     <div class="page-section" id="sec-sessions">
       <div class="section-header"><div class="section-title">Attendance <span>Sessions</span></div></div>
-      <div class="card"><div class="card-body" style="padding:0;overflow-x:auto">
+      <div class="card"><div class="card-body" class="tbl-scroll">
         <table class="data-table"><thead><tr><th>Course</th><th class="hide-mobile">Lecturer</th><th class="hide-mobile">Started</th><th>Status</th><th class="hide-mobile">Attendance</th><th>Actions</th></tr></thead><tbody>
-        <?php if(empty($sessions)): ?><tr><td colspan="6" style="color:var(--muted)">No sessions yet.</td></tr>
+        <?php if(empty($sessions)): ?><tr><td colspan="6" class="t-muted">No sessions yet.</td></tr>
         <?php else: foreach($sessions as $s): ?>
           <tr>
-            <td style="color:var(--gold);font-size:.78rem"><?= htmlspecialchars($s['course_code']) ?></td>
+            <td class="t-gold-78"><?= htmlspecialchars($s['course_code']) ?></td>
             <td class="hide-mobile"><?= htmlspecialchars($s['lecturer_name']) ?></td>
-            <td class="hide-mobile" style="color:var(--muted);font-size:.78rem"><?= date('d M, H:i',strtotime($s['start_time'])) ?></td>
+            <td class="hide-mobile" class="t-muted-78"><?= date('d M, H:i',strtotime($s['start_time'])) ?></td>
             <td><span class="pill pill-<?= $s['active_status']?'green':'red' ?>"><?= $s['active_status']?'Active':'Closed' ?></span></td>
             <td class="hide-mobile"><?= $s['attendance_count'] ?> students</td>
             <td><?php if($s['active_status']): ?><button class="btn btn-danger btn-sm" onclick="closeSession(<?= $s['id'] ?>)">Close</button><?php endif; ?></td>
@@ -888,7 +889,7 @@ $ttAll = $ttStmt->fetchAll();
     <div class="page-section" id="sec-attendance">
       <div class="section-header">
         <div class="section-title">Attendance <span>Records</span></div>
-        <div style="display:flex;gap:.6rem;flex-wrap:wrap">
+        <div class="flex-gap6-wrap">
           <a href="../../api/export_attendance.php" class="btn btn-ghost btn-sm"> Export All</a>
           <a href="../../api/export_attendance.php?from=<?= date('Y-m-d') ?>&to=<?= date('Y-m-d') ?>" class="btn btn-ghost btn-sm"> Today</a>
         </div>
@@ -901,18 +902,18 @@ $ttAll = $ttStmt->fetchAll();
         </select>
         <select><option value="">All Status</option><option>present</option><option>absent</option><option>late</option></select>
       </div>
-      <div class="card"><div class="card-body" style="padding:0;overflow-x:auto">
+      <div class="card"><div class="card-body" class="tbl-scroll">
         <table class="data-table"><thead><tr><th>Student</th><th class="hide-mobile">Index No.</th><th class="hide-mobile">Course</th><th>Status</th><th class="hide-mobile">Timestamp</th><th class="hide-mobile">Selfie</th></tr></thead><tbody>
         <?php
         $records = $__q=$pdo->prepare("SELECT a.*,u.full_name,u.index_no,s.course_code FROM attendance a JOIN users u ON a.student_id=u.id JOIN sessions s ON a.session_id=s.id WHERE u.institution_id=? ORDER BY a.timestamp DESC LIMIT 50");$__q->execute([$inst_id]);$__q->fetchAll();
-        if(empty($records)): ?><tr><td colspan="6" style="color:var(--muted)">No attendance records yet.</td></tr>
+        if(empty($records)): ?><tr><td colspan="6" class="t-muted">No attendance records yet.</td></tr>
         <?php else: foreach($records as $r): ?>
           <tr>
             <td><?= htmlspecialchars($r['full_name']) ?></td>
-            <td class="hide-mobile" style="color:var(--gold);font-size:.78rem"><?= $r['index_no'] ?></td>
+            <td class="hide-mobile" class="t-gold-78"><?= $r['index_no'] ?></td>
             <td class="hide-mobile"><?= $r['course_code'] ?></td>
             <td><span class="pill pill-<?= $r['status']==='present'?'green':($r['status']==='late'?'gold':'red') ?>"><?= $r['status'] ?></span></td>
-            <td class="hide-mobile" style="color:var(--muted);font-size:.75rem"><?= date('d M Y H:i',strtotime($r['timestamp'])) ?></td>
+            <td class="hide-mobile" class="t-muted-75"><?= date('d M Y H:i',strtotime($r['timestamp'])) ?></td>
             <td class="hide-mobile"><?= $r['selfie_url']?'<span class="pill pill-green"></span>':'<span class="pill pill-red">—</span>' ?></td>
           </tr>
         <?php endforeach; endif; ?>
@@ -924,7 +925,7 @@ $ttAll = $ttStmt->fetchAll();
     <div class="page-section" id="sec-override">
       <div class="section-header"><div class="section-title">Attendance <span>Override</span></div></div>
       <div class="override-banner"><strong> Boss Override Zone.</strong> Changes made here are logged and irreversible without a second override. Use with caution.</div>
-      <div class="card" style="margin-bottom:1.5rem;border-color:rgba(224,92,92,.3)"><div class="card-head" style="border-color:rgba(224,92,92,.2)"><div class="card-head-title" style="color:var(--danger)"> SYSTEM RESET</div></div><div class="card-body"><p style="font-size:.83rem;color:var(--muted);margin-bottom:1.2rem">Clears ALL attendance records and sessions. Students and lecturers remain.</p><form method="POST" onsubmit="return confirm('RESET ALL ATTENDANCE DATA? This cannot be undone!')"><input type="hidden" name="csrf_token" value="<?= csrfToken() ?>"><input type="hidden" name="action" value="reset_system"><button type="submit" class="btn" style="background:rgba(224,92,92,.15);color:var(--danger);border:1px solid rgba(224,92,92,.3);padding:.7rem 1.5rem"> Reset All Attendance & Sessions</button></form></div></div>
+      <div class="card" class="card card-danger"><div class="card-head" class="card-danger-border"><div class="card-head-title" class="t-danger"> SYSTEM RESET</div></div><div class="card-body"><p class="t-muted-83 mb-12">Clears ALL attendance records and sessions. Students and lecturers remain.</p><form method="POST" onsubmit="return confirm('RESET ALL ATTENDANCE DATA? This cannot be undone!')"><input type="hidden" name="csrf_token" value="<?= csrfToken() ?>"><input type="hidden" name="action" value="reset_system"><button type="submit" class="btn" class="info-danger-p"> Reset All Attendance & Sessions</button></form></div></div>
       <div class="card"><div class="card-head"><div class="card-head-title">Manual Attendance Adjustment</div></div><div class="card-body">
         <div class="form-row">
           <div class="form-field"><label>Student Index No.</label><input type="text" placeholder="e.g. 52430540001"></div>
@@ -936,13 +937,13 @@ $ttAll = $ttStmt->fetchAll();
         </div>
         <button class="btn btn-gold">Apply Override</button>
       </div></div>
-      <div class="card" style="margin-top:1.5rem"><div class="card-head"><div class="card-head-title">Device Fingerprint Ban</div></div><div class="card-body">
+      <div class="card" class="mt-15"><div class="card-head"><div class="card-head-title">Device Fingerprint Ban</div></div><div class="card-body">
         <form method="POST"><input type="hidden" name="csrf_token" value="<?= csrfToken() ?>">
           <div class="form-row">
             <div class="form-field"><label>Student Index No.</label><input type="text" name="index_no" placeholder="e.g. 52430540001" required></div>
-            <div class="form-field" style="display:flex;align-items:flex-end;gap:.6rem">
-              <button type="submit" name="action" value="ban_device" class="btn btn-danger" style="width:100%">Ban Device</button>
-              <button type="submit" name="action" value="unban_device" class="btn btn-ghost" style="width:100%">Unban</button>
+            <div class="form-field" class="flex-end-gap6">
+              <button type="submit" name="action" value="ban_device" class="btn btn-danger" class="w-full">Ban Device</button>
+              <button type="submit" name="action" value="unban_device" class="btn btn-ghost" class="w-full">Unban</button>
             </div>
           </div>
         </form>
@@ -954,7 +955,7 @@ $ttAll = $ttStmt->fetchAll();
       <div class="section-header"><div class="section-title">System <span>Audit Log</span></div></div>
       <div class="card"><div class="card-body">
         <?php if(empty($auditLog)): ?>
-          <div class="audit-item"><div class="audit-time">—</div><div class="audit-text" style="color:var(--muted)">No audit entries yet. Actions performed by admins will appear here.</div></div>
+          <div class="audit-item"><div class="audit-time">—</div><div class="audit-text" class="t-muted">No audit entries yet. Actions performed by admins will appear here.</div></div>
         <?php else: foreach($auditLog as $log): ?>
           <div class="audit-item">
             <div class="audit-time"><?= date('d M Y H:i',strtotime($log['created_at'])) ?></div>
@@ -970,24 +971,24 @@ $ttAll = $ttStmt->fetchAll();
         <div class="section-title">Locked <span>Accounts</span></div>
       </div>
       <?php if(empty($lockedUsers)): ?>
-        <div class="card"><div class="card-body" style="text-align:center;color:var(--muted);padding:3rem">No locked accounts</div></div>
+        <div class="card"><div class="card-body" class="tbl-empty">No locked accounts</div></div>
       <?php else: ?>
-      <div class="card"><div class="card-body" style="padding:0;overflow-x:auto">
+      <div class="card"><div class="card-body" class="tbl-scroll">
         <table class="data-table">
           <thead><tr><th>Name</th><th>Index</th><th>Role</th><th>Attempts</th><th>Action</th></tr></thead>
           <tbody>
           <?php foreach($lockedUsers as $lu): ?>
           <tr>
             <td><?= htmlspecialchars($lu["full_name"]) ?></td>
-            <td style="color:var(--muted)"><?= htmlspecialchars($lu["index_no"] ?? "N/A") ?></td>
+            <td class="t-muted"><?= htmlspecialchars($lu["index_no"] ?? "N/A") ?></td>
             <td><span class="pill pill-red"><?= $lu["role"] ?></span></td>
-            <td style="color:var(--danger)"><?= $lu["login_attempts"] ?></td>
+            <td class="t-danger"><?= $lu["login_attempts"] ?></td>
             <td>
-              <form method="POST" style="display:inline">
+              <form method="POST" class="d-inline">
                 <input type="hidden" name="csrf_token" value="<?= csrfToken() ?>">
                 <input type="hidden" name="action" value="unlock_account">
                 <input type="hidden" name="user_id" value="<?= $lu["id"] ?>">
-                <button type="submit" class="btn btn-sm" style="background:rgba(76,175,130,.15);color:var(--success);border:1px solid rgba(76,175,130,.3)">Unlock</button>
+                <button type="submit" class="btn btn-sm" class="badge-success-bg">Unlock</button>
               </form>
             </td>
           </tr>
@@ -999,13 +1000,13 @@ $ttAll = $ttStmt->fetchAll();
     </div>
     <div class="page-section" id="sec-devices">
       <div class="section-header"><div class="section-title">Device <span>Control</span></div></div>
-      <div class="card"><div class="card-body" style="padding:0;overflow-x:auto">
+      <div class="card"><div class="card-body" class="tbl-scroll">
         <table class="data-table"><thead><tr><th>Name</th><th class="hide-mobile">Index No.</th><th class="hide-mobile">Device</th><th>Login Status</th><th>Actions</th></tr></thead><tbody>
         <?php foreach($devs as $d): ?>
           <tr>
             <td><?= htmlspecialchars($d['full_name']) ?></td>
-            <td class="hide-mobile" style="color:var(--gold);font-size:.78rem"><?= $d['index_no'] ?></td>
-            <td class="hide-mobile" style="color:var(--muted);font-size:.72rem;max-width:160px;overflow:hidden;text-overflow:ellipsis"><?= $d['device_fingerprint']?:'— not registered —' ?></td>
+            <td class="hide-mobile" class="t-gold-78"><?= $d['index_no'] ?></td>
+            <td class="hide-mobile" class="t-muted-72-trunc"><?= $d['device_fingerprint']?:'— not registered —' ?></td>
             <td><?= $d['is_locked']?'<span class="pill pill-red"> Locked ('.$d["login_attempts"].' attempts)</span>':'<span class="pill pill-green">Active</span>' ?></td>
             <td><button class="btn btn-ghost btn-sm" onclick="manageDevice(<?= $d['id'] ?>,'<?= htmlspecialchars(addslashes($d['full_name'])) ?>',<?= $d['is_locked'] ?>)">Manage</button></td>
           </tr>
@@ -1018,32 +1019,32 @@ $ttAll = $ttStmt->fetchAll();
     <div class="page-section" id="sec-live">
       <div class="section-header"><div class="section-title">Live <span>Session</span></div></div>
       <?php if($activeSession): ?>
-        <div class="card" style="margin-bottom:1.5rem"><div class="card-body" style="text-align:center;padding:2rem">
-          <div style="font-size:.75rem;color:var(--muted);letter-spacing:.15em;margin-bottom:.5rem">CURRENT CODE</div>
-          <div style="font-family:Cinzel,serif;font-size:3rem;color:var(--gold);letter-spacing:.3em"><?= $currentCode ?></div>
-          <div style="font-size:.78rem;color:var(--muted);margin-top:.5rem"><?= $activeSession['course_code'] ?> · <?= $timeRemaining ?>s remaining</div>
-          <form method="POST" style="margin-top:1.5rem"><input type="hidden" name="csrf_token" value="<?= csrfToken() ?>"><input type="hidden" name="action" value="end_session"><input type="hidden" name="session_id" value="<?= $activeSession['id'] ?>"><button type="submit" class="btn btn-danger" onclick="return confirm('End this session?')">End Session</button></form>
+        <div class="card" class="mb-15"><div class="card-body" class="empty-center">
+          <div class="t-muted-75 mb-5">CURRENT CODE</div>
+          <div class="t-gold"><?= $currentCode ?></div>
+          <div class="t-muted-75 mt-5"><?= $activeSession['course_code'] ?> · <?= $timeRemaining ?>s remaining</div>
+          <form method="POST" class="mt-15"><input type="hidden" name="csrf_token" value="<?= csrfToken() ?>"><input type="hidden" name="action" value="end_session"><input type="hidden" name="session_id" value="<?= $activeSession['id'] ?>"><button type="submit" class="btn btn-danger" onclick="return confirm('End this session?')">End Session</button></form>
         </div></div>
-        <div class="card"><div class="card-head"><div class="card-head-title">Live Attendance (<?= count($liveAttendance) ?>)</div></div><div class="card-body" style="padding:0;overflow-x:auto">
+        <div class="card"><div class="card-head"><div class="card-head-title">Live Attendance (<?= count($liveAttendance) ?>)</div></div><div class="card-body" class="tbl-scroll">
           <table class="data-table"><thead><tr><th>Student</th><th>Index</th><th>Status</th><th>Time</th></tr></thead><tbody>
           <?php foreach($liveAttendance as $la): ?>
-            <tr><td><?= htmlspecialchars($la['full_name']) ?></td><td style="color:var(--gold);font-size:.78rem"><?= $la['index_no'] ?></td>
+            <tr><td><?= htmlspecialchars($la['full_name']) ?></td><td class="t-gold-78"><?= $la['index_no'] ?></td>
             <td><span class="pill pill-<?= $la['status']==='present'?'green':'gold' ?>"><?= $la['status'] ?><?= $la['status']==='late'&&$la['minutes_late']>0?' ('.$la['minutes_late'].'m)':'' ?></span></td>
-            <td style="color:var(--muted);font-size:.72rem"><?= date('H:i',strtotime($la['timestamp'])) ?></td></tr>
+            <td class="t-muted-72"><?= date('H:i',strtotime($la['timestamp'])) ?></td></tr>
           <?php endforeach; ?>
           </tbody></table>
         </div></div>
       <?php else: ?>
-        <div class="card"><div class="card-body" style="color:var(--muted);text-align:center;padding:2rem">No active session right now.</div></div>
+        <div class="card"><div class="card-body" class="tbl-empty">No active session right now.</div></div>
       <?php endif; ?>
     </div>
 
     <!--  APPROVALS  -->
     <div class="page-section" id="sec-approvals">
-      <div class="section-header"><div class="section-title">Pending <span>Approvals</span></div><span id="pending-count-badge" style="background:var(--warning);color:#060910;padding:.2rem .7rem;border-radius:2px;font-size:.75rem;font-weight:700"><?= $pendingCount ?> PENDING</span></div>
-      <div class="card"><div class="card-body" style="padding:0;overflow-x:auto">
+      <div class="section-header"><div class="section-title">Pending <span>Approvals</span></div><span id="pending-count-badge" class="badge-warning-lg"><?= $pendingCount ?> PENDING</span></div>
+      <div class="card"><div class="card-body" class="tbl-scroll">
         <table class="data-table" id="approvals-table"><thead><tr><th>Student</th><th>Index</th><th>Photos</th><th>Submitted</th><th>Actions</th></tr></thead>
-        <tbody id="approvals-tbody"><tr><td colspan="5" style="color:var(--muted);text-align:center">Loading...</td></tr></tbody>
+        <tbody id="approvals-tbody"><tr><td colspan="5" class="tbl-muted-center">Loading...</td></tr></tbody>
         </table>
       </div></div>
     </div>
@@ -1051,12 +1052,12 @@ $ttAll = $ttStmt->fetchAll();
     <!--  SESSION HISTORY  -->
     <div class="page-section" id="sec-history">
       <div class="section-header"><div class="section-title">Session <span>History</span></div><a href="../../api/export_attendance.php" class="btn btn-ghost btn-sm"> Export All CSV</a></div>
-      <div class="card"><div class="card-body" style="padding:0;overflow-x:auto">
+      <div class="card"><div class="card-body" class="tbl-scroll">
         <table class="data-table"><thead><tr><th>Course</th><th>Present</th><th class="hide-mobile">Late</th><th>Absent</th><th>Export</th></tr></thead><tbody>
-        <?php if(empty($sessionHistory)): ?><tr><td colspan="5" style="color:var(--muted)">No past sessions yet.</td></tr>
+        <?php if(empty($sessionHistory)): ?><tr><td colspan="5" class="t-muted">No past sessions yet.</td></tr>
         <?php else: foreach($sessionHistory as $sh): ?>
           <tr>
-            <td><strong><?= htmlspecialchars($sh['course_code']) ?></strong><br><small style="color:var(--muted)"><?= htmlspecialchars($sh['course_name']) ?></small><br><small style="color:var(--muted);font-size:.7rem"><?= date('d M Y H:i',strtotime($sh['start_time'])) ?></small></td>
+            <td><strong><?= htmlspecialchars($sh['course_code']) ?></strong><br><small class="t-muted"><?= htmlspecialchars($sh['course_name']) ?></small><br><small class="t-muted-72"><?= date('d M Y H:i',strtotime($sh['start_time'])) ?></small></td>
             <td><span class="pill pill-green"><?= $sh['present_count'] ?></span></td>
             <td class="hide-mobile"><span class="pill pill-gold"><?= $sh['late_count'] ?></span></td>
             <td><span class="pill pill-red"><?= $sh['absent_count'] ?></span></td>
@@ -1070,17 +1071,17 @@ $ttAll = $ttStmt->fetchAll();
     <!--  ANNOUNCEMENTS  -->
     <div class="page-section" id="sec-announce">
       <div class="section-header"><div class="section-title">Class <span>Announcements</span></div></div>
-      <div class="card" style="margin-bottom:1.5rem"><div class="card-head"><div class="card-head-title">Post Announcement</div></div><div class="card-body">
+      <div class="card" class="mb-15"><div class="card-head"><div class="card-head-title">Post Announcement</div></div><div class="card-body">
         <form method="POST"><input type="hidden" name="csrf_token" value="<?= csrfToken() ?>"><input type="hidden" name="action" value="announce">
-          <div class="form-field"><label>Message</label><textarea name="message" required style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:.75rem;border-radius:2px;font-family:'DM Sans',sans-serif;min-height:80px;resize:vertical"></textarea></div>
+          <div class="form-field"><label>Message</label><textarea name="message" required class="textarea-std"></textarea></div>
           <button type="submit" class="btn btn-gold"> Post to Class</button>
         </form>
       </div></div>
-      <div class="card"><div class="card-head"><div class="card-head-title">Recent Announcements</div></div><div class="card-body" style="padding:0;overflow-x:auto">
+      <div class="card"><div class="card-head"><div class="card-head-title">Recent Announcements</div></div><div class="card-body" class="tbl-scroll">
         <table class="data-table"><thead><tr><th>Message</th><th>From</th><th>Date</th></tr></thead><tbody>
-        <?php if(empty($announcements)): ?><tr><td colspan="3" style="color:var(--muted)">No announcements yet.</td></tr>
+        <?php if(empty($announcements)): ?><tr><td colspan="3" class="t-muted">No announcements yet.</td></tr>
         <?php else: foreach($announcements as $ann): ?>
-          <tr><td><?= htmlspecialchars($ann['message']) ?></td><td style="color:var(--gold);font-size:.75rem"><?= htmlspecialchars($ann['full_name']) ?></td><td style="color:var(--muted);font-size:.72rem"><?= date('d M H:i',strtotime($ann['created_at'])) ?></td></tr>
+          <tr><td><?= htmlspecialchars($ann['message']) ?></td><td class="t-gold-75"><?= htmlspecialchars($ann['full_name']) ?></td><td class="t-muted-72"><?= date('d M H:i',strtotime($ann['created_at'])) ?></td></tr>
         <?php endforeach; endif; ?>
         </tbody></table>
       </div></div>
@@ -1115,7 +1116,7 @@ $ttAll = $ttStmt->fetchAll();
           <div class="form-field"><label>Role</label><select name="role"><option value="student">Student</option><option value="rep">Course Rep</option></select></div>
         </div>
         <div class="form-field"><label>Email (optional)</label><input type="email" name="email" placeholder="auto-generated if blank"></div>
-        <button type="submit" class="btn btn-gold" style="width:100%">Add to Citadel</button>
+        <button type="submit" class="btn btn-gold" class="w-full">Add to Citadel</button>
       </form>
     </div>
   </div>
@@ -1134,13 +1135,13 @@ $ttAll = $ttStmt->fetchAll();
         </div>
         <div class="form-field"><label>Email</label><input type="email" name="email" id="edit-email"></div>
         <div class="form-field"><label>Role</label><select name="role" id="edit-role"><option value="student">Student</option><option value="rep">Course Rep</option></select></div>
-        <button type="submit" class="btn btn-gold" style="width:100%">Save Changes</button>
+        <button type="submit" class="btn btn-gold" class="w-full">Save Changes</button>
       </form>
-      <div style="margin-top:1.5rem;padding-top:1.2rem;border-top:1px solid rgba(224,92,92,.2)">
-        <div style="font-size:.7rem;color:var(--danger);letter-spacing:.12em;margin-bottom:.8rem">DANGER ZONE</div>
-        <div style="display:flex;flex-wrap:wrap;gap:.5rem">
-          <form method="POST" style="display:inline"><input type="hidden" name="csrf_token" value="<?= csrfToken() ?>"><input type="hidden" name="action" value="reset_device"><input type="hidden" name="user_id" id="danger-user-id"><button type="submit" class="btn btn-ghost btn-sm" onclick="return confirm('Reset device fingerprint?')"> Reset Device</button></form>
-          <form method="POST" style="display:inline"><input type="hidden" name="csrf_token" value="<?= csrfToken() ?>"><input type="hidden" name="action" value="unlock_account"><input type="hidden" name="user_id" id="danger-user-id2"><button type="submit" class="btn btn-sm" style="background:rgba(76,175,130,.15);color:var(--success);border:1px solid rgba(76,175,130,.3)" onclick="return confirm('Unlock this account?')"> Unlock Account</button></form>
+      <div class="border-danger-top">
+        <div class="label-danger-upper">DANGER ZONE</div>
+        <div class="flex-gap5-wrap">
+          <form method="POST" class="d-inline"><input type="hidden" name="csrf_token" value="<?= csrfToken() ?>"><input type="hidden" name="action" value="reset_device"><input type="hidden" name="user_id" id="danger-user-id"><button type="submit" class="btn btn-ghost btn-sm" onclick="return confirm('Reset device fingerprint?')"> Reset Device</button></form>
+          <form method="POST" class="d-inline"><input type="hidden" name="csrf_token" value="<?= csrfToken() ?>"><input type="hidden" name="action" value="unlock_account"><input type="hidden" name="user_id" id="danger-user-id2"><button type="submit" class="btn btn-sm" class="badge-success-bg" onclick="return confirm('Unlock this account?')"> Unlock Account</button></form>
           <button class="btn btn-danger btn-sm" id="danger-remove-btn"> Remove Student</button>
         </div>
       </div>
@@ -1166,7 +1167,7 @@ $ttAll = $ttStmt->fetchAll();
         <div class="form-field"><label>Start Date</label><input type="date" id="sem-start"></div>
         <div class="form-field"><label>End Date</label><input type="date" id="sem-end"></div>
       </div>
-      <button class="btn btn-gold" style="width:100%" onclick="saveSemester()">Save Semester</button>
+      <button class="btn btn-gold" class="w-full" onclick="saveSemester()">Save Semester</button>
     </div>
   </div>
 </div>
@@ -1191,8 +1192,8 @@ $ttAll = $ttStmt->fetchAll();
       </div>
       <div class="form-field"><label>Course Name</label><input type="text" id="course-name" placeholder="e.g. Systems Analysis and Design"></div>
       <div class="form-field"><label>Assign Lecturer</label><select id="course-lecturer"><option value="">— Select Lecturer —</option><?php foreach($allLecturers as $l): ?><option value="<?= $l['id'] ?>"><?= htmlspecialchars($l['full_name']) ?></option><?php endforeach; ?></select></div>
-      <div class="form-field" style="display:flex;align-items:center;gap:.6rem;margin-top:.4rem"><input type="checkbox" id="course-enroll-all" style="width:auto"><label for="course-enroll-all" style="font-size:.8rem;color:var(--muted)">Auto-enroll all students in selected program</label></div>
-      <button class="btn btn-gold" style="width:100%;margin-top:1rem" onclick="saveCourse()">Save Course</button>
+      <div class="form-field" class="flex-gap6-mt4"><input type="checkbox" id="course-enroll-all" class="w-auto"><label for="course-enroll-all" class="t-muted-78">Auto-enroll all students in selected program</label></div>
+      <button class="btn btn-gold" class="w-full mt-10" onclick="saveCourse()">Save Course</button>
     </div>
   </div>
 </div>
@@ -1211,7 +1212,7 @@ $ttAll = $ttStmt->fetchAll();
         <div class="form-field"><label>Phone (optional)</label><input type="text" id="lecturer-phone" placeholder="+233..."></div>
         <div class="form-field"><label>Temp Password</label><input type="text" id="lecturer-password" placeholder="citadel123"></div>
       </div>
-      <button class="btn btn-gold" style="width:100%;margin-top:.5rem" onclick="saveLecturer()">Save Lecturer</button>
+      <button class="btn btn-gold" class="w-full mt-5" onclick="saveLecturer()">Save Lecturer</button>
     </div>
   </div>
 </div>
@@ -1395,7 +1396,7 @@ function loadApprovalsAdmin() {
     const countBadge = document.getElementById('pending-count-badge');
     if (!tbody) return;
     if (!data.rows || !data.rows.length) {
-      tbody.innerHTML = '<tr><td colspan="5" style="color:var(--muted);text-align:center">No pending approvals.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="5" class="tbl-muted-center">No pending approvals.</td></tr>';
       if (badge) badge.style.display = 'none';
       if (countBadge) countBadge.textContent = '0 PENDING';
       return;
@@ -1405,15 +1406,15 @@ function loadApprovalsAdmin() {
     tbody.innerHTML = data.rows.map(r => `
       <tr>
         <td>${r.full_name}</td>
-        <td style="color:var(--gold);font-size:.78rem">${r.index_no}</td>
-        <td style="display:flex;gap:.4rem">
-          <img src="../../${r.selfie_url}" style="width:44px;height:44px;border-radius:50%;object-fit:cover;cursor:pointer;border:2px solid var(--steel)" onclick="viewImg('../../'+r.selfie_url,r.full_name+' — Face')">
-          ${r.classroom_url ? `<img src="../../${r.classroom_url}" style="width:44px;height:44px;border-radius:2px;object-fit:cover;cursor:pointer;border:2px solid var(--steel-dim)" onclick="viewImg('../../'+r.classroom_url,r.full_name+' — Classroom')">` : "<span style='color:var(--muted);font-size:.7rem'>No classroom</span>"}
+        <td class="t-gold-78">${r.index_no}</td>
+        <td class="flex-gap4">
+          <img src="../../${r.selfie_url}" class="avatar-steel" onclick="viewImg('../../'+r.selfie_url,r.full_name+' — Face')">
+          ${r.classroom_url ? `<img src="../../${r.classroom_url}" class="avatar-square" onclick="viewImg('../../'+r.classroom_url,r.full_name+' — Classroom')">` : "<span style='color:var(--muted);font-size:.7rem'>No classroom</span>"}
         </td>
-        <td style="color:var(--muted);font-size:.72rem">${r.submitted_at}</td>
-        <td style="display:flex;gap:.4rem">
-          <button class="btn btn-sm" style="background:rgba(76,175,130,.15);color:var(--success);border:1px solid rgba(76,175,130,.3)" onclick="approveAdmin(${r.id},'approve')"> Approve</button>
-          <button class="btn btn-sm" style="background:rgba(224,92,92,.15);color:var(--danger);border:1px solid rgba(224,92,92,.3)" onclick="approveAdmin(${r.id},'reject')"> Reject</button>
+        <td class="t-muted-72">${r.submitted_at}</td>
+        <td class="flex-gap4">
+          <button class="btn btn-sm" class="badge-success-bg" onclick="approveAdmin(${r.id},'approve')"> Approve</button>
+          <button class="btn btn-sm" class="info-danger" onclick="approveAdmin(${r.id},'reject')"> Reject</button>
         </td>
       </tr>`).join('');
   }).catch(() => {});
@@ -1427,7 +1428,7 @@ function approveAdmin(id, action) {
 function viewImg(src, title) {
   const ov = document.createElement('div');
   ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:1rem';
-  ov.innerHTML = `<div style="color:var(--gold);font-family:Cinzel,serif;font-size:.85rem">${title}</div><img src="${src}" style="max-width:90vw;max-height:80vh;border-radius:2px"><button onclick="this.parentElement.remove()" style="background:var(--surface);border:1px solid var(--border);color:var(--text);padding:.5rem 1.5rem;cursor:pointer;border-radius:2px">Close</button>`;
+  ov.innerHTML = `<div class="t-gold-cinzel">${title}</div><img src="${src}" class="img-modal"><button onclick="this.parentElement.remove()" class="btn-surface">Close</button>`;
   document.body.appendChild(ov);
 }
 
@@ -1522,7 +1523,7 @@ window.fetch = function(url, options = {}) {
           <?php endforeach; ?>
         </select>
       </div>
-      <button class="btn btn-gold" style="width:100%;margin-top:.5rem" onclick="saveTimetableSlot()">Save Slot</button>
+      <button class="btn btn-gold" class="w-full mt-5" onclick="saveTimetableSlot()">Save Slot</button>
     </div>
   </div>
 </div>
@@ -1611,17 +1612,17 @@ function deleteSlot(id, code) {
       <button class="modal-close" onclick="closeModal('modal-import-csv')"></button>
     </div>
     <div class="modal-body">
-      <div style="background:rgba(74,111,165,.06);border:1px solid rgba(74,111,165,.2);border-radius:2px;padding:.8rem 1rem;font-size:.78rem;color:var(--muted);margin-bottom:1.2rem;line-height:1.6">
-        <strong style="color:var(--steel)">CSV Format:</strong> full_name, index_no, email (optional), role (optional)<br>
+      <div class="info-steel">
+        <strong class="t-steel">CSV Format:</strong> full_name, index_no, email (optional), role (optional)<br>
         First row can be a header — skipped automatically.<br>
         Default password = index number. Auto-enrolled in active semester courses.
       </div>
       <div class="form-field">
         <label>Select CSV File</label>
-        <input type="file" id="csv-file" accept=".csv" style="background:var(--bg);border:1px solid var(--border);color:var(--text);padding:.65rem .9rem;border-radius:2px;width:100%;font-family:'DM Sans',sans-serif">
+        <input type="file" id="csv-file" accept=".csv" class="input-dmsans">
       </div>
-      <button class="btn btn-gold" style="width:100%" onclick="importCSV()">Import Students</button>
-      <div id="import-result" style="margin-top:1rem;font-size:.82rem;display:none"></div>
+      <button class="btn btn-gold" class="w-full" onclick="importCSV()">Import Students</button>
+      <div id="import-result" class="status-hidden"></div>
     </div>
   </div>
 </div>
@@ -1658,7 +1659,7 @@ function importCSV() {
     <div class="modal-body">
       <div class="form-field"><label>Department Name</label><input type="text" id="dept-name" placeholder="e.g. Computer Science"></div>
       <div class="form-field"><label>Code (optional)</label><input type="text" id="dept-code" placeholder="e.g. CS"></div>
-      <button class="btn btn-gold" style="width:100%" onclick="saveDept()">Save Department</button>
+      <button class="btn btn-gold" class="w-full" onclick="saveDept()">Save Department</button>
     </div>
   </div>
 </div>
@@ -1671,7 +1672,7 @@ function importCSV() {
       <input type="hidden" id="prog-edit-id">
       <div class="form-field">
         <label>Department</label>
-        <select id="prog-dept" style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:.7rem 1rem;border-radius:2px">
+        <select id="prog-dept" class="input-std">
           <?php foreach($allDepartments as $d): ?>
           <option value="<?= $d['id'] ?>"><?= htmlspecialchars($d['name']) ?></option>
           <?php endforeach; ?>
@@ -1682,12 +1683,12 @@ function importCSV() {
         <div class="form-field"><label>Code</label><input type="text" id="prog-code" placeholder="e.g. HND-CS"></div>
         <div class="form-field"><label>Duration (years)</label><input type="number" id="prog-duration" value="3" min="1" max="6"></div>
       </div>
-      <button class="btn btn-gold" style="width:100%;margin-top:.5rem" onclick="saveProgram()">Save Program</button>
-      <div style="margin-top:1.2rem;padding-top:1rem;border-top:1px solid var(--border)">
-        <div style="font-size:.68rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-bottom:.5rem">Or Upload CSV</div>
-        <div style="font-size:.72rem;color:var(--muted);margin-bottom:.5rem">Format: name,code,duration_yrs (one per line)</div>
-        <input type="file" id="prog-csv" accept=".csv" style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:.5rem;border-radius:2px;font-size:.8rem">
-        <button class="btn btn-steel" style="width:100%;margin-top:.5rem" onclick="uploadProgramCSV()">Upload CSV</button>
+      <button class="btn btn-gold" class="w-full mt-5" onclick="saveProgram()">Save Program</button>
+      <div class="border-top-muted">
+        <div class="label-muted-upper">Or Upload CSV</div>
+        <div class="t-muted-72 mb-5">Format: name,code,duration_yrs (one per line)</div>
+        <input type="file" id="prog-csv" accept=".csv" class="input-sm">
+        <button class="btn btn-steel" class="w-full mt-5" onclick="uploadProgramCSV()">Upload CSV</button>
       </div>
     </div>
   </div>
@@ -1740,14 +1741,14 @@ async function deleteProgram(id,name){
     <div class="page-section" id="sec-ca">
       <div class="section-header">
         <div class="section-title">Continuous <span>Assessment</span></div>
-        <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+        <div class="flex-gap5-wrap">
           <button class="btn btn-ghost btn-sm" onclick="adminCALoad()">Refresh</button>
           <button class="btn btn-gold btn-sm" onclick="adminCAExport()"> Export CSV</button>
         </div>
       </div>
 
       <!-- Filters -->
-      <div class="card" style="margin-bottom:1.5rem">
+      <div class="card" class="mb-15">
         <div class="card-body">
           <div class="form-row">
             <div class="form-field">
@@ -1782,7 +1783,7 @@ async function deleteProgram(id,name){
       </div>
 
       <!-- Summary cards -->
-      <div id="admin-ca-cards" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1rem;margin-bottom:1.5rem"></div>
+      <div id="admin-ca-cards" class="grid-auto-140"></div>
 
       <!-- Scores table -->
       <div class="card">
@@ -1790,11 +1791,11 @@ async function deleteProgram(id,name){
           <div class="card-head-title">All CA Scores</div>
           <span id="admin-ca-count" class="pill pill-steel">0 records</span>
         </div>
-        <div class="card-body" style="padding:0;overflow-x:auto">
+        <div class="card-body" class="tbl-scroll">
           <table class="data-table">
             <thead><tr><th>Student</th><th>ID</th><th>Course</th><th>CA Type</th><th>Score</th><th>Max</th><th>%</th><th>Lecturer</th><th>Date</th></tr></thead>
             <tbody id="admin-ca-body">
-              <tr><td colspan="9" style="color:var(--muted);text-align:center;padding:2rem">Click Refresh to load scores</td></tr>
+              <tr><td colspan="9" class="tbl-empty">Click Refresh to load scores</td></tr>
             </tbody>
           </table>
         </div>
@@ -1821,7 +1822,7 @@ async function adminCALoad() {
   const count = document.getElementById('admin-ca-count');
 
   if (!d.success || !d.scores?.length) {
-    tbody.innerHTML = '<tr><td colspan="9" style="color:var(--muted);text-align:center;padding:2rem">No scores found.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="9" class="tbl-empty">No scores found.</td></tr>';
     if (count) count.textContent = '0 records';
     if (cards) cards.innerHTML = '';
     return;
@@ -1842,9 +1843,9 @@ async function adminCALoad() {
       const avg = Math.round(v.total / v.max * 100);
       const col = avg >= 75 ? 'var(--success)' : avg >= 50 ? 'var(--gold)' : 'var(--danger)';
       return `<div style="background:var(--surface);border:1px solid var(--border);border-top:2px solid ${col};border-radius:2px;padding:1rem">
-        <div style="font-size:.65rem;color:var(--muted);letter-spacing:.15em;text-transform:uppercase;margin-bottom:.3rem">${type}</div>
-        <div style="font-size:1.5rem;font-weight:700;color:${col}">${avg}%</div>
-        <div style="font-size:.72rem;color:var(--muted)">${v.count} entries</div>
+        <div class="label-muted-upper">${type}</div>
+        <div class="fw-700 t-gold">${avg}%</div>
+        <div class="t-muted-72">${v.count} entries</div>
       </div>`;
     }).join('');
   }
@@ -1854,14 +1855,14 @@ async function adminCALoad() {
     const pill = pct >= 50 ? 'pill-green' : 'pill-red';
     return `<tr>
       <td>${s.full_name || '—'}</td>
-      <td style="color:var(--gold);font-size:.78rem">${s.index_no || '—'}</td>
-      <td style="font-size:.78rem">${s.course_code || '—'}</td>
+      <td class="t-gold-78">${s.index_no || '—'}</td>
+      <td class="fs-78">${s.course_code || '—'}</td>
       <td><span class="pill pill-steel">${s.ca_type}</span></td>
-      <td style="font-weight:600">${s.score}</td>
-      <td style="color:var(--muted)">${s.max_score}</td>
+      <td class="fw-600">${s.score}</td>
+      <td class="t-muted">${s.max_score}</td>
       <td><span class="pill ${pill}">${pct}%</span></td>
-      <td style="color:var(--muted);font-size:.78rem">${s.lecturer_name || '—'}</td>
-      <td style="color:var(--muted);font-size:.75rem">${(s.uploaded_at||'').substring(0,10)}</td>
+      <td class="t-muted-78">${s.lecturer_name || '—'}</td>
+      <td class="t-muted-75">${(s.uploaded_at||'').substring(0,10)}</td>
     </tr>`;
   }).join('');
 

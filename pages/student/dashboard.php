@@ -337,6 +337,23 @@ input,select,textarea{font-size:16px!important}
 const BASE_URL = window.location.origin;
 const API = BASE_URL + '/api';
 
+
+function openModal(id) {
+  var el = document.getElementById(id);
+  if (el) el.classList.add('open');
+}
+function closeModal(id) {
+  var el = document.getElementById(id);
+  if (el) el.classList.remove('open');
+}
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('.modal-overlay').forEach(function(o) {
+    o.addEventListener('click', function(e) {
+      if (e.target === o) o.classList.remove('open');
+    });
+  });
+});
+
 function toggleSidebar(){
   var sb=document.getElementById('sidebar');
   var ov=document.getElementById('sidebar-overlay');

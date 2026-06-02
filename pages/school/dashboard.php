@@ -284,9 +284,6 @@ body::before{content:'';position:fixed;inset:0;z-index:0;background:radial-gradi
 .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:199;backdrop-filter:blur(2px)}
 
 input,select,textarea{font-size:16px!important}
-
-input,select,textarea{font-size:16px!important}
-
 /*  MOBILE - CLEAN  */
 @media(max-width:768px){
   .sidebar{

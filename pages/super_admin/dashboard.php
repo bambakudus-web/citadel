@@ -368,8 +368,6 @@ async function delSchool(id,name){
   });
 })();
 </script>
-<script>
-</script>
 <style>@media(max-width:768px){.charts-wrap{grid-template-columns:1fr!important}}</style>
 <script src="/assets/chart.min.js"></script>
 <script>

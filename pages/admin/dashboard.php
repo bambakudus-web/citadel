@@ -654,7 +654,7 @@ document.addEventListener('DOMContentLoaded',function(){
           AND (t.semester_id=? OR t.semester_id IS NULL OR ?=0)
           ORDER BY FIELD(t.day_of_week,'Monday','Tuesday','Wednesday','Thursday','Friday'), t.start_time
       ");
-$ttStmt->execute([$activeSemId, $activeSemId]);
+$ttStmt->execute([$inst_id, $activeSemId, $activeSemId]);
 $ttAll = $ttStmt->fetchAll();
       $days = ['Monday','Tuesday','Wednesday','Thursday','Friday'];
       foreach ($days as $day):

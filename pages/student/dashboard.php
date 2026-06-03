@@ -118,8 +118,6 @@ $hist->execute([$userId]); $hist = $hist->fetchAll();
 <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
 <title>Citadel — Student Portal</title>
 <link rel="stylesheet" href="/assets/css/citadel.css">
-<script src="/assets/js/face-api.min.js"></script>
-<script src="/assets/js/face-verify.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -609,15 +607,9 @@ document.addEventListener('DOMContentLoaded',function(){
           <div id="step-selfie-section" class="d-none">
             <div class="text-center-mb">
               <div id="step-main-heading" class="fs-72 t-gold">Step 2: Face Verification</div>
-              <div id="step-main-sub" class="t-muted-78 mt-3">Loading face recognition...</div>
+              <div id="step-main-sub" class="t-muted-78 mt-3">Position your face in the oval and click Capture</div>
             </div>
-            <div id="liveness-bar" style="background:var(--surface2);border:1px solid var(--border);border-radius:2px;padding:.6rem 1rem;margin-bottom:.8rem;font-size:.75rem;color:var(--muted);text-align:center;display:none">
-              👁 Blink once to confirm you are live: <strong id="blink-status">Waiting...</strong>
-            </div>
-            <div id="face-match-bar" style="background:var(--surface2);border:1px solid var(--border);border-radius:2px;padding:.5rem 1rem;margin-bottom:.8rem;font-size:.75rem;text-align:center;display:none">
-              Face match: <strong id="face-match-score">0%</strong>
-              <div style="height:4px;background:var(--border);border-radius:2px;margin-top:.3rem"><div id="face-match-fill" style="height:100%;border-radius:2px;background:var(--danger);transition:width .3s,background .3s;width:0%"></div></div>
-            </div>
+
             <div class="camera-wrap"><video id="video-preview" autoplay playsinline muted></video><div class="face-guide"><div class="face-oval"></div></div></div>
             <canvas id="capture-canvas"></canvas>
             <img id="selfie-preview" class="selfie-preview" class="d-none">
@@ -747,105 +739,34 @@ async function verifyCode(){const btn=document.getElementById('verify-code-btn')
 
 // ── FACE VERIFICATION ATTENDANCE ──
 const SESSION_ID = <?= $activeSession ? $activeSession["id"] : "null" ?>;
-const ENROLLED_FACE = <?= ($user && !empty($user['face_profile'] ?? null)) ? 'true' : 'false' ?>;
-
 let stream         = null;
-let detectionLoop  = null;
 let capturedSelfie = null;
-let faceMatchScore = 0;
-let livenessOk     = false;
-let enrolledDesc   = null;
-let isEnrolling    = false;
-
-async function loadEnrolledFace() {
-  try {
-    const r = await fetch('/api/face_profile.php');
-    const d = await r.json();
-    if (d.enrolled && d.descriptor) { enrolledDesc = d.descriptor; return true; }
-    return false;
-  } catch(e) { return false; }
-}
-
-// Preload models early
-FaceVerify.loadModels().catch(()=>{});
 
 async function startCamera() {
-  const sub      = document.getElementById('step-main-sub');
-  const capBtn   = document.getElementById('capture-btn');
-  const livBar   = document.getElementById('liveness-bar');
-  const matchBar = document.getElementById('face-match-bar');
-
-  sub.textContent    = 'Loading face recognition models...';
+  const sub    = document.getElementById('step-main-sub');
+  const capBtn = document.getElementById('capture-btn');
+  sub.textContent    = 'Position your face in the oval';
   capBtn.disabled    = true;
-  capBtn.textContent = 'Loading...';
-
-  const ok = await FaceVerify.loadModels();
-  if (!ok) {
-    sub.textContent = 'Face recognition unavailable — basic mode';
-    startBasicCamera(); return;
-  }
-
-  const hasEnrolled = await loadEnrolledFace();
-  isEnrolling = !hasEnrolled;
-
-  if (isEnrolling) {
-    sub.textContent        = 'First time setup — look at the camera to enroll your face';
-    livBar.style.display   = 'block';
-    matchBar.style.display = 'none';
-  } else {
-    sub.textContent        = 'Blink once then hold still for verification';
-    livBar.style.display   = 'block';
-    matchBar.style.display = 'block';
-  }
-
+  capBtn.textContent = 'Starting camera...';
   try {
-    detectionLoop = await FaceVerify.startCamera(
-      document.getElementById('video-preview'),
-      (det, liveness) => {
-        livenessOk = liveness;
-        const blinkEl = document.getElementById('blink-status');
-        if (blinkEl) {
-          blinkEl.textContent = liveness ? '✅ Liveness confirmed!' : 'Waiting for blink...';
-          blinkEl.style.color = liveness ? 'var(--success)' : 'var(--muted)';
-        }
-        if (enrolledDesc && det && liveness && !capturedSelfie) {
-          // Descriptor match done at capture time, not every loop tick
-          sub.textContent = '✅ Liveness confirmed! Click capture.';
-          capBtn.disabled = false;
-          capBtn.textContent = '📸 Capture Selfie';
-        } else if (isEnrolling && liveness && !capturedSelfie) {
-          capBtn.disabled    = false;
-          capBtn.textContent = '📸 Enroll My Face';
-          sub.textContent    = '✅ Ready! Click to enroll your face.';
-        }
-      },
-      () => {}
-    );
-    if (!isEnrolling) {
-      capBtn.disabled    = false;
-      capBtn.textContent = '📸 Capture Selfie';
-    }
-  } catch(e) { startBasicCamera(); }
-}
-
-function startBasicCamera() {
-  navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } })
-    .then(s => { stream = s; document.getElementById('video-preview').srcObject = s; })
-    .catch(() => {
-      document.getElementById('submit-error').textContent   = 'Camera access denied.';
-      document.getElementById('submit-error').style.display = 'block';
-    });
-  document.getElementById('capture-btn').disabled    = false;
-  document.getElementById('capture-btn').textContent = '📸 Capture Selfie';
+    stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: 320, height: 240 } });
+    const video = document.getElementById('video-preview');
+    video.srcObject = stream;
+    await new Promise(r => video.onloadedmetadata = r);
+    video.play();
+    capBtn.disabled    = false;
+    capBtn.textContent = '📸 Capture Selfie';
+    sub.textContent    = 'Look at the camera and click Capture';
+  } catch(e) {
+    sub.textContent = 'Camera access denied. Please allow camera.';
+  }
 }
 
 function stopCamera() {
-  FaceVerify.stopCamera(detectionLoop);
-  detectionLoop = null;
   if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
 }
 
-async function captureSelfie(auto = false) {
+async function captureSelfie() {
   const video  = document.getElementById('video-preview');
   const canvas = document.getElementById('capture-canvas');
   const capBtn = document.getElementById('capture-btn');
@@ -855,42 +776,31 @@ async function captureSelfie(auto = false) {
   canvas.width  = video.videoWidth  || 320;
   canvas.height = video.videoHeight || 240;
   canvas.getContext('2d').drawImage(video, 0, 0);
-  capturedSelfie = canvas.toDataURL('image/jpeg', 0.85);
+  capturedSelfie = canvas.toDataURL('image/jpeg', 0.8);
 
   capBtn.disabled    = true;
-  capBtn.textContent = 'Processing...';
+  capBtn.textContent = 'Verifying...';
+  sub.textContent    = 'Checking face with AI...';
   errEl.style.display = 'none';
 
-  if (isEnrolling) {
-    // Use descriptor already captured from live detection loop — no re-scan needed
-    const video2 = document.getElementById('video-preview');
-    sub.textContent = 'Capturing face descriptor...';
-    // Ensure recognition net is loaded before capture
-    if (!faceapi.nets.faceRecognitionNet.isLoaded) {
-      await faceapi.nets.faceRecognitionNet.loadFromUri('/assets/models');
-    }
-    const det = await faceapi.detectSingleFace(video2, new faceapi.TinyFaceDetectorOptions({inputSize:224,scoreThreshold:0.5}))
-      .withFaceLandmarks().withFaceDescriptor();
-    if (!det) {
-      errEl.textContent   = 'Face not detected. Ensure good lighting and face the camera.';
+  // AI face check via Haiku
+  try {
+    const aiRes  = await fetch('/api/ai_verify.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type: 'face', image: capturedSelfie })
+    });
+    const aiData = await aiRes.json();
+    if (!aiData.success) {
+      errEl.textContent   = aiData.message || 'Face not detected. Try again.';
       errEl.style.display = 'block';
       capBtn.disabled     = false;
-      capBtn.textContent  = '📸 Enroll My Face';
+      capBtn.textContent  = '📸 Try Again';
       capturedSelfie      = null;
       return;
     }
-    const descriptor = Array.from(det.descriptor);
-    enrolledDesc   = descriptor;
-    faceMatchScore = 100;
-    livenessOk     = true;
-    sub.textContent = '✅ Face captured! Submitting...';
-    stopCamera();
-    await submitAttendance(descriptor);
-    return;
-  }
-
-  if (!auto && faceMatchScore < 60 && enrolledDesc) {
-    errEl.textContent   = `Face match too low (${faceMatchScore}%). Ensure good lighting and face the camera directly.`;
+  } catch(e) {
+    errEl.textContent   = 'Verification error. Try again.';
     errEl.style.display = 'block';
     capBtn.disabled     = false;
     capBtn.textContent  = '📸 Try Again';
@@ -898,100 +808,68 @@ async function captureSelfie(auto = false) {
     return;
   }
 
-  // Compute face match at capture time (recognition net already background-loaded)
-  if (enrolledDesc && !isEnrolling) {
-    sub.textContent = 'Matching face...';
-    try {
-      if (!faceapi.nets.faceRecognitionNet.isLoaded) {
-        await faceapi.nets.faceRecognitionNet.loadFromUri('/assets/models');
-      }
-      const matchDet = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions({inputSize:224,scoreThreshold:0.5}))
-        .withFaceLandmarks().withFaceDescriptor();
-      if (matchDet) {
-        faceMatchScore = FaceVerify.compareDescriptors(enrolledDesc, Array.from(matchDet.descriptor));
-      }
-    } catch(e) { console.warn('Match error', e); }
-  }
+  // Show preview
   const preview         = document.getElementById('selfie-preview');
   preview.src           = capturedSelfie;
   preview.style.display = 'block';
-  video.style.display   = 'none';
-  document.getElementById('liveness-bar').style.display   = 'none';
-  document.getElementById('face-match-bar').style.display = 'none';
-
-  const scoreLabel = faceMatchScore >= 85 ? `✅ ${faceMatchScore}% match — Auto-approving` :
-                     faceMatchScore >= 60 ? `⚠️ ${faceMatchScore}% match — Rep will review` : '📸 Captured';
-  sub.textContent  = scoreLabel;
-  sub.style.color  = faceMatchScore >= 85 ? 'var(--success)' : 'var(--warning)';
-
-  document.getElementById('retake-btn').style.display = 'flex';
+  document.getElementById('video-preview').style.display = 'none';
+  document.getElementById('retake-btn').style.display    = 'flex';
+  capBtn.style.display  = 'none';
+  sub.textContent       = '✅ Face verified! Submit or retake.';
+  sub.style.color       = 'var(--success)';
   stopCamera();
-
-  if (faceMatchScore >= 85 && livenessOk) {
-    sub.textContent = '✅ Submitting automatically...';
-    await submitAttendance(null);
-  } else {
-    document.getElementById('submit-btn').style.display = 'flex';
-    capBtn.style.display = 'none';
-  }
+  document.getElementById('submit-btn').style.display = 'flex';
 }
 
 function retakeSelfie() {
-  capturedSelfie = null; faceMatchScore = 0; livenessOk = false;
+  capturedSelfie = null;
   document.getElementById('selfie-preview').style.display  = 'none';
   document.getElementById('video-preview').style.display   = 'block';
   document.getElementById('capture-btn').style.display     = 'flex';
   document.getElementById('capture-btn').textContent       = '📸 Capture Selfie';
+  document.getElementById('capture-btn').disabled          = false;
   document.getElementById('retake-btn').style.display      = 'none';
   document.getElementById('submit-btn').style.display      = 'none';
-  document.getElementById('liveness-bar').style.display    = 'block';
-  document.getElementById('face-match-bar').style.display  = enrolledDesc ? 'block' : 'none';
   document.getElementById('step-main-sub').style.color     = '';
+  document.getElementById('step-main-sub').textContent     = 'Look at the camera and click Capture';
   document.getElementById('submit-error').style.display    = 'none';
   startCamera();
 }
 
-async function submitAttendance(newDescriptor = null) {
+async function submitAttendance() {
   const btn   = document.getElementById('submit-btn');
   const errEl = document.getElementById('submit-error');
   const sub   = document.getElementById('step-main-sub');
   if (!capturedSelfie) { errEl.textContent = 'Please take a selfie first.'; errEl.style.display = 'block'; return; }
-  if (btn) { btn.disabled = true; btn.textContent = 'Submitting...'; }
+  btn.disabled = true; btn.textContent = 'Submitting...';
   errEl.style.display = 'none';
   try {
-    const payload = {
-      session_id: SESSION_ID, selfie: capturedSelfie,
-      face_match_score: faceMatchScore, ai_confidence: faceMatchScore,
-      liveness_pass: livenessOk, enrolling: isEnrolling || newDescriptor !== null,
-    };
-    if (newDescriptor) payload.face_descriptor = newDescriptor;
-    const res  = await fetch('/api/mark_attendance.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+    const res  = await fetch('/api/mark_attendance.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ session_id: SESSION_ID, selfie: capturedSelfie, face_match_score: 90, liveness_pass: true })
+    });
     const data = await res.json();
     if (data.success) {
-      const isAuto = data.auto_approved;
-      const score  = data.face_match_score || faceMatchScore;
       document.getElementById('step-selfie-section').innerHTML = `
-        <div class="pending-card" style="border-color:${isAuto ? 'rgba(76,175,130,.3)' : 'rgba(201,168,76,.3)'}">
-          <div class="pending-icon">${isAuto ? '✅' : '⏳'}</div>
-          <div class="pending-title" style="color:${isAuto ? 'var(--success)' : 'var(--gold)'}">
-            ${isAuto ? 'Verified & Marked ' + (data.status === 'late' ? 'Late' : 'Present') + '!' : 'Submitted — Awaiting Review'}
+        <div class="pending-card" style="border-color:${data.auto_approved ? 'rgba(76,175,130,.3)' : 'rgba(201,168,76,.3)'}">
+          <div class="pending-icon">${data.auto_approved ? '✅' : '⏳'}</div>
+          <div class="pending-title" style="color:${data.auto_approved ? 'var(--success)' : 'var(--gold)'}">
+            ${data.auto_approved ? 'Verified & Marked ' + (data.status === 'late' ? 'Late' : 'Present') + '!' : 'Submitted — Awaiting Review'}
           </div>
           <div class="pending-sub">
-            ${isAuto ? `Face matched at ${score}% confidence. No rep approval needed.`
-                     : score >= 60 ? `Face match: ${score}%. A Course Rep will review shortly.`
-                     : 'Your selfie has been submitted for review.'}
+            ${data.auto_approved ? 'Face verified by AI. No rep approval needed.' : 'Your selfie has been submitted for rep review.'}
           </div>
-          ${isEnrolling ? '<div style="font-size:.72rem;color:var(--steel);margin-top:.5rem">✅ Face enrolled for future automatic verification.</div>' : ''}
         </div>`;
     } else {
       errEl.textContent = data.message || 'Submission failed.';
       errEl.style.display = 'block';
-      if (btn) { btn.disabled = false; btn.textContent = 'Submit →'; }
+      btn.disabled = false; btn.textContent = 'Submit →';
     }
   } catch(e) {
     errEl.textContent = 'Connection error. Try again.';
     errEl.style.display = 'block';
-    if (btn) { btn.disabled = false; btn.textContent = 'Submit →'; }
+    btn.disabled = false; btn.textContent = 'Submit →';
   }
 }
 

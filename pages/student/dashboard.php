@@ -766,6 +766,9 @@ async function loadEnrolledFace() {
   } catch(e) { return false; }
 }
 
+// Preload models early
+FaceVerify.loadModels().catch(()=>{});
+
 async function startCamera() {
   const sub      = document.getElementById('step-main-sub');
   const capBtn   = document.getElementById('capture-btn');

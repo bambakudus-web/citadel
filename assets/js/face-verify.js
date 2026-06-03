@@ -136,15 +136,15 @@ const FaceVerify = (() => {
   async function enrollFace(videoEl, statusCb) {
     statusCb('Looking for your face...');
     const samples = [];
-    for (let i = 0; i < 5; i++) {
-      await new Promise(r => setTimeout(r, 600));
+    for (let i = 0; i < 3; i++) {
+      await new Promise(r => setTimeout(r, 300));
       const det = await detectFace(videoEl);
       if (det) {
         samples.push(Array.from(det.descriptor));
-        statusCb(`Capturing sample ${samples.length}/5...`);
+        statusCb(`Capturing sample ${samples.length}/3...`);
       }
     }
-    if (samples.length < 3) {
+    if (samples.length < 2) {
       return { success: false, error: 'Could not capture enough face samples. Ensure good lighting and face is visible.' };
     }
     // Average the descriptors

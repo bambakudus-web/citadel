@@ -74,7 +74,7 @@ $__sq = $pdo->prepare("SELECT u.*, COUNT(DISTINCT s.id) as total_sessions, SUM(C
 //  Sessions 
 $__sq = $pdo->prepare("SELECT s.*, u.full_name as lecturer_name, COUNT(a.id) as attendance_count FROM sessions s JOIN users u ON s.lecturer_id=u.id LEFT JOIN attendance a ON s.id=a.session_id WHERE u.institution_id=? GROUP BY s.id ORDER BY s.created_at DESC LIMIT 20"); $__sq->execute([$inst_id]); $sessions = $__sq->fetchAll();
 
-$activeSession = $__q=$pdo->prepare("SELECT s.* FROM sessions s JOIN users u ON u.id=s.lecturer_id WHERE s.active_status=1 AND u.institution_id=? ORDER BY s.start_time DESC LIMIT 1");$__q->execute([$inst_id]);$__q->fetch();
+$__q=$pdo->prepare("SELECT s.* FROM sessions s JOIN users u ON u.id=s.lecturer_id WHERE s.active_status=1 AND u.institution_id=? ORDER BY s.start_time DESC LIMIT 1");$__q->execute([$inst_id]);$activeSession=$__q->fetch();
 $pendingCount = 0;
 if ($activeSession) {
     $pc = $pdo->prepare("SELECT COUNT(*) FROM attendance WHERE session_id=? AND status='pending'");

@@ -37,7 +37,7 @@ $__q = $pdo->prepare("SELECT DISTINCT t.course_code, t.course_name FROM timetabl
 // Today's timetable
 $today = date('l');
 $todayStmt = $pdo->prepare("SELECT t.*, u.full_name as lecturer_name FROM timetable t JOIN users u ON t.lecturer_id=u.id WHERE t.day_of_week=? AND u.institution_id=? AND (t.semester_id=? OR t.semester_id IS NULL) ORDER BY t.start_time");
-$todayStmt->execute([$today, $activeSemId]); $todayClasses = $todayStmt->fetchAll();
+$todayStmt->execute([$today, $inst_id, $activeSemId]); $todayClasses = $todayStmt->fetchAll();
 
 // Active session
 $__q = $pdo->prepare("SELECT s.* FROM sessions s JOIN users u ON u.id=s.lecturer_id WHERE s.active_status=1 AND u.institution_id=? ORDER BY s.start_time DESC LIMIT 1"); $__q->execute([$inst_id]); $activeSession = $__q->fetch();

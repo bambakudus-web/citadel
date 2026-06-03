@@ -1704,6 +1704,8 @@ async function deleteProgram(id,name){
   else toast('error',d.error||'Error');
 }
 
+</script>
+
     <!-- CA SCORES ADMIN -->
     <div class="page-section" id="sec-ca">
       <div class="section-header">
@@ -1854,7 +1856,6 @@ function adminCAExport() {
   a.click();
 }
 
-</script>
 </script>
 </body>
 </html>

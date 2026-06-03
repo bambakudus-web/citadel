@@ -34,7 +34,7 @@ $_i->execute([$inst_id]);
 $institution = $_i->fetch();
 
 function guardRole(array $allowed): void {
-    global $me;
+    global $me, $institution;
     if ($me['role'] === 'super_admin') return;
     if (!in_array($me['role'], $allowed, true)) {
         $map = ['admin'=>'admin','lecturer'=>'lecturer','rep'=>'rep','student'=>'student'];
@@ -46,7 +46,7 @@ function guardRole(array $allowed): void {
 }
 
 function guardSuperAdmin(): void {
-    global $me;
+    global $me, $institution;
     if ($me['role'] !== 'super_admin') {
         header('Location: ' . _rootPath() . 'index.php');
         exit;

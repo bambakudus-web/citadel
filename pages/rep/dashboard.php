@@ -629,7 +629,7 @@ document.addEventListener('DOMContentLoaded',function(){
       <div class="section-header"><div class="section-title">Class <span>Timetable</span></div></div>
       <?php foreach(['Monday','Tuesday','Wednesday','Thursday','Friday'] as $day):
         $cls=$pdo->prepare("SELECT t.*,u.full_name as lecturer_name FROM timetable t JOIN users u ON t.lecturer_id=u.id WHERE t.day_of_week=? AND u.institution_id=? AND (t.semester_id=? OR t.semester_id IS NULL) ORDER BY t.start_time");
-        $cls->execute([$day, $activeSemId]); $cls=$cls->fetchAll(); if(empty($cls)) continue; ?>
+        $cls->execute([$day, $inst_id, $activeSemId]); $cls=$cls->fetchAll(); if(empty($cls)) continue; ?>
         <div class="mb-15">
           <div class="tt-day-label-rep"><?= $day ?></div>
           <div class="flex-col-gap5"><?php foreach($cls as $c): ?>

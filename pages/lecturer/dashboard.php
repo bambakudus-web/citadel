@@ -183,7 +183,7 @@ if ($activeSession && $activeSession['course_id']) {
     $ec = $pdo->prepare("SELECT COUNT(*) FROM course_enrollments WHERE course_id=? AND status='active'");
     $ec->execute([$activeSession['course_id']]); $enrolledCount = $ec->fetchColumn();
 } else {
-    $enrolledCount = $__q=$pdo->prepare("SELECT COUNT(*) FROM users WHERE role IN ('student','rep') AND is_active=1 AND institution_id=?");$__q->execute([$inst_id]);$__q->fetchColumn();
+    $__q=$pdo->prepare("SELECT COUNT(*) FROM users WHERE role IN ('student','rep') AND is_active=1 AND institution_id=?");$__q->execute([$inst_id]);$enrolledCount=$__q->fetchColumn();
 }
 ?>
 <!DOCTYPE html>

@@ -55,10 +55,10 @@ $user = currentUser();
 //  Stats 
 $inst_id = (int)($_SESSION['institution_id'] ?? 1);
 
-$totalStudents   = $__q=$pdo->prepare("SELECT COUNT(*) FROM users WHERE role='student' AND institution_id=?");$__q->execute([$inst_id]);$__q->fetchColumn();
-$totalLecturers  = $__q=$pdo->prepare("SELECT COUNT(*) FROM users WHERE role='lecturer' AND institution_id=?");$__q->execute([$inst_id]);$__q->fetchColumn();
-$totalSessions   = $__q=$pdo->prepare("SELECT COUNT(*) FROM sessions s JOIN users u ON u.id=s.lecturer_id WHERE u.institution_id=?");$__q->execute([$inst_id]);$__q->fetchColumn();
-$todayAttendance = $__q=$pdo->prepare("SELECT COUNT(*) FROM attendance a JOIN sessions s ON s.id=a.session_id JOIN users u ON u.id=s.lecturer_id WHERE DATE(a.timestamp)=CURDATE() AND u.institution_id=?");$__q->execute([$inst_id]);$__q->fetchColumn();
+$__q=$pdo->prepare("SELECT COUNT(*) FROM users WHERE role='student' AND institution_id=?");$__q->execute([$inst_id]);$totalStudents=$__q->fetchColumn();
+$__q=$pdo->prepare("SELECT COUNT(*) FROM users WHERE role='lecturer' AND institution_id=?");$__q->execute([$inst_id]);$totalLecturers=$__q->fetchColumn();
+$__q=$pdo->prepare("SELECT COUNT(*) FROM sessions s JOIN users u ON u.id=s.lecturer_id WHERE u.institution_id=?");$__q->execute([$inst_id]);$totalSessions=$__q->fetchColumn();
+$__q=$pdo->prepare("SELECT COUNT(*) FROM attendance a JOIN sessions s ON s.id=a.session_id JOIN users u ON u.id=s.lecturer_id WHERE DATE(a.timestamp)=CURDATE() AND u.institution_id=?");$__q->execute([$inst_id]);$todayAttendance=$__q->fetchColumn();
 
 //  Today's timetable 
 $today = date('l');
@@ -119,7 +119,7 @@ if ($activeSemId) {
 
 $__sq = $pdo->prepare("SELECT u.*, d.name AS department_name, COUNT(DISTINCT ca.course_id) AS assigned_courses FROM users u LEFT JOIN departments d ON d.id=u.department_id LEFT JOIN course_assignments ca ON ca.lecturer_id=u.id WHERE u.role='lecturer' AND u.institution_id=? GROUP BY u.id ORDER BY u.full_name ASC"); $__sq->execute([$inst_id]); $allLecturers = $__sq->fetchAll();
 
-$allPrograms    = $__q=$pdo->prepare("SELECT p.* FROM programs p JOIN departments d ON d.id=p.department_id WHERE d.institution_id=? ORDER BY p.name");$__q->execute([$inst_id]);$__q->fetchAll();
+$__q=$pdo->prepare("SELECT p.* FROM programs p JOIN departments d ON d.id=p.department_id WHERE d.institution_id=? ORDER BY p.name");$__q->execute([$inst_id]);$allPrograms=$__q->fetchAll();
 $__q=$pdo->prepare("SELECT * FROM departments WHERE institution_id=? ORDER BY name");$__q->execute([$inst_id]);$allDepartments=$__q->fetchAll();
 
 $__sq = $pdo->prepare("SELECT al.*, u.full_name AS actor_name FROM audit_log al JOIN users u ON u.id=al.actor_id WHERE u.institution_id=? ORDER BY al.created_at DESC LIMIT 50"); $__sq->execute([$inst_id]); $auditLog = $__sq->fetchAll();
@@ -872,7 +872,7 @@ $ttAll = $ttStmt->fetchAll();
       <div class="card"><div class="card-body" class="tbl-scroll">
         <table class="data-table"><thead><tr><th>Student</th><th class="hide-mobile">Index No.</th><th class="hide-mobile">Course</th><th>Status</th><th class="hide-mobile">Timestamp</th><th class="hide-mobile">Selfie</th></tr></thead><tbody>
         <?php
-        $records = $__q=$pdo->prepare("SELECT a.*,u.full_name,u.index_no,s.course_code FROM attendance a JOIN users u ON a.student_id=u.id JOIN sessions s ON a.session_id=s.id WHERE u.institution_id=? ORDER BY a.timestamp DESC LIMIT 50");$__q->execute([$inst_id]);$__q->fetchAll();
+        $__q=$pdo->prepare("SELECT a.*,u.full_name,u.index_no,s.course_code FROM attendance a JOIN users u ON a.student_id=u.id JOIN sessions s ON a.session_id=s.id WHERE u.institution_id=? ORDER BY a.timestamp DESC LIMIT 50");$__q->execute([$inst_id]);$records=$__q->fetchAll();
         if(empty($records)): ?><tr><td colspan="6" class="t-muted">No attendance records yet.</td></tr>
         <?php else: foreach($records as $r): ?>
           <tr>

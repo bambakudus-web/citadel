@@ -12,7 +12,7 @@ $userId = $_SESSION['user_id'];
 
 // Active semester
 $inst_id = (int)($_SESSION['institution_id'] ?? 1);
-$activeSem = $__q=$pdo->prepare("SELECT * FROM semesters WHERE is_active=1 AND institution_id=? LIMIT 1");$__q->execute([$inst_id]);$__q->fetch();
+$__q=$pdo->prepare("SELECT * FROM semesters WHERE is_active=1 AND institution_id=? LIMIT 1");$__q->execute([$inst_id]);$activeSem=$__q->fetch();
 $semId     = $activeSem['id'] ?? null;
 $activeSemId = (int)($activeSem['id'] ?? 0);
 

@@ -99,7 +99,7 @@ if ($activeSession) {
 }
 
 //  NEW: Semester & Course data 
-$activeSemester = $__q=$pdo->prepare("SELECT * FROM semesters WHERE is_active=1 AND institution_id=? LIMIT 1");$__q->execute([$inst_id]);$__q->fetch();
+$__q=$pdo->prepare("SELECT * FROM semesters WHERE is_active=1 AND institution_id=? LIMIT 1");$__q->execute([$inst_id]);$activeSemester=$__q->fetch();
 $activeSemId    = $activeSemester['id'] ?? null;
 
 $__sq = $pdo->prepare("SELECT s.*, COUNT(DISTINCT c.id) AS course_count FROM semesters s LEFT JOIN courses c ON c.semester_id=s.id WHERE s.institution_id=? GROUP BY s.id ORDER BY s.academic_year DESC, s.semester_no DESC"); $__sq->execute([$inst_id]); $allSemesters = $__sq->fetchAll();
@@ -122,12 +122,12 @@ if ($activeSemId) {
 $__sq = $pdo->prepare("SELECT u.*, d.name AS department_name, COUNT(DISTINCT ca.course_id) AS assigned_courses FROM users u LEFT JOIN departments d ON d.id=u.department_id LEFT JOIN course_assignments ca ON ca.lecturer_id=u.id WHERE u.role='lecturer' AND u.institution_id=? GROUP BY u.id ORDER BY u.full_name ASC"); $__sq->execute([$inst_id]); $allLecturers = $__sq->fetchAll();
 
 $allPrograms    = $__q=$pdo->prepare("SELECT p.* FROM programs p JOIN departments d ON d.id=p.department_id WHERE d.institution_id=? ORDER BY p.name");$__q->execute([$inst_id]);$__q->fetchAll();
-$allDepartments = $__q=$pdo->prepare("SELECT * FROM departments WHERE institution_id=? ORDER BY name");$__q->execute([$inst_id]);$__q->fetchAll();
+$__q=$pdo->prepare("SELECT * FROM departments WHERE institution_id=? ORDER BY name");$__q->execute([$inst_id]);$allDepartments=$__q->fetchAll();
 
 $__sq = $pdo->prepare("SELECT al.*, u.full_name AS actor_name FROM audit_log al JOIN users u ON u.id=al.actor_id WHERE u.institution_id=? ORDER BY al.created_at DESC LIMIT 50"); $__sq->execute([$inst_id]); $auditLog = $__sq->fetchAll();
 
-$devs = $__q=$pdo->prepare("SELECT id, full_name, index_no, device_fingerprint, is_locked, login_attempts FROM users WHERE role IN ('student','rep','lecturer') AND institution_id=? ORDER BY is_locked DESC, full_name");$__q->execute([$inst_id]);$__q->fetchAll();
-$lockedUsers = $__q=$pdo->prepare("SELECT id, full_name, index_no, role, login_attempts FROM users WHERE is_locked=1 AND institution_id=? ORDER BY full_name");$__q->execute([$inst_id]);$__q->fetchAll();
+$__q=$pdo->prepare("SELECT id, full_name, index_no, device_fingerprint, is_locked, login_attempts FROM users WHERE role IN ('student','rep','lecturer') AND institution_id=? ORDER BY is_locked DESC, full_name");$__q->execute([$inst_id]);$devs=$__q->fetchAll();
+$__q=$pdo->prepare("SELECT id, full_name, index_no, role, login_attempts FROM users WHERE is_locked=1 AND institution_id=? ORDER BY full_name");$__q->execute([$inst_id]);$lockedUsers=$__q->fetchAll();
 
 //  Code gen 
 function generateCode(string $secret, int $window): string {

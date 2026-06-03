@@ -234,6 +234,8 @@ input,select,textarea{font-size:16px!important}
 .sidebar{overflow:hidden!important;-webkit-overflow-scrolling:touch!important;scrollbar-width:none!important}
 .sidebar::-webkit-scrollbar{display:none!important}
 .sidebar-user,.sidebar-footer,.sb-foot{padding-bottom:env(safe-area-inset-bottom,20px)!important}
+
+@media(max-width:768px){.charts-wrap{grid-template-columns:1fr!important}}
 </style>
 <script>
 function toggleSidebar(){
@@ -368,7 +370,7 @@ async function delSchool(id,name){
   });
 })();
 </script>
-<style>@media(max-width:768px){.charts-wrap{grid-template-columns:1fr!important}}</style>
+
 <script src="/assets/chart.min.js"></script>
 <script>
 const gd = <?php echo json_encode($growth); ?>;

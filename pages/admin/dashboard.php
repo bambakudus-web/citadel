@@ -355,53 +355,8 @@ input,select,textarea{font-size:16px!important}
 
 
 
-</style>
-<script src="/assets/chart.min.js"></script>
-<script>
-// Mobile handled in head script
 
-
-</script>
-<script>
-
-}
-
-</script>
-
-<script>
-const BASE_URL = window.location.origin;
-const API = BASE_URL + '/api';
-
-function toggleSidebar(){
-  var sb=document.getElementById('sidebar');
-  var ov=document.getElementById('sidebar-overlay');
-  if(!sb)return;
-  var isOpen=sb.classList.toggle('open');
-  if(ov)ov.style.display=isOpen?'block':'none';
-}
-
-function showSection(name,el){
-  document.querySelectorAll('.page-section').forEach(function(s){s.classList.remove('active');});
-  document.querySelectorAll('.nav-item').forEach(function(n){n.classList.remove('active');});
-  var sec=document.getElementById('sec-'+name);
-  if(sec)sec.classList.add('active');
-  var title=document.getElementById('page-title');
-  if(title)title.textContent=name.charAt(0).toUpperCase()+name.slice(1);
-  if(el)el.classList.add('active');
-  var sb=document.getElementById('sidebar');
-  if(sb&&sb.classList.contains('open'))toggleSidebar();
-}
-
-document.addEventListener('DOMContentLoaded',function(){
-  var btn=document.getElementById('menu-btn')||document.getElementById('menu-toggle');
-  if(btn)btn.onclick=function(e){e.stopPropagation();toggleSidebar();};
-  var ov=document.getElementById('sidebar-overlay');
-  if(ov)ov.onclick=function(){toggleSidebar();};
-});
-</script>
-
-    <style>
-        .sidebar-user {
+.sidebar-user {
             padding: 0.75rem 1rem max(1rem, env(safe-area-inset-bottom)) !important;
             margin: 0 0.6rem 0 !important;
             background: var(--surface2) !important;
@@ -456,6 +411,51 @@ document.addEventListener('DOMContentLoaded',function(){
         }
 @media(max-width:768px){.sidebar{overflow:hidden!important;display:flex!important;flex-direction:column!important}.sidebar-nav,.sb-nav{flex:1 1 0!important;overflow-y:auto!important;overflow-x:hidden!important;min-height:0!important}.sidebar-user,.sidebar-footer,.sb-foot{flex-shrink:0!important;overflow:visible!important}}
 </style>
+<script src="/assets/chart.min.js"></script>
+<script>
+// Mobile handled in head script
+
+
+</script>
+<script>
+
+}
+
+</script>
+
+<script>
+const BASE_URL = window.location.origin;
+const API = BASE_URL + '/api';
+
+function toggleSidebar(){
+  var sb=document.getElementById('sidebar');
+  var ov=document.getElementById('sidebar-overlay');
+  if(!sb)return;
+  var isOpen=sb.classList.toggle('open');
+  if(ov)ov.style.display=isOpen?'block':'none';
+}
+
+function showSection(name,el){
+  document.querySelectorAll('.page-section').forEach(function(s){s.classList.remove('active');});
+  document.querySelectorAll('.nav-item').forEach(function(n){n.classList.remove('active');});
+  var sec=document.getElementById('sec-'+name);
+  if(sec)sec.classList.add('active');
+  var title=document.getElementById('page-title');
+  if(title)title.textContent=name.charAt(0).toUpperCase()+name.slice(1);
+  if(el)el.classList.add('active');
+  var sb=document.getElementById('sidebar');
+  if(sb&&sb.classList.contains('open'))toggleSidebar();
+}
+
+document.addEventListener('DOMContentLoaded',function(){
+  var btn=document.getElementById('menu-btn')||document.getElementById('menu-toggle');
+  if(btn)btn.onclick=function(e){e.stopPropagation();toggleSidebar();};
+  var ov=document.getElementById('sidebar-overlay');
+  if(ov)ov.onclick=function(){toggleSidebar();};
+});
+</script>
+
+    
 
 </head>
 

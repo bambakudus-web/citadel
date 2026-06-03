@@ -103,13 +103,13 @@ $students = $students->fetchAll();
 $totalStudents = count($students);
 
 $__q = $pdo->prepare("SELECT a.*, u.full_name, u.index_no, s.course_code FROM attendance a JOIN users u ON a.student_id=u.id JOIN sessions s ON a.session_id=s.id WHERE u.institution_id=? ORDER BY a.timestamp DESC LIMIT 15"); $__q->execute([$inst_id]); $recentAtt = $__q->fetchAll();
-$sessionHistory = $pdo->query("
+$__sq = $pdo->prepare("
     SELECT s.*,
     COUNT(DISTINCT CASE WHEN a.status IN ('present','late') THEN a.student_id END) as present_count,
     COUNT(DISTINCT CASE WHEN a.status='absent' THEN a.student_id END) as absent_count,
     COUNT(DISTINCT CASE WHEN a.status='late' THEN a.student_id END) as late_count
     FROM sessions s JOIN users lu ON lu.id=s.lecturer_id LEFT JOIN attendance a ON s.id=a.session_id WHERE lu.institution_id=? AND s.active_status=0 GROUP BY s.id ORDER BY s.start_time DESC LIMIT 30
-")->fetchAll();
+"); $__sq->execute([$inst_id]); $sessionHistory = $__sq->fetchAll();
 $__q = $pdo->prepare("SELECT COUNT(*) FROM attendance a JOIN sessions s ON s.id=a.session_id JOIN users u ON u.id=s.lecturer_id WHERE DATE(a.timestamp)=CURDATE() AND u.institution_id=?"); $__q->execute([$inst_id]); $todayAttendance = $__q->fetchColumn();
 
 $msg = ''; $msgType = '';

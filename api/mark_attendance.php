@@ -122,7 +122,7 @@ try {
     $attId = $pdo->lastInsertId();
 } catch (\PDOException $e) {
     logError('MARK_ATTENDANCE', $e);
-    echo json_encode(['success' => false, 'message' => 'Failed to record attendance: ' . $e->getMessage()]);
+    echo json_encode(['success' => false, 'message' => 'Failed to record attendance']);
     exit;
 }
 

@@ -872,22 +872,28 @@ async function captureSelfie(auto = false) {
   errEl.style.display = 'none';
 
   if (isEnrolling) {
-    sub.textContent = 'Enrolling your face...';
-    const result = await FaceVerify.enrollFace(video, msg => sub.textContent = msg);
-    if (!result.success) {
-      errEl.textContent   = result.error || 'Enrollment failed. Ensure good lighting.';
+    // Use descriptor already captured from live detection loop — no re-scan needed
+    const video2 = document.getElementById('video-preview');
+    sub.textContent = 'Capturing face descriptor...';
+    const det = await FaceVerify.loadModels().then(() =>
+      faceapi.detectSingleFace(video2, new faceapi.TinyFaceDetectorOptions({inputSize:224,scoreThreshold:0.5}))
+        .withFaceLandmarks().withFaceDescriptor()
+    );
+    if (!det) {
+      errEl.textContent   = 'Face not detected. Ensure good lighting and face the camera.';
       errEl.style.display = 'block';
       capBtn.disabled     = false;
       capBtn.textContent  = '📸 Enroll My Face';
       capturedSelfie      = null;
       return;
     }
-    enrolledDesc   = result.descriptor;
+    const descriptor = Array.from(det.descriptor);
+    enrolledDesc   = descriptor;
     faceMatchScore = 100;
     livenessOk     = true;
-    sub.textContent = '✅ Face enrolled! Submitting...';
+    sub.textContent = '✅ Face captured! Submitting...';
     stopCamera();
-    await submitAttendance(result.descriptor);
+    await submitAttendance(descriptor);
     return;
   }
 

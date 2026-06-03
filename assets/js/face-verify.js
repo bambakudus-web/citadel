@@ -104,7 +104,7 @@ const FaceVerify = (() => {
             if (onFaceDetected) onFaceDetected(det, livenessPass);
           }
         }
-      }, 200);
+      }, 400);
 
       return loop;
     } catch (e) {

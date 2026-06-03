@@ -86,7 +86,7 @@ Be EXTREMELY strict. When in doubt, return false.";
 
 // Call Anthropic API
 $payload = json_encode([
-    'model'      => 'claude-opus-4-6',
+    'model'      => 'claude-haiku-4-5-20251001',
     'max_tokens' => 300,
     'messages'   => [[
         'role'    => 'user',

@@ -91,12 +91,13 @@ if (!empty($repCourseIds)) {
     ");
     $students->execute($repCourseIds);
 } else {
-    $students = $pdo->query("
+    $students = $pdo->prepare("
         SELECT u.*, COUNT(DISTINCT s.id) as total_sessions,
         SUM(CASE WHEN a.status IN ('present','late') THEN 1 ELSE 0 END) as attended,
         ROUND(SUM(CASE WHEN a.status IN ('present','late') THEN 1 ELSE 0 END) / NULLIF(COUNT(DISTINCT s.id),0) * 100) as attendance_pct
         FROM users u LEFT JOIN attendance a ON u.id=a.student_id LEFT JOIN sessions s ON a.session_id=s.id WHERE u.institution_id=? AND u.role IN ('student','rep') GROUP BY u.id ORDER BY u.full_name
     ");
+    $students->execute([$inst_id]);
 }
 $students = $students->fetchAll();
 $totalStudents = count($students);

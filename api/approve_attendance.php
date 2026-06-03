@@ -16,7 +16,13 @@ if (!$attendanceId || !in_array($action, ['approve', 'reject'])) {
     exit;
 }
 
-$att = $pdo->prepare("SELECT a.*, s.start_time FROM attendance a JOIN sessions s ON a.session_id=s.id WHERE a.id=?");
+$att = $pdo->prepare("
+    SELECT a.*, s.start_time, u.full_name, u.face_profile
+    FROM attendance a 
+    JOIN sessions s ON a.session_id = s.id 
+    JOIN users u ON u.id = a.student_id
+    WHERE a.id=?
+");
 $att->execute([$attendanceId]);
 $att = $att->fetch();
 
@@ -33,8 +39,10 @@ if ($action === 'approve') {
     $minutesLate  = $diff > 0 ? (int)floor($diff / 60) : 0;
     $pdo->prepare("UPDATE attendance SET status=?, minutes_late=? WHERE id=?")
         ->execute([$status, $minutesLate, $attendanceId]);
+    audit('REP_APPROVE', 'attendance', $attendanceId);
     echo json_encode(['success' => true, 'status' => $status, 'message' => 'Marked as ' . $status]);
 } else {
     $pdo->prepare("DELETE FROM attendance WHERE id=?")->execute([$attendanceId]);
+    audit('REP_REJECT', 'attendance', $attendanceId);
     echo json_encode(['success' => true, 'status' => 'rejected', 'message' => 'Attendance rejected']);
 }

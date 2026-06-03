@@ -708,7 +708,7 @@ document.addEventListener('DOMContentLoaded',function(){
         <div class="card"><div class="card-body" class="tbl-empty">No active session. Start a session to see pending approvals.</div></div>
       <?php else: ?>
         <div class="card"><div class="card-body" class="tbl-scroll">
-          <table class="data-table"><thead><tr><th>Student</th><th class="hide-mobile">Index</th><th>Photos</th><th class="hide-mobile">Submitted</th><th>Actions</th></tr></thead>
+          <table class="data-table"><thead><tr><th>Student</th><th class="hide-mobile">Index</th><th>Selfie</th><th class="hide-mobile">AI Match</th><th class="hide-mobile">Submitted</th><th>Actions</th></tr></thead>
           <tbody id="approvals-tbody"><tr><td colspan="5" class="empty-state">Loading...</td></tr></tbody>
           </table>
         </div></div>
@@ -859,20 +859,29 @@ function loadApprovals(){
     if(pendingCount)pendingCount.textContent=data.total;
     if(!tbody)return;
     if(!data.rows||data.rows.length===0){tbody.innerHTML='<tr><td colspan="5" class="empty-state">No pending approvals. </td></tr>';return}
-    tbody.innerHTML=data.rows.map(r=>`
-      <tr id="arow-${r.id}">
-        <td class="fw-500">${r.full_name}</td>
-        <td class="hide-mobile" class="t-gold-78">${r.index_no}</td>
-        <td class="flex-gap4">
-          <img src="${r.selfie_url}" class="selfie-thumb" onclick="viewSelfie('${r.selfie_url}','${r.full_name} — Face')" title="Face photo">
-          ${r.classroom_url?`<img src="../../${r.classroom_url}" class="selfie-thumb" onclick="viewSelfie('../../${r.classroom_url}','${r.full_name} — Classroom')" title="Classroom" class="border-steel">`:'<span class="t-muted-72">No classroom</span>'}
+    tbody.innerHTML=data.rows.map(r=>{
+      const score = r.face_match_score ? parseFloat(r.face_match_score) : null;
+      const scoreColor = score === null ? 'var(--muted)' : score >= 85 ? 'var(--success)' : score >= 60 ? 'var(--warning)' : 'var(--danger)';
+      const scoreLabel = score === null ? 'No AI data' : score + '%';
+      const scorePill  = score === null ? '<span class="t-muted-72">—</span>' :
+                         score >= 85 ? `<span class="pill pill-green">${score}% ✅</span>` :
+                         score >= 60 ? `<span class="pill pill-gold">${score}% ⚠️</span>` :
+                                       `<span class="pill pill-red">${score}% ❌</span>`;
+      const liveness = r.ai_auto_approved ? '<br><small class="t-muted-72">Liveness ✅</small>' : '';
+      return `<tr id="arow-${r.id}">
+        <td class="fw-500">${r.full_name}${r.ai_auto_approved?'<br><small style="color:var(--success);font-size:.65rem">Auto-approved</small>':''}</td>
+        <td class="hide-mobile t-gold-78">${r.index_no}</td>
+        <td>
+          <img src="${r.selfie_url}" class="selfie-thumb" onclick="viewSelfie('${r.selfie_url}','${r.full_name}')" title="Click to enlarge">
         </td>
-        <td class="hide-mobile" class="t-muted-72">${r.submitted_at||r.time||''}</td>
+        <td class="hide-mobile">${scorePill}${liveness}</td>
+        <td class="hide-mobile t-muted-72">${r.submitted_at||r.time||''}</td>
         <td class="flex-gap4-wrap">
-          <button class="btn btn-rep btn-sm" onclick="approveAtt(${r.id},'approve')"> Approve</button>
-          <button class="btn btn-danger btn-sm" onclick="approveAtt(${r.id},'reject')"> Reject</button>
+          <button class="btn btn-rep btn-sm" onclick="approveAtt(${r.id},'approve')">✓ Approve</button>
+          <button class="btn btn-danger btn-sm" onclick="approveAtt(${r.id},'reject')">✗ Reject</button>
         </td>
-      </tr>`).join('');
+      </tr>`;
+    }).join('');
   });
 }
 loadApprovals();

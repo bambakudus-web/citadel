@@ -62,10 +62,6 @@ $todayAttendance = $__q=$pdo->prepare("SELECT COUNT(*) FROM attendance a JOIN se
 
 //  Today's timetable 
 $today = date('l');
-$activeSemId = $activeSemester["id"] ?? 0;
-$todayClasses = $pdo->prepare("SELECT t.*, u.full_name as lecturer_name FROM timetable t JOIN users u ON t.lecturer_id=u.id WHERE t.day_of_week=? AND u.institution_id=? AND (t.semester_id=? OR t.semester_id IS NULL) ORDER BY t.start_time");
-$todayClasses->execute([$today, $inst_id, $activeSemId]);
-$todayClasses = $todayClasses->fetchAll();
 
 //  Recent activity 
 $__ra = $pdo->prepare("SELECT a.timestamp, u.full_name, u.index_no, s.course_code, a.status FROM attendance a JOIN users u ON a.student_id=u.id JOIN sessions s ON a.session_id=s.id WHERE u.institution_id=? ORDER BY a.timestamp DESC LIMIT 10");
@@ -98,6 +94,11 @@ if ($activeSession) {
 //  NEW: Semester & Course data 
 $activeSemester = $__q=$pdo->prepare("SELECT * FROM semesters WHERE is_active=1 AND institution_id=? LIMIT 1");$__q->execute([$inst_id]);$__q->fetch();
 $activeSemId    = $activeSemester['id'] ?? null;
+//  Today's timetable
+$today = date('l');
+$todayClasses = $pdo->prepare("SELECT t.*, u.full_name as lecturer_name FROM timetable t JOIN users u ON t.lecturer_id=u.id WHERE t.day_of_week=? AND u.institution_id=? AND (t.semester_id=? OR t.semester_id IS NULL) ORDER BY t.start_time");
+$todayClasses->execute([$today, $inst_id, $activeSemId]);
+$todayClasses = $todayClasses->fetchAll();
 
 $__sq = $pdo->prepare("SELECT s.*, COUNT(DISTINCT c.id) AS course_count FROM semesters s LEFT JOIN courses c ON c.semester_id=s.id WHERE s.institution_id=? GROUP BY s.id ORDER BY s.academic_year DESC, s.semester_no DESC"); $__sq->execute([$inst_id]); $allSemesters = $__sq->fetchAll();
 

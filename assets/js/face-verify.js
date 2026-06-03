@@ -16,8 +16,11 @@ const FaceVerify = (() => {
       await Promise.all([
         faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
         faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
-        faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL),
       ]);
+      // faceRecognitionNet (6.2MB) loaded separately only when needed
+      if (!faceapi.nets.faceRecognitionNet.isLoaded) {
+        faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL).catch(()=>{});
+      }
       modelsLoaded = true;
       return true;
     } catch (e) {
@@ -39,8 +42,7 @@ const FaceVerify = (() => {
   async function detectFace(video) {
     const det = await faceapi
       .detectSingleFace(video, new faceapi.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.5 }))
-      .withFaceLandmarks()
-      .withFaceDescriptor();
+      .withFaceLandmarks();
     return det || null;
   }
 

@@ -808,21 +808,11 @@ async function startCamera() {
           blinkEl.textContent = liveness ? '✅ Liveness confirmed!' : 'Waiting for blink...';
           blinkEl.style.color = liveness ? 'var(--success)' : 'var(--muted)';
         }
-        if (enrolledDesc && det) {
-          const score    = FaceVerify.compareDescriptors(enrolledDesc, Array.from(det.descriptor));
-          faceMatchScore = score;
-          const scoreEl  = document.getElementById('face-match-score');
-          const fillEl   = document.getElementById('face-match-fill');
-          if (scoreEl) scoreEl.textContent = score + '%';
-          if (fillEl) {
-            fillEl.style.width      = score + '%';
-            fillEl.style.background = score >= 85 ? 'var(--success)' : score >= 60 ? 'var(--warning)' : 'var(--danger)';
-          }
-          if (score >= 85 && liveness && !capturedSelfie) {
-            sub.textContent = '✅ Face matched! Capturing automatically...';
-            capBtn.disabled = true;
-            setTimeout(() => captureSelfie(true), 600);
-          }
+        if (enrolledDesc && det && liveness && !capturedSelfie) {
+          // Descriptor match done at capture time, not every loop tick
+          sub.textContent = '✅ Liveness confirmed! Click capture.';
+          capBtn.disabled = false;
+          capBtn.textContent = '📸 Capture Selfie';
         } else if (isEnrolling && liveness && !capturedSelfie) {
           capBtn.disabled    = false;
           capBtn.textContent = '📸 Enroll My Face';
@@ -875,10 +865,12 @@ async function captureSelfie(auto = false) {
     // Use descriptor already captured from live detection loop — no re-scan needed
     const video2 = document.getElementById('video-preview');
     sub.textContent = 'Capturing face descriptor...';
-    const det = await FaceVerify.loadModels().then(() =>
-      faceapi.detectSingleFace(video2, new faceapi.TinyFaceDetectorOptions({inputSize:224,scoreThreshold:0.5}))
-        .withFaceLandmarks().withFaceDescriptor()
-    );
+    // Ensure recognition net is loaded before capture
+    if (!faceapi.nets.faceRecognitionNet.isLoaded) {
+      await faceapi.nets.faceRecognitionNet.loadFromUri('/assets/models');
+    }
+    const det = await faceapi.detectSingleFace(video2, new faceapi.TinyFaceDetectorOptions({inputSize:224,scoreThreshold:0.5}))
+      .withFaceLandmarks().withFaceDescriptor();
     if (!det) {
       errEl.textContent   = 'Face not detected. Ensure good lighting and face the camera.';
       errEl.style.display = 'block';
@@ -906,6 +898,20 @@ async function captureSelfie(auto = false) {
     return;
   }
 
+  // Compute face match at capture time (recognition net already background-loaded)
+  if (enrolledDesc && !isEnrolling) {
+    sub.textContent = 'Matching face...';
+    try {
+      if (!faceapi.nets.faceRecognitionNet.isLoaded) {
+        await faceapi.nets.faceRecognitionNet.loadFromUri('/assets/models');
+      }
+      const matchDet = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions({inputSize:224,scoreThreshold:0.5}))
+        .withFaceLandmarks().withFaceDescriptor();
+      if (matchDet) {
+        faceMatchScore = FaceVerify.compareDescriptors(enrolledDesc, Array.from(matchDet.descriptor));
+      }
+    } catch(e) { console.warn('Match error', e); }
+  }
   const preview         = document.getElementById('selfie-preview');
   preview.src           = capturedSelfie;
   preview.style.display = 'block';

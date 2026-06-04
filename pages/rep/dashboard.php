@@ -861,27 +861,33 @@ function loadApprovals(){
     if(!tbody)return;
     if(!data.rows||data.rows.length===0){tbody.innerHTML='<tr><td colspan="5" class="empty-state">No pending approvals. </td></tr>';return}
     tbody.innerHTML=data.rows.map(r=>{
-      const score = r.face_match_score ? parseFloat(r.face_match_score) : null;
-      const scoreColor = score === null ? 'var(--muted)' : score >= 85 ? 'var(--success)' : score >= 60 ? 'var(--warning)' : 'var(--danger)';
-      const scoreLabel = score === null ? 'No AI data' : score + '%';
-      const scorePill  = score === null ? '<span class="t-muted-72">—</span>' :
-                         score >= 85 ? `<span class="pill pill-green">${score}% ✅</span>` :
-                         score >= 60 ? `<span class="pill pill-gold">${score}% ⚠️</span>` :
-                                       `<span class="pill pill-red">${score}% ❌</span>`;
-      const liveness = r.ai_auto_approved ? '<br><small class="t-muted-72">Liveness ✅</small>' : '';
-      return `<tr id="arow-${r.id}">
-        <td class="fw-500">${r.full_name}${r.ai_auto_approved?'<br><small style="color:var(--success);font-size:.65rem">Auto-approved</small>':''}</td>
-        <td class="hide-mobile t-gold-78">${r.index_no}</td>
-        <td>
-          <img src="${r.selfie_url}" class="selfie-thumb" onclick="viewSelfie('${r.selfie_url}','${r.full_name}')" title="Click to enlarge">
-        </td>
-        <td class="hide-mobile">${scorePill}${liveness}</td>
-        <td class="hide-mobile t-muted-72">${r.submitted_at||r.time||''}</td>
-        <td class="flex-gap4-wrap">
-          <button class="btn btn-rep btn-sm" onclick="approveAtt(${r.id},'approve')">✓ Approve</button>
-          <button class="btn btn-danger btn-sm" onclick="approveAtt(${r.id},'reject')">✗ Reject</button>
-        </td>
-      </tr>`;
+      try {
+        const score = r.face_match_score ? parseFloat(r.face_match_score) : null;
+        const scorePill = score === null
+          ? '<span class="t-muted-72">—</span>'
+          : score >= 85 ? `<span class="pill pill-green">${score}% ✅</span>`
+          : score >= 60 ? `<span class="pill pill-gold">${score}% ⚠️</span>`
+          :               `<span class="pill pill-red">${score}% ❌</span>`;
+        const selfieHtml = r.selfie_url
+          ? `<img src="${r.selfie_url}" class="selfie-thumb" onclick="viewSelfie('${r.selfie_url}','${r.full_name}')" title="Click to enlarge">`
+          : '<span class="t-muted-72">No photo</span>';
+        return `<tr id="arow-${r.id}">
+          <td class="fw-500">${r.full_name}</td>
+          <td class="hide-mobile t-gold-78">${r.index_no||'—'}</td>
+          <td>${selfieHtml}</td>
+          <td class="hide-mobile">${scorePill}</td>
+          <td class="hide-mobile t-muted-72">${r.time||''}</td>
+          <td>
+            <div class="flex-gap4-wrap">
+              <button class="btn btn-rep btn-sm" onclick="approveAtt(${r.id},'approve')">✓ Approve</button>
+              <button class="btn btn-danger btn-sm" onclick="approveAtt(${r.id},'reject')">✗ Reject</button>
+            </div>
+          </td>
+        </tr>`;
+      } catch(e) {
+        console.error('Row render error:', e, r);
+        return `<tr id="arow-${r.id}"><td colspan="6" class="t-muted-72">Error rendering row</td></tr>`;
+      }
     }).join('');
   });
 }

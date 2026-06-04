@@ -575,7 +575,7 @@ document.addEventListener('DOMContentLoaded',function(){
             <div class="flex-gap8-mt10">
               <button class="btn btn-ghost" id="retake-class-btn" onclick="retakeClass()" style="display:none">Retake</button>
               <button class="btn btn-gold" id="class-capture-btn" onclick="captureClassroom()" disabled>Starting camera...</button>
-              <button class="btn btn-gold" id="class-submit-btn" onclick="submitAttendance()" style="display:none">Submit →</button>
+              <button class="btn btn-gold" id="class-submit-btn" onclick="submitAttendance(true)" style="display:none">Submit →</button>
             </div>
             <div id="class-error" class="err-inline"></div>
           </div>
@@ -767,6 +767,11 @@ async function captureSelfie() {
     return;
   }
 
+  // Face passed AI check — set scores for submission
+  faceMatchScore = 88;  // AI verified face
+  livenessOk     = true;
+  isEnrolling    = false;
+
   // Show preview
   const preview         = document.getElementById('selfie-preview');
   preview.src           = capturedSelfie;
@@ -774,7 +779,7 @@ async function captureSelfie() {
   document.getElementById('video-preview').style.display = 'none';
   document.getElementById('retake-btn').style.display    = 'flex';
   capBtn.style.display  = 'none';
-  sub.textContent       = '✅ Face verified! Submit or retake.';
+  sub.textContent       = '✅ Face verified! Showing classroom step...';
   sub.style.color = 'var(--success)';
   stopCamera();
   // Move to step 3
@@ -867,6 +872,7 @@ async function captureClassroom() {
     if (!aiData.success) {
       // Show preview and let rep decide
       showClassPreview();
+      faceMatchScore = 60; // Classroom failed — send to rep
       sub.textContent = '⚠️ ' + (aiData.message || 'Could not verify classroom — rep will review.');
       sub.style.color = 'var(--warning)';
       document.getElementById('class-submit-btn').style.display = 'flex';
@@ -876,7 +882,9 @@ async function captureClassroom() {
       return;
     }
 
-    // Classroom verified
+    // Classroom verified — keep high score, auto-approve
+    faceMatchScore = 88;
+    livenessOk     = true;
     showClassPreview();
     sub.textContent = '✅ Classroom verified!';
     sub.style.color = 'var(--success)';
@@ -916,22 +924,30 @@ function retakeClass() {
   startClassCamera();
 }
 
-async function submitAttendance() {
-  const btn   = document.getElementById('submit-btn');
-  const errEl = document.getElementById('submit-error');
-  const sub   = document.getElementById('step-main-sub');
-  if (!capturedSelfie) { errEl.textContent = 'Please take a selfie first.'; errEl.style.display = 'block'; return; }
-  btn.disabled = true; btn.textContent = 'Submitting...';
+async function submitAttendance(fromClassStep = false) {
+  const btn   = fromClassStep ? document.getElementById('class-submit-btn') : document.getElementById('submit-btn');
+  const errEl = fromClassStep ? document.getElementById('class-error') : document.getElementById('submit-error');
+  if (!capturedSelfie) { if(errEl){errEl.textContent='Please take a selfie first.';errEl.style.display='block';} return; }
+  if (btn) { btn.disabled = true; btn.textContent = 'Submitting...'; }
   errEl.style.display = 'none';
   try {
     const res  = await fetch('/api/mark_attendance.php', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ session_id: SESSION_ID, selfie: capturedSelfie, classroom: capturedClassroom, face_match_score: 90, liveness_pass: true })
+      body: JSON.stringify({
+          session_id:       SESSION_ID,
+          selfie:           capturedSelfie,
+          classroom:        capturedClassroom,
+          face_match_score: faceMatchScore,
+          ai_confidence:    faceMatchScore,
+          liveness_pass:    livenessOk,
+          enrolling:        isEnrolling,
+        })
     });
     const data = await res.json();
     if (data.success) {
-      document.getElementById('step-selfie-section').innerHTML = `
+      const displayEl = document.getElementById('step-class-section') || document.getElementById('step-selfie-section');
+      displayEl.innerHTML = `
         <div class="pending-card" style="border-color:${data.auto_approved ? 'rgba(76,175,130,.3)' : 'rgba(201,168,76,.3)'}">
           <div class="pending-icon">${data.auto_approved ? '✅' : '⏳'}</div>
           <div class="pending-title" style="color:${data.auto_approved ? 'var(--success)' : 'var(--gold)'}">

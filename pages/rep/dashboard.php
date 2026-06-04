@@ -2,6 +2,7 @@
 require_once '../../includes/security.php';
 require_once '../../includes/db.php';
 require_once '../../includes/auth.php';
+require_once '../../includes/guard.php';
 require_once '../../includes/terminology.php';
 $instType = $institution['inst_type'] ?? 'university';
 requireRole('rep', 'admin');

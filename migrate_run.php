@@ -1,5 +1,6 @@
 <?php
-if ($_GET['key'] ?? '' !== 'citadel_migrate_2026') { http_response_code(403); die('No'); }
+$key = $_GET['key'] ?? '';
+if ($key !== 'citadel_migrate_2026') { http_response_code(403); die('No'); }
 require_once 'includes/db.php';
 $results = [];
 $queries = [
@@ -11,5 +12,5 @@ foreach ($queries as $q) {
     try { $pdo->exec($q); $results[] = "OK: $q"; }
     catch(PDOException $e) { $results[] = "Skip: " . $e->getMessage(); }
 }
-$cols = $pdo->query("DESCRIBE attendance")->fetchAll(PDO::FETCH_COLUMN);
+$cols = array_column($pdo->query("DESCRIBE attendance")->fetchAll(PDO::FETCH_ASSOC), 'Field');
 echo implode("\n", $results) . "\n\nColumns: " . implode(', ', $cols);

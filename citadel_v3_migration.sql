@@ -127,3 +127,61 @@ INSERT IGNORE INTO users (full_name, email, password_hash, role, institution_id,
 VALUES ('Super Admin','super@citadel.app','\$2y\$12\$LQ8LJrwAFT2Wla5jlnEFouMoEn7vAfZ6XxnIx5iI7wW/XPNz5y5Uy','super_admin',1,1);
 
 SELECT 'Citadel v3 migration complete.' AS status;
+
+-- Face profile and AI attendance columns
+SET @db = DATABASE();
+
+SET @q = (SELECT IF(
+  EXISTS(SELECT 1 FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=@db AND TABLE_NAME='users' AND COLUMN_NAME='face_profile'),
+  'SELECT 1', 'ALTER TABLE users ADD COLUMN face_profile LONGTEXT DEFAULT NULL'
+)); PREPARE s FROM @q; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @q = (SELECT IF(
+  EXISTS(SELECT 1 FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=@db AND TABLE_NAME='users' AND COLUMN_NAME='face_enrolled_at'),
+  'SELECT 1', 'ALTER TABLE users ADD COLUMN face_enrolled_at TIMESTAMP NULL DEFAULT NULL'
+)); PREPARE s FROM @q; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @q = (SELECT IF(
+  EXISTS(SELECT 1 FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=@db AND TABLE_NAME='attendance' AND COLUMN_NAME='ai_confidence'),
+  'SELECT 1', 'ALTER TABLE attendance ADD COLUMN ai_confidence DECIMAL(5,2) DEFAULT NULL'
+)); PREPARE s FROM @q; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @q = (SELECT IF(
+  EXISTS(SELECT 1 FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=@db AND TABLE_NAME='attendance' AND COLUMN_NAME='ai_auto_approved'),
+  'SELECT 1', 'ALTER TABLE attendance ADD COLUMN ai_auto_approved TINYINT(1) DEFAULT 0'
+)); PREPARE s FROM @q; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @q = (SELECT IF(
+  EXISTS(SELECT 1 FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=@db AND TABLE_NAME='attendance' AND COLUMN_NAME='face_match_score'),
+  'SELECT 1', 'ALTER TABLE attendance ADD COLUMN face_match_score DECIMAL(5,2) DEFAULT NULL'
+)); PREPARE s FROM @q; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @q = (SELECT IF(
+  EXISTS(SELECT 1 FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=@db AND TABLE_NAME='sessions' AND COLUMN_NAME='is_online'),
+  'SELECT 1', 'ALTER TABLE sessions ADD COLUMN is_online TINYINT(1) NOT NULL DEFAULT 0'
+)); PREPARE s FROM @q; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @q = (SELECT IF(
+  EXISTS(SELECT 1 FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=@db AND TABLE_NAME='sessions' AND COLUMN_NAME='meeting_link'),
+  'SELECT 1', 'ALTER TABLE sessions ADD COLUMN meeting_link VARCHAR(512) DEFAULT NULL'
+)); PREPARE s FROM @q; EXECUTE s; DEALLOCATE PREPARE s;
+
+CREATE TABLE IF NOT EXISTS ca_scores (
+  id             int unsigned NOT NULL AUTO_INCREMENT,
+  course_id      int unsigned NOT NULL,
+  student_id     int unsigned NOT NULL,
+  lecturer_id    int unsigned NOT NULL,
+  institution_id int unsigned NOT NULL DEFAULT 1,
+  ca_type        varchar(50) NOT NULL DEFAULT 'CA1',
+  score          decimal(5,2) NOT NULL DEFAULT 0,
+  max_score      decimal(5,2) NOT NULL DEFAULT 100,
+  semester_id    int unsigned DEFAULT NULL,
+  remarks        varchar(255) DEFAULT NULL,
+  uploaded_at    timestamp DEFAULT CURRENT_TIMESTAMP,
+  updated_at     timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  UNIQUE KEY unique_ca (course_id, student_id, ca_type, semester_id),
+  KEY idx_student (student_id),
+  KEY idx_course (course_id),
+  KEY idx_lecturer (lecturer_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

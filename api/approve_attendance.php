@@ -19,7 +19,7 @@ if (!$attendanceId || !in_array($action, ['approve', 'reject'])) {
 }
 
 $att = $pdo->prepare("
-    SELECT a.*, s.start_time, u.full_name, u.face_profile
+    SELECT a.*, s.start_time, u.full_name
     FROM attendance a 
     JOIN sessions s ON a.session_id = s.id 
     JOIN users u ON u.id = a.student_id

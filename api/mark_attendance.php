@@ -17,7 +17,6 @@ $selfieB64 = $input['selfie']           ?? '';
 $matchScore     = isset($input['face_match_score'])  ? (float)$input['face_match_score']  : null;
 $aiConfidence   = isset($input['ai_confidence'])     ? (float)$input['ai_confidence']     : null;
 $livenessPass   = $input['liveness_pass']            ?? false;
-$enrolling      = $input['enrolling']                ?? false;
 $classroomB64  = $input['classroom']             ?? '';
 
 if (!$sessionId) {
@@ -92,7 +91,7 @@ if ($matchScore !== null && $livenessPass) {
         exit;
     }
 } elseif ($matchScore === null) {
-    // No face profile yet — enrolling for first time
+    // No face profile — send to rep
     $status = 'pending';
 }
 
@@ -125,16 +124,6 @@ try {
     logError('MARK_ATTENDANCE', $e);
     echo json_encode(['success' => false, 'message' => 'Failed to record attendance']);
     exit;
-}
-
-// If enrolling face for first time, save descriptor
-if ($enrolling && !empty($input['face_descriptor'])) {
-    $descriptor = $input['face_descriptor'];
-    if (is_array($descriptor) && count($descriptor) === 128) {
-        $pdo->prepare("UPDATE users SET face_profile=?, face_enrolled_at=NOW() WHERE id=?")
-            ->execute([json_encode($descriptor), $userId]);
-        audit('FACE_ENROLL', 'user', $userId);
-    }
 }
 
 audit('ATTENDANCE_' . strtoupper($status), 'attendance', $attId);

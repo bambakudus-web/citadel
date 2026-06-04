@@ -700,6 +700,9 @@ async function verifyCode(){const btn=document.getElementById('verify-code-btn')
 // ── FACE VERIFICATION ATTENDANCE ──
 const SESSION_ID = <?= $activeSession ? $activeSession["id"] : "null" ?>;
 let stream         = null;
+let faceMatchScore = 0;
+let livenessOk     = false;
+let isEnrolling    = false;
 let capturedSelfie = null;
 
 async function startCamera() {
@@ -942,7 +945,6 @@ async function submitAttendance(fromClassStep = false) {
           face_match_score: faceMatchScore,
           ai_confidence:    faceMatchScore,
           liveness_pass:    livenessOk,
-          enrolling:        isEnrolling,
         })
     });
     const data = await res.json();

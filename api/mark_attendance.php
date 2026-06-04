@@ -17,7 +17,8 @@ $selfieB64 = $input['selfie']           ?? '';
 $matchScore     = isset($input['face_match_score'])  ? (float)$input['face_match_score']  : null;
 $aiConfidence   = isset($input['ai_confidence'])     ? (float)$input['ai_confidence']     : null;
 $livenessPass   = $input['liveness_pass']            ?? false;
-$enrolling      = $input['enrolling']                ?? false; // true = first time, enrolling face
+$enrolling      = $input['enrolling']                ?? false;
+$classroomB64  = $input['classroom']             ?? '';
 
 if (!$sessionId) {
     echo json_encode(['success' => false, 'message' => 'No session ID provided']);

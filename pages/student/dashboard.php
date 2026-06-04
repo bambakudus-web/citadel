@@ -564,6 +564,21 @@ document.addEventListener('DOMContentLoaded',function(){
             </div>
             <div id="submit-error" class="err-inline"></div>
           </div>
+          <div id="step-class-section" class="d-none">
+            <div class="text-center-mb">
+              <div class="fs-72 t-gold">Step 3: Classroom Verification</div>
+              <div id="step-class-sub" class="t-muted-78 mt-3">Flip your camera to show the classroom</div>
+            </div>
+            <div class="camera-wrap"><video id="class-video" autoplay playsinline muted></video></div>
+            <canvas id="class-canvas"></canvas>
+            <img id="class-preview" class="selfie-preview" style="display:none">
+            <div class="flex-gap8-mt10">
+              <button class="btn btn-ghost" id="retake-class-btn" onclick="retakeClass()" style="display:none">Retake</button>
+              <button class="btn btn-gold" id="class-capture-btn" onclick="captureClassroom()" disabled>Starting camera...</button>
+              <button class="btn btn-gold" id="class-submit-btn" onclick="submitAttendance()" style="display:none">Submit →</button>
+            </div>
+            <div id="class-error" class="err-inline"></div>
+          </div>
           <?php endif; ?>
         <?php else: ?>
           <div class="no-session-card">
@@ -760,9 +775,10 @@ async function captureSelfie() {
   document.getElementById('retake-btn').style.display    = 'flex';
   capBtn.style.display  = 'none';
   sub.textContent       = '✅ Face verified! Submit or retake.';
-  sub.style.color       = 'var(--success)';
+  sub.style.color = 'var(--success)';
   stopCamera();
-  document.getElementById('submit-btn').style.display = 'flex';
+  // Move to step 3
+  setTimeout(() => startClassroomStep(), 600);
 }
 
 function retakeSelfie() {
@@ -780,6 +796,126 @@ function retakeSelfie() {
   startCamera();
 }
 
+let classStream = null;
+let capturedClassroom = null;
+
+function startClassroomStep() {
+  document.getElementById('step-selfie-section').style.display = 'none';
+  document.getElementById('step-class-section').style.display = 'block';
+  document.getElementById('dot-selfie').className = 'step-dot done';
+  document.getElementById('dot-class').className = 'step-dot active';
+  document.getElementById('step-label').textContent = 'Step 3: Show your classroom';
+  startClassCamera();
+}
+
+async function startClassCamera() {
+  const sub = document.getElementById('step-class-sub');
+  const btn = document.getElementById('class-capture-btn');
+  sub.textContent = 'Starting rear camera...';
+  btn.disabled = true;
+  try {
+    // Try rear camera first, fallback to any
+    try {
+      classStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { exact: 'environment' }, width: 320, height: 240 } });
+    } catch(e) {
+      classStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment', width: 320, height: 240 } });
+    }
+    const video = document.getElementById('class-video');
+    video.srcObject = classStream;
+    await new Promise(r => video.onloadedmetadata = r);
+    video.play();
+    btn.disabled = false;
+    btn.textContent = '📷 Capture Classroom';
+    sub.textContent = 'Point camera at the classroom and capture';
+  } catch(e) {
+    sub.textContent = 'Camera error. Try again.';
+    btn.disabled = false;
+    btn.textContent = '📷 Try Again';
+    btn.onclick = startClassCamera;
+  }
+}
+
+function stopClassCamera() {
+  if (classStream) { classStream.getTracks().forEach(t => t.stop()); classStream = null; }
+}
+
+async function captureClassroom() {
+  const video  = document.getElementById('class-video');
+  const canvas = document.getElementById('class-canvas');
+  const btn    = document.getElementById('class-capture-btn');
+  const sub    = document.getElementById('step-class-sub');
+  const errEl  = document.getElementById('class-error');
+
+  canvas.width  = video.videoWidth  || 320;
+  canvas.height = video.videoHeight || 240;
+  canvas.getContext('2d').drawImage(video, 0, 0);
+  capturedClassroom = canvas.toDataURL('image/jpeg', 0.8);
+
+  btn.disabled = true;
+  btn.textContent = 'Verifying classroom...';
+  errEl.style.display = 'none';
+  sub.textContent = 'Checking classroom with AI...';
+
+  try {
+    const aiRes  = await fetch('/api/ai_verify.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type: 'environment', image: capturedClassroom })
+    });
+    const aiData = await aiRes.json();
+
+    if (!aiData.success) {
+      // Show preview and let rep decide
+      showClassPreview();
+      sub.textContent = '⚠️ ' + (aiData.message || 'Could not verify classroom — rep will review.');
+      sub.style.color = 'var(--warning)';
+      document.getElementById('class-submit-btn').style.display = 'flex';
+      document.getElementById('retake-class-btn').style.display = 'flex';
+      btn.style.display = 'none';
+      stopClassCamera();
+      return;
+    }
+
+    // Classroom verified
+    showClassPreview();
+    sub.textContent = '✅ Classroom verified!';
+    sub.style.color = 'var(--success)';
+    document.getElementById('class-submit-btn').style.display = 'flex';
+    document.getElementById('retake-class-btn').style.display = 'flex';
+    btn.style.display = 'none';
+    stopClassCamera();
+  } catch(e) {
+    errEl.textContent = 'Verification error. Try again.';
+    errEl.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = '📷 Try Again';
+    capturedClassroom = null;
+  }
+}
+
+function showClassPreview() {
+  const preview = document.getElementById('class-preview');
+  preview.src = capturedClassroom;
+  preview.style.display = 'block';
+  document.getElementById('class-video').style.display = 'none';
+}
+
+function retakeClass() {
+  capturedClassroom = null;
+  document.getElementById('class-preview').style.display = 'none';
+  document.getElementById('class-video').style.display = 'block';
+  document.getElementById('class-capture-btn').style.display = 'flex';
+  document.getElementById('class-capture-btn').disabled = false;
+  document.getElementById('class-capture-btn').textContent = '📷 Capture Classroom';
+  document.getElementById('class-capture-btn').onclick = captureClassroom;
+  document.getElementById('retake-class-btn').style.display = 'none';
+  document.getElementById('class-submit-btn').style.display = 'none';
+  document.getElementById('class-error').style.display = 'none';
+  document.getElementById('step-class-sub').style.color = '';
+  document.getElementById('step-class-sub').textContent = 'Point camera at the classroom and capture';
+  startClassCamera();
+}
+
 async function submitAttendance() {
   const btn   = document.getElementById('submit-btn');
   const errEl = document.getElementById('submit-error');
@@ -791,7 +927,7 @@ async function submitAttendance() {
     const res  = await fetch('/api/mark_attendance.php', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ session_id: SESSION_ID, selfie: capturedSelfie, face_match_score: 90, liveness_pass: true })
+      body: JSON.stringify({ session_id: SESSION_ID, selfie: capturedSelfie, classroom: capturedClassroom, face_match_score: 90, liveness_pass: true })
     });
     const data = await res.json();
     if (data.success) {

@@ -4,6 +4,7 @@ require_once '../includes/cors.php';
 header('Content-Type: application/json');
 session_start();
 require_once '../includes/db.php';
+require_once '../includes/logger.php';
 require_once '../includes/auth.php';
 
 

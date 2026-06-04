@@ -1,6 +1,7 @@
 <?php
 // api/close_session.php
 require_once '../includes/db.php';
+require_once '../includes/logger.php';
 require_once '../includes/cors.php';
 require_once '../includes/auth.php';
 

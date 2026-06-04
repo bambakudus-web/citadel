@@ -5,6 +5,8 @@ header('Content-Type: application/json');
 session_start();
 require_once '../includes/db.php';
 require_once '../includes/auth.php';
+
+
 requireRole('rep', 'admin');
 
 $input        = json_decode(file_get_contents('php://input'), true);

@@ -383,62 +383,6 @@ document.addEventListener('DOMContentLoaded',function(){
 });
 </script>
 
-    <style>
-        .sidebar-user {
-            padding: 0.75rem 1rem max(1rem, env(safe-area-inset-bottom)) !important;
-            margin: 0 0.6rem 0 !important;
-            background: var(--surface2) !important;
-            border: 1px solid var(--border) !important;
-            border-radius: 6px !important;
-            margin-bottom: 0.6rem !important;
-        }
-        .u-name {
-            font-size: 0.78rem !important;
-            font-weight: 600 !important;
-            color: var(--text) !important;
-            margin-bottom: 0.15rem !important;
-            white-space: nowrap !important;
-            overflow: hidden !important;
-            text-overflow: ellipsis !important;
-        }
-        .u-index {
-            font-size: 0.6rem !important;
-            color: var(--muted) !important;
-            letter-spacing: 0.05em !important;
-            margin-bottom: 0.6rem !important;
-            white-space: nowrap !important;
-            overflow: hidden !important;
-            text-overflow: ellipsis !important;
-        }
-        .sidebar-user-actions {
-            display: flex !important;
-            gap: 0.4rem !important;
-            margin-top: 0.1rem !important;
-        }
-        .sidebar-user-actions a {
-            flex: 1 !important;
-            text-align: center !important;
-            font-size: 0.65rem !important;
-            letter-spacing: 0.06em !important;
-            text-transform: uppercase !important;
-            padding: 0.35rem 0.4rem !important;
-            border-radius: 4px !important;
-            text-decoration: none !important;
-            font-weight: 500 !important;
-            display: block !important;
-        }
-        .sidebar-user-actions .btn-pwd {
-            background: rgba(255,255,255,0.05) !important;
-            border: 1px solid var(--border) !important;
-            color: var(--muted) !important;
-        }
-        .sidebar-user-actions .btn-out {
-            background: rgba(224,92,92,0.12) !important;
-            border: 1px solid rgba(224,92,92,0.3) !important;
-            color: var(--danger) !important;
-        }
-@media(max-width:768px){.sidebar{overflow:hidden!important;display:flex!important;flex-direction:column!important}.sidebar-nav,.sb-nav{flex:1 1 0!important;overflow-y:auto!important;overflow-x:hidden!important;min-height:0!important}.sidebar-user,.sidebar-footer,.sb-foot{flex-shrink:0!important;overflow:visible!important}}
-</style>
 </head>
 
 <body>

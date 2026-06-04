@@ -302,7 +302,7 @@
 .fw-600{font-weight:600}
 .fw-700{font-weight:700}
 .fs-78{font-size:.78rem}
-.t-gold{font-family:'Cinzel',serif;font-size:2rem;font-weight:700;color:var(--gold);letter-spacing:.1em}
+.t-gold{color:var(--gold);font-weight:600}
 .t-gold-75{font-size:.75rem;color:var(--gold)}
 .t-gold-78{font-size:.78rem;color:var(--gold)}
 .t-gold-80{font-size:.8rem;color:var(--gold)}

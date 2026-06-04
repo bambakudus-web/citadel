@@ -894,13 +894,15 @@ function loadApprovals(){
 loadApprovals();
 setInterval(loadApprovals,6000);
 
+<?php endif; ?>
+
 async function approveAtt(id,action){
   const row=document.getElementById('arow-'+id);
   if(row){row.style.opacity='.4';row.style.pointerEvents='none'}
   try{const res=await fetch(API + '/approve_attendance.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({attendance_id:id,action})});const data=await res.json();if(data.success)loadApprovals();else if(row){row.style.opacity='1';row.style.pointerEvents='auto'}}
   catch(e){if(row){row.style.opacity='1';row.style.pointerEvents='auto'}}
 }
-<?php endif; ?>
+
 
 function toggleTheme(){const body=document.body;const btn=document.getElementById('theme-btn');if(body.classList.contains('light')){body.classList.remove('light');localStorage.setItem('theme','dark');if(btn)btn.innerHTML='&#9790;';}else{body.classList.add('light');localStorage.setItem('theme','light');if(btn)btn.innerHTML='&#9790;';}}
 (function(){if(localStorage.getItem('theme')==='light'){document.body.classList.add('light');const btn=document.getElementById('theme-btn');if(btn)btn.innerHTML='&#9790;';}})();

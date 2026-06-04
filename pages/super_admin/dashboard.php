@@ -280,7 +280,7 @@ document.addEventListener('DOMContentLoaded',function(){
   </div>
 </aside>
 <main class="main">
-  <button class="menu-toggle" id="menu-toggle" onclick="toggleSidebar()"></button>
+  <button class="menu-toggle" id="menu-toggle" onclick="toggleSidebar()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
   <div class="ph">
     <div class="pt">Platform Overview</div>
     <div class="ps">Welcome back, <?php echo htmlspecialchars(explode(' ',$me['full_name'])[0]); ?>. Here's the platform at a glance.</div>

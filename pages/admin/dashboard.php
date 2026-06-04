@@ -1380,8 +1380,8 @@ function loadApprovalsAdmin() {
         </td>
         <td class="t-muted-72">${r.submitted_at}</td>
         <td class="flex-gap4">
-          <button class="btn btn-sm" class="badge-success-bg" onclick="approveAdmin(${r.id},'approve')"> Approve</button>
-          <button class="btn btn-sm" class="info-danger" onclick="approveAdmin(${r.id},'reject')"> Reject</button>
+          <button class="btn btn-sm" class="badge-success-bg" onclick="approveAdmin(${r.id},'approve')">&#10003; Approve</button>
+          <button class="btn btn-sm" class="info-danger" onclick="approveAdmin(${r.id},'reject')">&#10007; Reject</button>
         </td>
       </tr>`).join('');
   }).catch(() => {});

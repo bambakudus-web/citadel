@@ -12,7 +12,25 @@ $msg = ''; $msgType = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? 'change_password';
 
-    if ($action === 'update_phone') {
+    if ($action === 'update_email') {
+        $newEmail = trim(strtolower($_POST['new_email'] ?? ''));
+        if (!filter_var($newEmail, FILTER_VALIDATE_EMAIL)) {
+            $msg = 'Invalid email address.'; $msgType = 'error';
+        } else {
+            // Check not taken
+            $taken = $pdo->prepare("SELECT id FROM users WHERE email=? AND id!=?");
+            $taken->execute([$newEmail, $userId]);
+            if ($taken->fetch()) {
+                $msg = 'That email is already in use.'; $msgType = 'error';
+            } else {
+                $pdo->prepare("UPDATE users SET email=? WHERE id=?")->execute([$newEmail, $userId]);
+                $msg = 'Email updated successfully!'; $msgType = 'success';
+                // Refresh userData
+                $userData = $pdo->prepare("SELECT full_name, email, phone, role, index_no FROM users WHERE id=?");
+                $userData->execute([$userId]); $userData = $userData->fetch();
+            }
+        }
+    } elseif ($action === 'update_phone') {
         $phone = trim($_POST['phone'] ?? '');
         $pdo->prepare("UPDATE users SET phone=? WHERE id=?")->execute([$phone, $userId]);
         $msg = 'Phone number updated!'; $msgType = 'success';
@@ -126,6 +144,19 @@ input,select,textarea{font-size:16px!important}
         <div class="ff"><label>New Password</label><input type="password" name="new_password" placeholder="Min. 8 characters" required></div>
         <div class="ff"><label>Confirm New Password</label><input type="password" name="confirm_password" placeholder="Repeat new password" required></div>
         <button type="submit" class="btn">Update Password</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Update Email -->
+  <div class="card">
+    <div class="card-head"><div class="card-title">Change Email</div></div>
+    <div class="card-body">
+      <form method="POST">
+        <input type="hidden" name="action" value="update_email">
+        <div class="ff"><label>Current Email</label><input type="email" value="<?= htmlspecialchars($userData['email']) ?>" disabled style="opacity:.5"></div>
+        <div class="ff"><label>New Email Address</label><input type="email" name="new_email" placeholder="your@newemail.com" required></div>
+        <button type="submit" class="btn btn-ghost">Update Email</button>
       </form>
     </div>
   </div>

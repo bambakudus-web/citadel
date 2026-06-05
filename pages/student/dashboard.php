@@ -67,7 +67,7 @@ if (!empty($enrolledCourseIds)) {
 // Fallback: if no course_id links, use old timetable
 if (empty($todayClasses)) {
     $stmt = $pdo->prepare("SELECT t.*, u.full_name AS lecturer_name FROM timetable t JOIN users u ON t.lecturer_id=u.id WHERE t.day_of_week=? AND u.institution_id=? ORDER BY t.start_time");
-    $stmt->execute([$today]); $todayClasses = $stmt->fetchAll();
+    $stmt->execute([$today, $inst_id]); $todayClasses = $stmt->fetchAll();
 }
 
 // Active session — only if student is enrolled in that course

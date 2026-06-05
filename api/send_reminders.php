@@ -53,7 +53,7 @@ foreach ($slots as $slot) {
         if (!filter_var($student['email'], FILTER_VALIDATE_EMAIL)) { $skipped++; continue; }
 
         // Check not already sent in last 30 mins (avoid duplicates)
-        $dup = $pdo->prepare("SELECT id FROM audit_log WHERE actor_id=? AND action='REMINDER_SENT' AND entity_type=? AND created_at > DATE_SUB(NOW(), INTERVAL 30 MINUTE)");
+        $dup = $pdo->prepare("SELECT id FROM audit_log WHERE actor_id=? AND action='REMINDER_SENT' AND target_type=? AND created_at > DATE_SUB(NOW(), INTERVAL 30 MINUTE)");
         $dup->execute([$student['id'], 'timetable_' . $slot['id']]);
         if ($dup->fetch()) { $skipped++; continue; }
 
@@ -74,7 +74,7 @@ foreach ($slots as $slot) {
         if ($result['success']) {
             $sent++;
             // Log to prevent duplicates
-            $pdo->prepare("INSERT INTO audit_log (actor_id, action, entity_type, entity_id, created_at) VALUES (?, 'REMINDER_SENT', ?, ?, NOW())")
+            $pdo->prepare("INSERT INTO audit_log (actor_id, action, target_type, target_id, created_at) VALUES (?, 'REMINDER_SENT', ?, ?, NOW())")
                 ->execute([$student['id'], 'timetable_' . $slot['id'], $slot['id']]);
         } else { $skipped++; }
     }

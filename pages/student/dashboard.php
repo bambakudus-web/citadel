@@ -570,13 +570,13 @@ document.addEventListener('DOMContentLoaded',function(){
               <div class="fs-72 t-gold">Step 3: Classroom Verification</div>
               <div id="step-class-sub" class="t-muted-78 mt-3">Flip your camera to show the classroom</div>
             </div>
-            <div class="camera-wrap"><video id="class-video" autoplay playsinline muted></video></div>
+            <div class="camera-wrap"><video id="class-video" autoplay playsinline muted style="display:none"></video></div>
             <canvas id="class-canvas"></canvas>
             <img id="class-preview" class="selfie-preview" style="display:none">
             <div class="flex-gap8-mt10">
               <button class="btn btn-ghost" id="retake-class-btn" onclick="retakeClass()" style="display:none">Retake</button>
               <button class="btn btn-gold" id="class-capture-btn" onclick="captureClassroom()" disabled>Starting camera...</button>
-              <button class="btn btn-gold" id="class-submit-btn" onclick="submitAttendance(true)" style="display:none">Submit →</button>
+              <button class="btn btn-gold" id="class-submit-btn" onclick="submitAttendance()" style="display:none">Submit →</button>
             </div>
             <div id="class-error" class="err-inline"></div>
           </div>
@@ -598,7 +598,7 @@ document.addEventListener('DOMContentLoaded',function(){
         <div class="card"><div class="card-body" class="t-muted">No courses enrolled this semester. Contact admin.</div></div>
       <?php else: ?>
         <div class="card"><div class="card-body" class="tbl-scroll">
-          <table class="data-table"><thead><tr><th>Code</th><th>Course Name</th><th class="hide-mobile">Lecturer</th><th>Attended</th><th>Rate</th></tr></thead><tbody>
+          <div class="tbl-scroll"><table class="data-table"><thead><tr><th>Code</th><th>Course Name</th><th class="hide-mobile">Lecturer</th><th>Attended</th><th>Rate</th></tr></thead><tbody>
           <?php foreach($enrolledCourses as $c):
             $pct=$c['total_sessions']>0?round(($c['attended']/$c['total_sessions'])*100):0;
             $color=$pct>=75?'var(--success)':($pct>=50?'var(--warning)':'var(--danger)'); ?>
@@ -610,7 +610,7 @@ document.addEventListener('DOMContentLoaded',function(){
               <td><span style="color:<?= $color ?>;font-weight:600"><?= $pct ?>%</span><?php if($pct<75&&$c['total_sessions']>3): ?> <span class="t-danger"></span><?php endif; ?></td>
             </tr>
           <?php endforeach; ?>
-          </tbody></table>
+          </tbody></table></div>
         </div></div>
       <?php endif; ?>
     </div>
@@ -832,6 +832,7 @@ async function startClassCamera() {
     const video = document.getElementById('class-video');
     video.srcObject = classStream;
     await new Promise(r => video.onloadedmetadata = r);
+    video.style.display = 'block';
     video.play();
     btn.disabled = false;
     btn.textContent = '📷 Capture Classroom';

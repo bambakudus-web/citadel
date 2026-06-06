@@ -724,7 +724,7 @@ async function startCamera() {
     await new Promise(r => video.onloadedmetadata = r);
     video.play();
     capBtn.disabled    = false;
-    capBtn.textContent = '📸 Capture Selfie';
+    capBtn.textContent = 'Capture Selfie';
     sub.textContent    = 'Look at the camera and click Capture';
   } catch(e) {
     sub.textContent = 'Camera access denied. Please allow camera.';
@@ -764,7 +764,7 @@ async function captureSelfie() {
       errEl.textContent   = aiData.message || 'Face not detected. Try again.';
       errEl.style.display = 'block';
       capBtn.disabled     = false;
-      capBtn.textContent  = '📸 Try Again';
+      capBtn.textContent  = 'Try Again';
       capturedSelfie      = null;
       return;
     }
@@ -772,7 +772,7 @@ async function captureSelfie() {
     errEl.textContent   = 'Verification error. Try again.';
     errEl.style.display = 'block';
     capBtn.disabled     = false;
-    capBtn.textContent  = '📸 Try Again';
+    capBtn.textContent  = 'Try Again';
     capturedSelfie      = null;
     return;
   }
@@ -789,7 +789,7 @@ async function captureSelfie() {
   document.getElementById('video-preview').style.display = 'none';
   document.getElementById('retake-btn').style.display    = 'flex';
   capBtn.style.display  = 'none';
-  sub.textContent       = '✅ Face verified! Showing classroom step...';
+  sub.textContent       = 'Face verified! Showing classroom step...';
   sub.style.color = 'var(--success)';
   stopCamera();
   // Move to step 3
@@ -801,7 +801,7 @@ function retakeSelfie() {
   document.getElementById('selfie-preview').style.display  = 'none';
   document.getElementById('video-preview').style.display   = 'block';
   document.getElementById('capture-btn').style.display     = 'flex';
-  document.getElementById('capture-btn').textContent       = '📸 Capture Selfie';
+  document.getElementById('capture-btn').textContent       = 'Capture Selfie';
   document.getElementById('capture-btn').disabled          = false;
   document.getElementById('retake-btn').style.display      = 'none';
   document.getElementById('submit-btn').style.display      = 'none';
@@ -841,12 +841,12 @@ async function startClassCamera() {
     video.style.display = 'block';
     video.play();
     btn.disabled = false;
-    btn.textContent = '📷 Capture Classroom';
+    btn.textContent = 'Capture Classroom';
     sub.textContent = 'Point camera at the classroom and capture';
   } catch(e) {
     sub.textContent = 'Camera error. Try again.';
     btn.disabled = false;
-    btn.textContent = '📷 Try Again';
+    btn.textContent = 'Try Again';
     btn.onclick = startClassCamera;
   }
 }
@@ -884,7 +884,7 @@ async function captureClassroom() {
       // Show preview and let rep decide
       showClassPreview();
       faceMatchScore = 60; // Classroom failed — send to rep
-      sub.textContent = '⚠️ ' + (aiData.message || 'Could not verify classroom — rep will review.');
+      sub.textContent = 'Warning: ' + (aiData.message || 'Could not verify classroom — rep will review.');
       sub.style.color = 'var(--warning)';
       document.getElementById('class-submit-btn').style.display = 'flex';
       document.getElementById('retake-class-btn').style.display = 'flex';
@@ -897,7 +897,7 @@ async function captureClassroom() {
     faceMatchScore = 88;
     livenessOk     = true;
     showClassPreview();
-    sub.textContent = '✅ Classroom verified!';
+    sub.textContent = 'Classroom verified!';
     sub.style.color = 'var(--success)';
     document.getElementById('class-submit-btn').style.display = 'flex';
     document.getElementById('retake-class-btn').style.display = 'flex';
@@ -907,7 +907,7 @@ async function captureClassroom() {
     errEl.textContent = 'Verification error. Try again.';
     errEl.style.display = 'block';
     btn.disabled = false;
-    btn.textContent = '📷 Try Again';
+    btn.textContent = 'Try Again';
     capturedClassroom = null;
   }
 }
@@ -925,7 +925,7 @@ function retakeClass() {
   document.getElementById('class-video').style.display = 'block';
   document.getElementById('class-capture-btn').style.display = 'flex';
   document.getElementById('class-capture-btn').disabled = false;
-  document.getElementById('class-capture-btn').textContent = '📷 Capture Classroom';
+  document.getElementById('class-capture-btn').textContent = 'Capture Classroom';
   document.getElementById('class-capture-btn').onclick = captureClassroom;
   document.getElementById('retake-class-btn').style.display = 'none';
   document.getElementById('class-submit-btn').style.display = 'none';

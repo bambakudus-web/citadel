@@ -606,7 +606,7 @@ document.addEventListener('DOMContentLoaded',function(){
           </div>
           <div class="card">
             <div class="card-head"><div class="card-head-title">Live Attendance</div><span class="pill pill-green" id="live-pill"><?= count($liveAttendance) ?> present</span></div>
-            <div class="card-body" class="tbl-scroll-h">
+            <div class="card-body" style="overflow-x:auto;-webkit-overflow-scrolling:touch">
               <table class="data-table"><thead><tr><th>Student</th><th><?= terms('index_no', $instType) ?></th><th>Status</th><th>Time</th></tr></thead>
               <tbody id="live-tbody">
                 <?php if(empty($liveAttendance)): ?><tr id="empty-row"><td colspan="4" class="t-muted">Waiting for students...</td></tr>
@@ -702,7 +702,7 @@ document.addEventListener('DOMContentLoaded',function(){
     <!--  PAST SESSIONS  -->
     <div class="page-section" id="sec-history">
       <div class="section-header"><div class="section-title">Past <span>Sessions</span></div></div>
-      <div class="card"><div class="card-body" class="tbl-scroll">
+      <div class="card"><div class="card-body" style="overflow-x:auto;-webkit-overflow-scrolling:touch">
         <table class="data-table"><thead><tr><th>Course</th><th>Date</th><th>Duration</th><th>Attended</th><th>Rate</th><th>Status</th></tr></thead>
         <tbody>
           <?php if(empty($pastSessions)): ?><tr><td colspan="6" class="t-muted">No sessions yet.</td></tr>
@@ -953,7 +953,7 @@ function updateMarkSummary(students) {
             <button class="btn btn-lec btn-sm" onclick="caSaveScores()">Save All Scores</button>
           </div>
         </div>
-        <div class="card-body" class="tbl-scroll">
+        <div class="card-body" style="overflow-x:auto;-webkit-overflow-scrolling:touch">
           <table class="data-table">
             <thead><tr><th>Student</th><th>ID</th><th>Score</th><th>Remarks</th></tr></thead>
             <tbody id="ca-students-body"></tbody>
@@ -968,7 +968,7 @@ function updateMarkSummary(students) {
       <!-- Existing scores viewer -->
       <div class="card" class="mt-15" id="ca-existing-card" class="d-none">
         <div class="card-head"><div class="card-head-title">Uploaded Scores</div></div>
-        <div class="card-body" class="tbl-scroll">
+        <div class="card-body" style="overflow-x:auto;-webkit-overflow-scrolling:touch">
           <table class="data-table">
             <thead><tr><th>Student</th><th>ID</th><th>CA Type</th><th>Score</th><th>Max</th><th>%</th><th>Remarks</th></tr></thead>
             <tbody id="ca-existing-body"><tr><td colspan="7" class="t-muted">Select a course to view scores.</td></tr></tbody>

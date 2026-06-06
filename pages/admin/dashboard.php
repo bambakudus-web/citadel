@@ -596,7 +596,7 @@ document.addEventListener('DOMContentLoaded',function(){
         </div>
         <div class="card">
           <div class="card-head"><div class="card-head-title">Recent Activity</div></div>
-          <div class="card-body" class="tbl-scroll">
+          <div class="card-body" style="overflow-x:auto;-webkit-overflow-scrolling:touch">
             <table class="data-table"><thead><tr><th>Student</th><th>Course</th><th>Status</th><th>Time</th></tr></thead><tbody>
             <?php if(empty($recentActivity)): ?><tr><td colspan="4" class="t-muted">No activity yet.</td></tr>
             <?php else: foreach($recentActivity as $r): ?>
@@ -616,7 +616,7 @@ document.addEventListener('DOMContentLoaded',function(){
           <div class="card-head-title" class="t-danger"> At-Risk Students — Below 75% Attendance</div>
           <span class="pill pill-red"><?= count($atRisk) ?> students</span>
         </div>
-        <div class="card-body" class="tbl-scroll">
+        <div class="card-body" style="overflow-x:auto;-webkit-overflow-scrolling:touch">
           <table class="data-table">
             <thead><tr><th>Student</th><th>Index No</th><th>Sessions</th><th>Absences</th><th>Rate</th></tr></thead>
             <tbody>
@@ -702,7 +702,7 @@ $ttAll = $ttStmt->fetchAll();
         </div>
       </div>
       <?php endif; ?>
-      <div class="card"><div class="card-body" class="tbl-scroll">
+      <div class="card"><div class="card-body" style="overflow-x:auto;-webkit-overflow-scrolling:touch">
         <table class="data-table"><thead><tr><th>Semester</th><th class="hide-mobile">Academic Year</th><th class="hide-mobile">Dates</th><th class="hide-mobile">Courses</th><th>Status</th><th>Actions</th></tr></thead><tbody>
         <?php foreach($allSemesters as $sem): ?>
         <tr>
@@ -727,7 +727,7 @@ $ttAll = $ttStmt->fetchAll();
         <div class="section-title"><?= terms('program', $instType) ?> <span>Management</span></div>
         <button class="btn btn-gold" onclick="openAddProgram()">+ Add Program</button>
       </div>
-      <div class="card"><div class="card-body" class="tbl-scroll">
+      <div class="card"><div class="card-body" style="overflow-x:auto;-webkit-overflow-scrolling:touch">
         <table class="data-table"><thead><tr><th>Program Name</th><th>Code</th><th class="hide-mobile">Department</th><th class="hide-mobile">Duration</th><th class="hide-mobile">Students</th><th>Actions</th></tr></thead><tbody>
         <?php foreach($allPrograms as $p): ?>
         <?php
@@ -759,7 +759,7 @@ ob_start();
         <div class="section-title"><?= terms('course', $instType) ?> <span>Management</span><?php if($activeSemester): ?><span class="sem-label"><?= htmlspecialchars($activeSemester['name']) ?></span><?php endif; ?></div>
         <button class="btn btn-gold" onclick="openAddCourse()">+ Add Course</button>
       </div>
-      <div class="card"><div class="card-body" class="tbl-scroll">
+      <div class="card"><div class="card-body" style="overflow-x:auto;-webkit-overflow-scrolling:touch">
         <table class="data-table"><thead><tr><th>Code</th><th>Course Name</th><th class="hide-mobile">Lecturer</th><th class="hide-mobile">Enrolled</th><th class="hide-mobile">Credits</th><th>Actions</th></tr></thead><tbody>
         <?php foreach($activeCourses as $c): ?>
         <tr>
@@ -784,7 +784,7 @@ ob_start();
         <div class="section-title"><?= terms('lecturer', $instType) ?> <span>Registry</span></div>
         <button class="btn btn-gold" onclick="openAddLecturer()">+ Add Lecturer</button>
       </div>
-      <div class="card"><div class="card-body" class="tbl-scroll">
+      <div class="card"><div class="card-body" style="overflow-x:auto;-webkit-overflow-scrolling:touch">
         <table class="data-table"><thead><tr><th>Full Name</th><th class="hide-mobile">Email</th><th class="hide-mobile">Department</th><th class="hide-mobile">Courses</th><th>Status</th><th>Actions</th></tr></thead><tbody>
         <?php foreach($allLecturers as $l): ?>
         <tr>
@@ -811,7 +811,7 @@ ob_start();
         <button class="btn btn-ghost" onclick="openModal('modal-import-csv')"> Import CSV</button>
       </div>
       <div class="filter-bar"><input type="text" id="student-search" placeholder="Search name or index number..." oninput="filterStudents()"></div>
-      <div class="card"><div class="card-body" class="tbl-scroll">
+      <div class="card"><div class="card-body" style="overflow-x:auto;-webkit-overflow-scrolling:touch">
         <table class="data-table" id="student-table">
           <thead><tr><th>#</th><th>Index No.</th><th>Full Name</th><th class="hide-mobile">Email</th><th class="hide-mobile">Role</th><th class="hide-mobile">Attendance</th><th>Actions</th></tr></thead>
           <tbody>
@@ -838,7 +838,7 @@ ob_start();
     <!--  SESSIONS  -->
     <div class="page-section" id="sec-sessions">
       <div class="section-header"><div class="section-title">Attendance <span>Sessions</span></div></div>
-      <div class="card"><div class="card-body" class="tbl-scroll">
+      <div class="card"><div class="card-body" style="overflow-x:auto;-webkit-overflow-scrolling:touch">
         <table class="data-table"><thead><tr><th>Course</th><th class="hide-mobile">Lecturer</th><th class="hide-mobile">Started</th><th>Status</th><th class="hide-mobile">Attendance</th><th>Actions</th></tr></thead><tbody>
         <?php if(empty($sessions)): ?><tr><td colspan="6" class="t-muted">No sessions yet.</td></tr>
         <?php else: foreach($sessions as $s): ?>
@@ -872,7 +872,7 @@ ob_start();
         </select>
         <select><option value="">All Status</option><option>present</option><option>absent</option><option>late</option></select>
       </div>
-      <div class="card"><div class="card-body" class="tbl-scroll">
+      <div class="card"><div class="card-body" style="overflow-x:auto;-webkit-overflow-scrolling:touch">
         <table class="data-table"><thead><tr><th>Student</th><th class="hide-mobile">Index No.</th><th class="hide-mobile">Course</th><th>Status</th><th class="hide-mobile">Timestamp</th><th class="hide-mobile">Selfie</th></tr></thead><tbody>
         <?php
 ob_start();
@@ -944,7 +944,7 @@ ob_start();
       <?php if(empty($lockedUsers)): ?>
         <div class="card"><div class="card-body" class="tbl-empty">No locked accounts</div></div>
       <?php else: ?>
-      <div class="card"><div class="card-body" class="tbl-scroll">
+      <div class="card"><div class="card-body" style="overflow-x:auto;-webkit-overflow-scrolling:touch">
         <table class="data-table">
           <thead><tr><th>Name</th><th>Index</th><th>Role</th><th>Attempts</th><th>Action</th></tr></thead>
           <tbody>
@@ -971,7 +971,7 @@ ob_start();
     </div>
     <div class="page-section" id="sec-devices">
       <div class="section-header"><div class="section-title">Device <span>Control</span></div></div>
-      <div class="card"><div class="card-body" class="tbl-scroll">
+      <div class="card"><div class="card-body" style="overflow-x:auto;-webkit-overflow-scrolling:touch">
         <table class="data-table"><thead><tr><th>Name</th><th class="hide-mobile">Index No.</th><th class="hide-mobile">Device</th><th>Login Status</th><th>Actions</th></tr></thead><tbody>
         <?php foreach($devs as $d): ?>
           <tr>
@@ -996,7 +996,7 @@ ob_start();
           <div class="t-muted-75 mt-5"><?= $activeSession['course_code'] ?> · <?= $timeRemaining ?>s remaining</div>
           <form method="POST" class="mt-15"><input type="hidden" name="csrf_token" value="<?= csrfToken() ?>"><input type="hidden" name="action" value="end_session"><input type="hidden" name="session_id" value="<?= $activeSession['id'] ?>"><button type="submit" class="btn btn-danger" onclick="return confirm('End this session?')">End Session</button></form>
         </div></div>
-        <div class="card"><div class="card-head"><div class="card-head-title">Live Attendance (<?= count($liveAttendance) ?>)</div></div><div class="card-body" class="tbl-scroll">
+        <div class="card"><div class="card-head"><div class="card-head-title">Live Attendance (<?= count($liveAttendance) ?>)</div></div><div class="card-body" style="overflow-x:auto;-webkit-overflow-scrolling:touch">
           <table class="data-table"><thead><tr><th>Student</th><th>Index</th><th>Status</th><th>Time</th></tr></thead><tbody>
           <?php foreach($liveAttendance as $la): ?>
             <tr><td><?= htmlspecialchars($la['full_name']) ?></td><td class="t-gold-78"><?= $la['index_no'] ?></td>
@@ -1013,7 +1013,7 @@ ob_start();
     <!--  APPROVALS  -->
     <div class="page-section" id="sec-approvals">
       <div class="section-header"><div class="section-title">Pending <span>Approvals</span></div><span id="pending-count-badge" class="badge-warning-lg"><?= $pendingCount ?> PENDING</span></div>
-      <div class="card"><div class="card-body" class="tbl-scroll">
+      <div class="card"><div class="card-body" style="overflow-x:auto;-webkit-overflow-scrolling:touch">
         <table class="data-table" id="approvals-table"><thead><tr><th>Student</th><th>Index</th><th>Photos</th><th>Submitted</th><th>Actions</th></tr></thead>
         <tbody id="approvals-tbody"><tr><td colspan="5" class="tbl-muted-center">Loading...</td></tr></tbody>
         </table>
@@ -1023,7 +1023,7 @@ ob_start();
     <!--  SESSION HISTORY  -->
     <div class="page-section" id="sec-history">
       <div class="section-header"><div class="section-title">Session <span>History</span></div><a href="../../api/export_attendance.php" class="btn btn-ghost btn-sm"> Export All CSV</a></div>
-      <div class="card"><div class="card-body" class="tbl-scroll">
+      <div class="card"><div class="card-body" style="overflow-x:auto;-webkit-overflow-scrolling:touch">
         <table class="data-table"><thead><tr><th>Course</th><th>Present</th><th class="hide-mobile">Late</th><th>Absent</th><th>Export</th></tr></thead><tbody>
         <?php if(empty($sessionHistory)): ?><tr><td colspan="5" class="t-muted">No past sessions yet.</td></tr>
         <?php else: foreach($sessionHistory as $sh): ?>
@@ -1048,7 +1048,7 @@ ob_start();
           <button type="submit" class="btn btn-gold"> Post to Class</button>
         </form>
       </div></div>
-      <div class="card"><div class="card-head"><div class="card-head-title">Recent Announcements</div></div><div class="card-body" class="tbl-scroll">
+      <div class="card"><div class="card-head"><div class="card-head-title">Recent Announcements</div></div><div class="card-body" style="overflow-x:auto;-webkit-overflow-scrolling:touch">
         <table class="data-table"><thead><tr><th>Message</th><th>From</th><th>Date</th></tr></thead><tbody>
         <?php if(empty($announcements)): ?><tr><td colspan="3" class="t-muted">No announcements yet.</td></tr>
         <?php else: foreach($announcements as $ann): ?>
@@ -1764,7 +1764,7 @@ async function deleteProgram(id,name){
           <div class="card-head-title">All CA Scores</div>
           <span id="admin-ca-count" class="pill pill-steel">0 records</span>
         </div>
-        <div class="card-body" class="tbl-scroll">
+        <div class="card-body" style="overflow-x:auto;-webkit-overflow-scrolling:touch">
           <table class="data-table">
             <thead><tr><th>Student</th><th>ID</th><th>Course</th><th>CA Type</th><th>Score</th><th>Max</th><th>%</th><th>Lecturer</th><th>Date</th></tr></thead>
             <tbody id="admin-ca-body">

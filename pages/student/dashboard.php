@@ -598,7 +598,7 @@ document.addEventListener('DOMContentLoaded',function(){
       <?php if(empty($enrolledCourses)): ?>
         <div class="card"><div class="card-body" class="t-muted">No courses enrolled this semester. Contact admin.</div></div>
       <?php else: ?>
-        <div class="card"><div class="card-body" class="tbl-scroll">
+        <div class="card"><div class="card-body" style="overflow-x:auto;-webkit-overflow-scrolling:touch">
           <div class="tbl-scroll"><table class="data-table"><thead><tr><th>Code</th><th>Course Name</th><th class="hide-mobile">Lecturer</th><th>Attended</th><th>Rate</th></tr></thead><tbody>
           <?php foreach($enrolledCourses as $c):
             $pct=$c['total_sessions']>0?round(($c['attended']/$c['total_sessions'])*100):0;
@@ -643,7 +643,7 @@ document.addEventListener('DOMContentLoaded',function(){
     <!-- HISTORY -->
     <div class="page-section" id="sec-history">
       <div class="section-title">My <span>History</span></div>
-      <div class="card"><div class="card-body" class="tbl-scroll">
+      <div class="card"><div class="card-body" style="overflow-x:auto;-webkit-overflow-scrolling:touch">
         <table class="data-table"><thead><tr><th>Course</th><th>Status</th><th>Date & Time</th></tr></thead><tbody>
         <?php if(empty($hist)): ?><tr><td colspan="3" class="t-muted">No records yet.</td></tr>
         <?php else: foreach($hist as $r): ?>

@@ -270,7 +270,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;background:radial-gradi
 .pill-steel{background:rgba(74,111,165,.12);color:var(--steel);border:1px solid rgba(74,111,165,.3)}
 .pill-warn{background:rgba(224,160,80,.12);color:var(--warning);border:1px solid rgba(224,160,80,.3)}
 .tt-item{display:flex;align-items:center;gap:1rem;background:var(--surface2);border:1px solid var(--border);border-left:3px solid var(--rep);padding:.7rem 1rem;border-radius:2px;margin-bottom:.5rem}
-.tt-time{font-size:.75rem;color:var(--gold);min-width:100px;font-weight:500}
+.tt-time{font-size:.75rem;color:var(--gold);font-weight:500}
 .btn{display:inline-flex;align-items:center;gap:.4rem;padding:.5rem 1rem;font-family:'DM Sans',sans-serif;font-size:.78rem;letter-spacing:.06em;border:none;border-radius:2px;cursor:pointer;transition:opacity .2s,transform .15s;text-decoration:none}
 .btn:hover{opacity:.85;transform:translateY(-1px)}
 .btn-rep{background:linear-gradient(135deg,var(--rep-dim),var(--rep));color:#060910;font-weight:600}
@@ -279,7 +279,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;background:radial-gradi
 .btn-danger{background:rgba(224,92,92,.15);color:var(--danger);border:1px solid rgba(224,92,92,.3)}
 .btn-sm{padding:.3rem .7rem;font-size:.72rem}
 .filter-bar{display:flex;gap:.8rem;margin-bottom:1.2rem;flex-wrap:wrap}
-.filter-bar input{background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:.5rem .9rem;font-family:'DM Sans',sans-serif;font-size:.83rem;border-radius:2px;outline:none;flex:1;min-width:160px}
+.filter-bar input{background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:.5rem .9rem;font-family:'DM Sans',sans-serif;font-size:.83rem;border-radius:2px;outline:none;flex:1;}
 .filter-bar input:focus{border-color:var(--rep)}
 .filter-bar input::placeholder{color:var(--muted)}
 .alert{padding:.7rem 1rem;border-radius:2px;font-size:.82rem;margin-bottom:1.2rem}
@@ -348,8 +348,7 @@ input,select,textarea{font-size:16px!important}
     display:flex!important;
     align-items:center!important;
     justify-content:center!important;
-    width:36px!important;height:36px!important;
-    min-width:36px!important;
+    width:36px!important;height:36px!important;!important;
     background:rgba(255,255,255,.08)!important;
     border:1px solid var(--border)!important;
     border-radius:4px!important;
@@ -378,11 +377,11 @@ input,select,textarea{font-size:16px!important}
 @media(max-width:420px){
   .stats-grid{grid-template-columns:1fr!important}
 }
-@media(min-width:769px){
+@media(){
   #menu-btn{display:none!important}
 }
 input,select,textarea{font-size:16px!important}
-@media(min-width:769px){input,select,textarea{font-size:unset!important}}
+@media(){input,select,textarea{font-size:unset!important}}
 
 #sidebar-overlay{
   display:none;position:fixed;inset:0;
@@ -393,42 +392,6 @@ input,select,textarea{font-size:16px!important}
 
 /* TABLE SCROLL FIX */
 .table-wrap{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
-@media(max-width:768px){
-  .data-table,.tbl{font-size:.7rem!important;min-width:0!important;width:100%}
-  .data-table th,.data-table td,.tbl th,.tbl td{
-    padding:.35rem .4rem!important;
-    white-space:nowrap!important;
-    font-size:.7rem!important
-  }
-  /* Hide less important columns on mobile */
-  .hide-col-mobile{display:none!important}
-  /* Wrap all card tables */
-  .card-body{overflow-x:auto!important;-webkit-overflow-scrolling:touch!important}
-  /* Prevent body scroll caused by tables */
-  body{overflow-x:hidden!important}
-  .content{overflow-x:hidden!important}
-  /* Stats grid */
-  .stats-grid{grid-template-columns:repeat(2,1fr)!important;gap:.5rem!important}
-  .stat-card{padding:.75rem!important}
-  .stat-value,.stat-num{font-size:1.3rem!important}
-  .stat-label,.stat-sub{font-size:.62rem!important}
-  /* Two col */
-  .two-col,.wrap2{grid-template-columns:1fr!important;gap:.6rem!important}
-  /* Forms */
-  .form-row{grid-template-columns:1fr!important}
-  /* Topbar */
-  .topbar{padding:.6rem .8rem!important}
-  .topbar-title{font-size:.8rem!important}
-  /* Modals */
-  .modal,.modal-box{width:95vw!important;max-height:88vh!important;overflow-y:auto!important}
-  /* Pills */
-  .pill,.badge{font-size:.6rem!important;padding:.1rem .35rem!important}
-  /* Section header */
-  .section-header{flex-wrap:wrap!important;gap:.4rem!important}
-  .section-title{font-size:.88rem!important}
-  /* Buttons */
-  .btn-sm{font-size:.68rem!important;padding:.3rem .5rem!important}
-}
 
 
 
@@ -489,34 +452,9 @@ input,select,textarea{font-size:16px!important}
             border: 1px solid rgba(224,92,92,0.3) !important;
             color: var(--danger) !important;
         }
-@media(max-width:768px){.sidebar{overflow:hidden!important;display:flex!important;flex-direction:column!important}.sidebar-nav,.sb-nav{flex:1 1 0!important;overflow-y:auto!important;overflow-x:hidden!important;min-height:0!important}.sidebar-user,.sidebar-footer,.sb-foot{flex-shrink:0!important;overflow:visible!important}}
 
 /* === MOBILE TABLE FIX === */
-@media(max-width:768px){
-  .card-body{overflow-x:auto!important;-webkit-overflow-scrolling:touch!important;padding:.6rem!important}
-  .data-table{font-size:.7rem!important;width:100%!important;min-width:0!important}
-  .data-table th,.data-table td{padding:.3rem .35rem!important;white-space:nowrap!important;font-size:.68rem!important}
-  .hide-mobile{display:none!important}
-  .two-col{grid-template-columns:1fr!important;gap:.6rem!important}
-  .stats-grid{grid-template-columns:repeat(2,1fr)!important;gap:.5rem!important}
-  .section-header{flex-wrap:wrap!important;gap:.4rem!important}
-  .content{padding:.6rem!important;overflow-x:hidden!important}
-  body{overflow-x:hidden!important}
-  .course-cards{grid-template-columns:1fr!important}
-  .form-row{grid-template-columns:1fr!important}
-  .page-section{overflow-x:hidden!important}
-  .card{overflow:hidden!important}
-}
-@media(max-width:420px){
-  .stats-grid{grid-template-columns:1fr!important}
-  .data-table th,.data-table td{font-size:.62rem!important;padding:.25rem!important}
-}
 
-@media(max-width:768px){
-  .grid-auto-140{grid-template-columns:repeat(2,1fr)!important;gap:.5rem!important}
-  #ca-summary-cards,#rep-ca-cards,#admin-ca-cards{grid-template-columns:repeat(2,1fr)!important}
-  .card-dynamic-top{padding:.6rem!important}
-}
 </style>
 
 <script>

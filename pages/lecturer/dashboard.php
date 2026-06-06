@@ -260,7 +260,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;background:radial-gradi
 .btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--border)}
 .btn-sm{padding:.3rem .7rem;font-size:.72rem}
 .tt-item{display:flex;align-items:center;gap:1rem;background:var(--surface2);border:1px solid var(--border);border-left:3px solid var(--lec);padding:.7rem 1rem;border-radius:2px;margin-bottom:.5rem}
-.tt-time{font-size:.75rem;color:var(--gold);min-width:100px;font-weight:500}
+.tt-time{font-size:.75rem;color:var(--gold);font-weight:500}
 .tt-day{font-family:'Cinzel',serif;font-size:.78rem;color:var(--lec);letter-spacing:.15em;margin:1.2rem 0 .5rem;text-transform:uppercase}
 .code-display-zone{background:var(--surface);border:1px solid var(--border);border-radius:2px;padding:2.5rem 2rem;text-align:center;position:relative;overflow:hidden}
 .code-display-zone::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--lec),transparent)}
@@ -322,8 +322,7 @@ input,select,textarea{font-size:16px!important}
     display:flex!important;
     align-items:center!important;
     justify-content:center!important;
-    width:36px!important;height:36px!important;
-    min-width:36px!important;
+    width:36px!important;height:36px!important;!important;
     background:rgba(255,255,255,.08)!important;
     border:1px solid var(--border)!important;
     border-radius:4px!important;
@@ -352,11 +351,11 @@ input,select,textarea{font-size:16px!important}
 @media(max-width:420px){
   .stats-grid{grid-template-columns:1fr!important}
 }
-@media(min-width:769px){
+@media(){
   #menu-btn{display:none!important}
 }
 input,select,textarea{font-size:16px!important}
-@media(min-width:769px){input,select,textarea{font-size:unset!important}}
+@media(){input,select,textarea{font-size:unset!important}}
 
 #sidebar-overlay{
   display:none;position:fixed;inset:0;
@@ -367,42 +366,6 @@ input,select,textarea{font-size:16px!important}
 
 /* TABLE SCROLL FIX */
 .table-wrap{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
-@media(max-width:768px){
-  .data-table,.tbl{font-size:.7rem!important;min-width:0!important;width:100%}
-  .data-table th,.data-table td,.tbl th,.tbl td{
-    padding:.35rem .4rem!important;
-    white-space:nowrap!important;
-    font-size:.7rem!important
-  }
-  /* Hide less important columns on mobile */
-  .hide-col-mobile{display:none!important}
-  /* Wrap all card tables */
-  .card-body{overflow-x:auto!important;-webkit-overflow-scrolling:touch!important}
-  /* Prevent body scroll caused by tables */
-  body{overflow-x:hidden!important}
-  .content{overflow-x:hidden!important}
-  /* Stats grid */
-  .stats-grid{grid-template-columns:repeat(2,1fr)!important;gap:.5rem!important}
-  .stat-card{padding:.75rem!important}
-  .stat-value,.stat-num{font-size:1.3rem!important}
-  .stat-label,.stat-sub{font-size:.62rem!important}
-  /* Two col */
-  .two-col,.wrap2{grid-template-columns:1fr!important;gap:.6rem!important}
-  /* Forms */
-  .form-row{grid-template-columns:1fr!important}
-  /* Topbar */
-  .topbar{padding:.6rem .8rem!important}
-  .topbar-title{font-size:.8rem!important}
-  /* Modals */
-  .modal,.modal-box{width:95vw!important;max-height:88vh!important;overflow-y:auto!important}
-  /* Pills */
-  .pill,.badge{font-size:.6rem!important;padding:.1rem .35rem!important}
-  /* Section header */
-  .section-header{flex-wrap:wrap!important;gap:.4rem!important}
-  .section-title{font-size:.88rem!important}
-  /* Buttons */
-  .btn-sm{font-size:.68rem!important;padding:.3rem .5rem!important}
-}
 
 
 
@@ -463,34 +426,9 @@ input,select,textarea{font-size:16px!important}
             border: 1px solid rgba(224,92,92,0.3) !important;
             color: var(--danger) !important;
         }
-@media(max-width:768px){.sidebar{overflow:hidden!important;display:flex!important;flex-direction:column!important}.sidebar-nav,.sb-nav{flex:1 1 0!important;overflow-y:auto!important;overflow-x:hidden!important;min-height:0!important}.sidebar-user,.sidebar-footer,.sb-foot{flex-shrink:0!important;overflow:visible!important}}
 
 /* === MOBILE TABLE FIX === */
-@media(max-width:768px){
-  .card-body{overflow-x:auto!important;-webkit-overflow-scrolling:touch!important;padding:.6rem!important}
-  .data-table{font-size:.7rem!important;width:100%!important;min-width:0!important}
-  .data-table th,.data-table td{padding:.3rem .35rem!important;white-space:nowrap!important;font-size:.68rem!important}
-  .hide-mobile{display:none!important}
-  .two-col{grid-template-columns:1fr!important;gap:.6rem!important}
-  .stats-grid{grid-template-columns:repeat(2,1fr)!important;gap:.5rem!important}
-  .section-header{flex-wrap:wrap!important;gap:.4rem!important}
-  .content{padding:.6rem!important;overflow-x:hidden!important}
-  body{overflow-x:hidden!important}
-  .course-cards{grid-template-columns:1fr!important}
-  .form-row{grid-template-columns:1fr!important}
-  .page-section{overflow-x:hidden!important}
-  .card{overflow:hidden!important}
-}
-@media(max-width:420px){
-  .stats-grid{grid-template-columns:1fr!important}
-  .data-table th,.data-table td{font-size:.62rem!important;padding:.25rem!important}
-}
 
-@media(max-width:768px){
-  .grid-auto-140{grid-template-columns:repeat(2,1fr)!important;gap:.5rem!important}
-  #ca-summary-cards,#rep-ca-cards,#admin-ca-cards{grid-template-columns:repeat(2,1fr)!important}
-  .card-dynamic-top{padding:.6rem!important}
-}
 </style>
 
 <script>
@@ -739,7 +677,7 @@ document.addEventListener('DOMContentLoaded',function(){
     <div class="page-section" id="sec-history">
       <div class="section-header"><div class="section-title">Past <span>Sessions</span></div></div>
       <div class="card"><div class="card-body" style="overflow-x:auto;-webkit-overflow-scrolling:touch">
-        <table class="data-table" style="min-width:480px"><thead><tr><th style="width:70px">Course</th><th style="width:120px">Date</th><th style="width:70px">Duration</th><th style="width:80px">Attended</th><th style="width:60px">Rate</th><th style="width:70px">Status</th></tr></thead>
+        <table class="data-table" style=""><thead><tr><th style="width:70px">Course</th><th style="width:120px">Date</th><th style="width:70px">Duration</th><th style="width:80px">Attended</th><th style="width:60px">Rate</th><th style="width:70px">Status</th></tr></thead>
         <tbody>
           <?php if(empty($pastSessions)): ?><tr><td colspan="6" class="t-muted">No sessions yet.</td></tr>
           <?php else: foreach($pastSessions as $ps):

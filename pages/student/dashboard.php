@@ -179,7 +179,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;background:radial-gradi
 .pill-pending{background:rgba(224,160,80,.12);color:var(--warning);border:1px solid rgba(224,160,80,.3)}
 .tt-grid{display:flex;flex-direction:column;gap:.5rem}
 .tt-item{display:flex;align-items:center;gap:1rem;background:var(--surface2);border:1px solid var(--border);border-left:3px solid var(--steel);padding:.7rem 1rem;border-radius:2px}
-.tt-time{font-size:.75rem;color:var(--gold);min-width:100px;font-weight:500}
+.tt-time{font-size:.75rem;color:var(--gold);font-weight:500}
 .tt-info .code{font-size:.7rem;color:var(--muted)}
 .tt-info .name{font-size:.85rem;color:var(--text)}
 .tt-info .room{font-size:.72rem;color:var(--muted)}
@@ -199,7 +199,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;background:radial-gradi
 .timer-strip{display:flex;align-items:center;gap:.8rem;background:var(--surface2);border:1px solid var(--border);border-radius:2px;padding:.6rem 1rem;margin-bottom:1.2rem}
 .timer-bar{flex:1;height:4px;background:var(--border);border-radius:2px;overflow:hidden}
 .timer-fill{height:100%;background:var(--gold);border-radius:2px;transition:width 1s linear,background .3s}
-.timer-num{font-family:'Cinzel',serif;font-size:.85rem;color:var(--gold);min-width:28px;text-align:right}
+.timer-num{font-family:'Cinzel',serif;font-size:.85rem;color:var(--gold);text-align:right}
 .pending-card{background:var(--surface);border:1px solid rgba(224,160,80,.3);border-radius:2px;padding:2rem;text-align:center}
 .pending-icon{font-size:2.5rem;margin-bottom:1rem}
 .pending-title{font-family:'Cinzel',serif;font-size:1rem;color:var(--warning);margin-bottom:.5rem}
@@ -250,8 +250,7 @@ input,select,textarea{font-size:16px!important}
     display:flex!important;
     align-items:center!important;
     justify-content:center!important;
-    width:36px!important;height:36px!important;
-    min-width:36px!important;
+    width:36px!important;height:36px!important;!important;
     background:rgba(255,255,255,.08)!important;
     border:1px solid var(--border)!important;
     border-radius:4px!important;
@@ -280,11 +279,11 @@ input,select,textarea{font-size:16px!important}
 @media(max-width:420px){
   .stats-grid{grid-template-columns:1fr!important}
 }
-@media(min-width:769px){
+@media(){
   #menu-btn{display:none!important}
 }
 input,select,textarea{font-size:16px!important}
-@media(min-width:769px){input,select,textarea{font-size:unset!important}}
+@media(){input,select,textarea{font-size:unset!important}}
 
 #sidebar-overlay{
   display:none;position:fixed;inset:0;
@@ -295,42 +294,6 @@ input,select,textarea{font-size:16px!important}
 
 /* TABLE SCROLL FIX */
 .table-wrap{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
-@media(max-width:768px){
-  .data-table,.tbl{font-size:.7rem!important;min-width:0!important;width:100%}
-  .data-table th,.data-table td,.tbl th,.tbl td{
-    padding:.35rem .4rem!important;
-    white-space:nowrap!important;
-    font-size:.7rem!important
-  }
-  /* Hide less important columns on mobile */
-  .hide-col-mobile{display:none!important}
-  /* Wrap all card tables */
-  .card-body{overflow-x:auto!important;-webkit-overflow-scrolling:touch!important}
-  /* Prevent body scroll caused by tables */
-  body{overflow-x:hidden!important}
-  .content{overflow-x:hidden!important}
-  /* Stats grid */
-  .stats-grid{grid-template-columns:repeat(2,1fr)!important;gap:.5rem!important}
-  .stat-card{padding:.75rem!important}
-  .stat-value,.stat-num{font-size:1.3rem!important}
-  .stat-label,.stat-sub{font-size:.62rem!important}
-  /* Two col */
-  .two-col,.wrap2{grid-template-columns:1fr!important;gap:.6rem!important}
-  /* Forms */
-  .form-row{grid-template-columns:1fr!important}
-  /* Topbar */
-  .topbar{padding:.6rem .8rem!important}
-  .topbar-title{font-size:.8rem!important}
-  /* Modals */
-  .modal,.modal-box{width:95vw!important;max-height:88vh!important;overflow-y:auto!important}
-  /* Pills */
-  .pill,.badge{font-size:.6rem!important;padding:.1rem .35rem!important}
-  /* Section header */
-  .section-header{flex-wrap:wrap!important;gap:.4rem!important}
-  .section-title{font-size:.88rem!important}
-  /* Buttons */
-  .btn-sm{font-size:.68rem!important;padding:.3rem .5rem!important}
-}
 
 
 
@@ -339,31 +302,7 @@ input,select,textarea{font-size:16px!important}
 
 
 /* === MOBILE TABLE FIX === */
-@media(max-width:768px){
-  .card-body{overflow-x:auto!important;-webkit-overflow-scrolling:touch!important;padding:.6rem!important}
-  .data-table{font-size:.7rem!important;width:100%!important;min-width:0!important}
-  .data-table th,.data-table td{padding:.3rem .35rem!important;white-space:nowrap!important;font-size:.68rem!important}
-  .hide-mobile{display:none!important}
-  .two-col{grid-template-columns:1fr!important;gap:.6rem!important}
-  .stats-grid{grid-template-columns:repeat(2,1fr)!important;gap:.5rem!important}
-  .section-header{flex-wrap:wrap!important;gap:.4rem!important}
-  .content{padding:.6rem!important;overflow-x:hidden!important}
-  body{overflow-x:hidden!important}
-  .course-cards{grid-template-columns:1fr!important}
-  .form-row{grid-template-columns:1fr!important}
-  .page-section{overflow-x:hidden!important}
-  .card{overflow:hidden!important}
-}
-@media(max-width:420px){
-  .stats-grid{grid-template-columns:1fr!important}
-  .data-table th,.data-table td{font-size:.62rem!important;padding:.25rem!important}
-}
 
-@media(max-width:768px){
-  .grid-auto-140{grid-template-columns:repeat(2,1fr)!important;gap:.5rem!important}
-  #ca-summary-cards,#rep-ca-cards,#admin-ca-cards{grid-template-columns:repeat(2,1fr)!important}
-  .card-dynamic-top{padding:.6rem!important}
-}
 </style>
 
 <script>
@@ -638,7 +577,7 @@ function toggleTheme(){
         <div class="card"><div class="card-body" class="t-muted">No courses enrolled this semester. Contact admin.</div></div>
       <?php else: ?>
         <div class="card" style="max-width:100%;overflow:hidden"><div class="card-body" style="overflow-x:auto;-webkit-overflow-scrolling:touch">
-          <table class="data-table" style="min-width:400px"><thead><tr><th style="width:80px">Code</th><th>Course Name</th><th class="hide-mobile" style="width:100px">Lecturer</th><th style="width:80px">Attended</th><th style="width:60px">Rate</th></tr></thead><tbody>
+          <table class="data-table" style=""><thead><tr><th style="width:80px">Code</th><th>Course Name</th><th class="hide-mobile" style="width:100px">Lecturer</th><th style="width:80px">Attended</th><th style="width:60px">Rate</th></tr></thead><tbody>
           <?php foreach($enrolledCourses as $c):
             $pct=$c['total_sessions']>0?round(($c['attended']/$c['total_sessions'])*100):0;
             $color=$pct>=75?'var(--success)':($pct>=50?'var(--warning)':'var(--danger)'); ?>

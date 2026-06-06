@@ -414,6 +414,7 @@ input,select,textarea{font-size:16px!important}
             color: var(--danger) !important;
         }
 @media(max-width:768px){.sidebar{overflow:hidden!important;display:flex!important;flex-direction:column!important}.sidebar-nav,.sb-nav{flex:1 1 0!important;overflow-y:auto!important;overflow-x:hidden!important;min-height:0!important}.sidebar-user,.sidebar-footer,.sb-foot{flex-shrink:0!important;overflow:visible!important}}
+#ca-summary-cards:empty,#rep-ca-cards:empty,#admin-ca-cards:empty{display:none!important;margin:0!important;padding:0!important}
 </style>
 <script src="/assets/chart.min.js"></script>
 <script>

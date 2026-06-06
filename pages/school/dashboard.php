@@ -264,7 +264,10 @@ input,select,textarea{font-size:16px!important}
   .sidebar.open{transform:translateX(0)!important}
   .main{margin-left:0!important}
   .content{padding:.7rem!important}
-  .topbar{padding:.65rem .9rem!important;gap:.5rem}
+  .topbar{padding:.65rem .9rem!important;gap:.5rem;overflow:hidden!important}
+  .topbar .flex-center{gap:.4rem!important;min-width:0!important;overflow:hidden!important}
+  .topbar .badge-lec,.topbar .badge,.topbar .badge-admin{flex-shrink:0!important;font-size:.55rem!important;padding:.2rem .4rem!important;white-space:nowrap!important}
+  .topbar .t-muted-75{display:none!important}
   .hide-mobile{display:none!important}
   .topbar-right{gap:.5rem!important}
   #menu-btn{

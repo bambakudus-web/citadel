@@ -445,6 +445,7 @@ function showSection(name,el){
   if(el)el.classList.add('active');
   var sb=document.getElementById('sidebar');
   if(sb&&sb.classList.contains('open'))toggleSidebar();
+  if(name==='ca' && typeof adminCALoad==='function') setTimeout(adminCALoad,80);
 }
 
 document.addEventListener('DOMContentLoaded',function(){
@@ -1861,5 +1862,11 @@ function adminCAExport() {
 }
 
 </script>
+
+<style>
+.ca-cards-wrap:empty{display:none!important}
+#ca-summary-cards:empty,#rep-ca-cards,#admin-ca-cards{min-height:0!important}
+#ca-summary-cards:empty,#rep-ca-cards:empty,#admin-ca-cards:empty{display:none!important}
+</style>
 </body>
 </html>

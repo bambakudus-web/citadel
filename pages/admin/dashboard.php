@@ -1408,10 +1408,10 @@ function manageDevice(id, name, locked) {
 
 function toggleTheme() {
   const body = document.body, btn = document.getElementById('theme-btn');
-  if (body.classList.contains('light')) { body.classList.remove('light'); localStorage.setItem('theme','dark'); if(btn) btn.textContent=''; }
-  else { body.classList.add('light'); localStorage.setItem('theme','light'); if(btn) btn.textContent=''; }
+  if (body.classList.contains('light')) { body.classList.remove('light'); localStorage.setItem('theme','dark'); if(btn) btn.textContent='\u2728'; }
+  else { body.classList.add('light'); localStorage.setItem('theme','light'); if(btn) btn.textContent='\u263E'; }
 }
-(function(){ if(localStorage.getItem('theme')==='light'){ document.body.classList.add('light'); const btn=document.getElementById('theme-btn'); if(btn) btn.textContent=''; } })();
+(function(){ if(localStorage.getItem('theme')==='light'){ document.body.classList.add('light'); const btn=document.getElementById('theme-btn'); if(btn) btn.textContent='\u263E'; } })();
 
 loadApprovalsAdmin();
 setInterval(loadApprovalsAdmin, 15000);

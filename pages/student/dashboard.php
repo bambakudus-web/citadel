@@ -1052,6 +1052,26 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
+<!-- MY CA SCORES -->
+    <div class="page-section" id="sec-ca">
+      <div class="section-title">My <span>CA Scores</span></div>
+      <div class="grid-auto-140" id="ca-summary-cards"></div>
+      <div class="card">
+        <div class="card-head">
+          <div class="card-head-title">Assessment Scores</div>
+          <button class="btn btn-ghost btn-sm" onclick="loadMyCA()">Refresh</button>
+        </div>
+        <div class="card-body" style="overflow-x:auto;-webkit-overflow-scrolling:touch">
+          <table class="data-table"><thead><tr><th>Course</th><th>Type</th><th>Score</th><th>Max</th><th>%</th><th class="hide-mobile">Remarks</th><th class="hide-mobile">Date</th></tr></thead>
+          <tbody id="ca-scores-body"><tr><td colspan="7" class="tbl-empty">No CA scores uploaded yet. Your lecturer will upload scores after assessments.</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- MY CA SCORES -->
+
 <?php require_once '../../includes/toast.php'; ?>
 </body>
 </html>

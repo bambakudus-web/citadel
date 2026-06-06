@@ -914,7 +914,7 @@ async function approveAtt(id,action){
 }
 
 
-function toggleTheme(){const body=document.body;const btn=document.getElementById('theme-btn');if(body.classList.contains('light')){body.classList.remove('light');localStorage.setItem('theme','dark');if(btn)btn.innerHTML='&#9790;';}else{body.classList.add('light');localStorage.setItem('theme','light');if(btn)btn.innerHTML='&#9790;';}}
+function toggleTheme(){const body=document.body;const btn=document.getElementById('theme-btn');if(body.classList.contains('light')){body.classList.remove('light');localStorage.setItem('theme','dark');if(btn)btn.innerHTML='&#9728;';}else{body.classList.add('light');localStorage.setItem('theme','light');if(btn)btn.innerHTML='&#9790;';}}
 (function(){if(localStorage.getItem('theme')==='light'){document.body.classList.add('light');const btn=document.getElementById('theme-btn');if(btn)btn.innerHTML='&#9790;';}})();
 
 const csrfToken="<?= csrfToken() ?>";
@@ -925,6 +925,51 @@ window.fetch=function(url,options={}){options.headers=options.headers||{};option
 // Mobile handled in head script
 
 </script>
+<!-- REP CA SCORES -->
+    <div class="page-section" id="sec-ca">
+      <div class="section-title">My <span>CA Scores</span></div>
+      <div class="grid-auto-140" id="rep-ca-cards"></div>
+      <div class="card">
+        <div class="card-head">
+          <div class="card-head-title">Assessment Scores</div>
+          <button class="btn btn-ghost btn-sm" onclick="loadRepCA()">Refresh</button>
+        </div>
+        <div class="card-body" style="overflow-x:auto;-webkit-overflow-scrolling:touch">
+          <table class="data-table"><thead><tr><th>Course</th><th>Type</th><th>Score</th><th>Max</th><th>%</th><th class="hide-mobile">Remarks</th></tr></thead>
+          <tbody id="rep-ca-body"><tr><td colspan="6" class="tbl-empty">No CA scores uploaded yet. Your lecturer will upload scores after assessments.</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- REP MY CA SCORES -->
+
 <?php require_once '../../includes/toast.php'; ?>
+<script>
+async function loadRepCA(){
+  const r = await fetch(window.location.origin+'/api/ca_scores.php?type=student');
+  const d = await r.json();
+  const tbody = document.getElementById('rep-ca-body');
+  const cards = document.getElementById('rep-ca-cards');
+  if(!d.success||!d.scores||!d.scores.length){
+    if(tbody)tbody.innerHTML='<tr><td colspan="6" class="tbl-empty">No CA scores uploaded yet.</td></tr>';
+    if(cards)cards.innerHTML='';return;
+  }
+  if(tbody)tbody.innerHTML=d.scores.map(s=>{
+    const pct=Math.round(s.score/s.max_score*100);
+    return '<tr><td><div class="fw-500">'+s.course_code+'</div><div class="t-muted-75">'+s.course_name+'</div></td><td><span class="pill pill-steel">'+s.ca_type+'</span></td><td class="fw-600 t-gold">'+s.score+'</td><td class="t-muted">'+s.max_score+'</td><td><span class="pill '+(pct>=50?'pill-green':'pill-red')+'">'+pct+'%</span></td><td class="t-muted-78">'+(s.remarks||'—')+'</td></tr>';
+  }).join('');
+  if(cards){
+    const courses={};
+    d.scores.forEach(s=>{if(!courses[s.course_code])courses[s.course_code]={total:0,max:0,count:0,name:s.course_name};courses[s.course_code].total+=parseFloat(s.score);courses[s.course_code].max+=parseFloat(s.max_score);courses[s.course_code].count++;});
+    cards.innerHTML=Object.entries(courses).map(([code,c])=>{const avg=Math.round(c.total/c.max*100);const col=avg>=75?'var(--success)':avg>=50?'var(--gold)':'var(--danger)';return '<div class="card card-dynamic-top" style="border-top-color:'+col+'"><div class="label-muted-upper">'+code+'</div><div class="fw-700 t-gold">'+avg+'%</div><div class="t-muted-72">'+c.count+' assessment'+(c.count>1?'s':'')+'</div></div>';}).join('');
+  }
+}
+document.addEventListener('DOMContentLoaded',function(){
+  var n=document.querySelector('[onclick*="ca"]');
+  if(n)n.addEventListener('click',function(){setTimeout(loadRepCA,100);});
+});
+</script>
 </body>
 </html>

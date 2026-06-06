@@ -421,11 +421,6 @@ input,select,textarea{font-size:16px!important}
 
 
 </script>
-<script>
-
-}
-
-</script>
 
 <script>
 const BASE_URL = window.location.origin;

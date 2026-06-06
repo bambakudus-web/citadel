@@ -241,7 +241,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;background:radial-gradi
 .card{background:var(--surface);border:1px solid var(--border);border-radius:2px}
 .card-head{padding:1rem 1.4rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
 .card-head-title{font-size:.72rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted)}
-.card-body{padding:1.2rem 1.4rem}
+.card-body{padding:1.2rem 1.4rem;overflow-x:auto;-webkit-overflow-scrolling:touch}.card{overflow:hidden}
 .two-col{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:1.5rem}
 .data-table{width:100%;border-collapse:collapse;font-size:.83rem}
 .data-table th{text-align:left;font-size:.62rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);padding:.6rem .8rem;border-bottom:1px solid var(--border)}

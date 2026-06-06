@@ -373,6 +373,7 @@ function showSection(name,el){
   document.querySelectorAll('.nav-item').forEach(function(n){n.classList.remove('active');});
   var sec=document.getElementById('sec-'+name);
   if(sec)sec.classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
   var title=document.getElementById('page-title');
   if(title)title.textContent=name.charAt(0).toUpperCase()+name.slice(1);
   if(el)el.classList.add('active');
@@ -603,7 +604,7 @@ document.addEventListener('DOMContentLoaded',function(){
       <?php if(empty($enrolledCourses)): ?>
         <div class="card"><div class="card-body" class="t-muted">No courses enrolled this semester. Contact admin.</div></div>
       <?php else: ?>
-        <div class="card"><div class="card-body" style="overflow-x:auto;-webkit-overflow-scrolling:touch">
+        <div class="card" style="max-width:100%;overflow:hidden"><div class="card-body" style="overflow-x:auto;-webkit-overflow-scrolling:touch">
           <table class="data-table" style="min-width:400px"><thead><tr><th style="width:80px">Code</th><th>Course Name</th><th class="hide-mobile" style="width:100px">Lecturer</th><th style="width:80px">Attended</th><th style="width:60px">Rate</th></tr></thead><tbody>
           <?php foreach($enrolledCourses as $c):
             $pct=$c['total_sessions']>0?round(($c['attended']/$c['total_sessions'])*100):0;

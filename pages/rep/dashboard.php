@@ -490,6 +490,33 @@ input,select,textarea{font-size:16px!important}
             color: var(--danger) !important;
         }
 @media(max-width:768px){.sidebar{overflow:hidden!important;display:flex!important;flex-direction:column!important}.sidebar-nav,.sb-nav{flex:1 1 0!important;overflow-y:auto!important;overflow-x:hidden!important;min-height:0!important}.sidebar-user,.sidebar-footer,.sb-foot{flex-shrink:0!important;overflow:visible!important}}
+
+/* === MOBILE TABLE FIX === */
+@media(max-width:768px){
+  .card-body{overflow-x:auto!important;-webkit-overflow-scrolling:touch!important;padding:.6rem!important}
+  .data-table{font-size:.7rem!important;width:100%!important;min-width:0!important}
+  .data-table th,.data-table td{padding:.3rem .35rem!important;white-space:nowrap!important;font-size:.68rem!important}
+  .hide-mobile{display:none!important}
+  .two-col{grid-template-columns:1fr!important;gap:.6rem!important}
+  .stats-grid{grid-template-columns:repeat(2,1fr)!important;gap:.5rem!important}
+  .section-header{flex-wrap:wrap!important;gap:.4rem!important}
+  .content{padding:.6rem!important;overflow-x:hidden!important}
+  body{overflow-x:hidden!important}
+  .course-cards{grid-template-columns:1fr!important}
+  .form-row{grid-template-columns:1fr!important}
+  .page-section{overflow-x:hidden!important}
+  .card{overflow:hidden!important}
+}
+@media(max-width:420px){
+  .stats-grid{grid-template-columns:1fr!important}
+  .data-table th,.data-table td{font-size:.62rem!important;padding:.25rem!important}
+}
+
+@media(max-width:768px){
+  .grid-auto-140{grid-template-columns:repeat(2,1fr)!important;gap:.5rem!important}
+  #ca-summary-cards,#rep-ca-cards,#admin-ca-cards{grid-template-columns:repeat(2,1fr)!important}
+  .card-dynamic-top{padding:.6rem!important}
+}
 </style>
 
 <script>
@@ -967,8 +994,11 @@ async function loadRepCA(){
   }
 }
 document.addEventListener('DOMContentLoaded',function(){
-  var n=document.querySelector('[onclick*="ca"]');
-  if(n)n.addEventListener('click',function(){setTimeout(loadRepCA,100);});
+  document.querySelectorAll('.nav-item').forEach(function(n){
+    if(n.getAttribute('onclick') && n.getAttribute('onclick').indexOf("'ca'") !== -1){
+      n.addEventListener('click',function(){setTimeout(loadRepCA,150);});
+    }
+  });
 });
 </script>
 </body>

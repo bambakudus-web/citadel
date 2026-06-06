@@ -1,4 +1,5 @@
 <?php
+ob_start();
 require_once '../../includes/security.php';
 require_once '../../includes/db.php';
 require_once '../../includes/auth.php';
@@ -643,6 +644,7 @@ document.addEventListener('DOMContentLoaded',function(){
         <button class="btn btn-gold" onclick="openAddSlot()">+ Add Slot</button>
       </div>
       <?php
+ob_start();
       $ttStmt = $pdo->prepare("
           SELECT t.*, u.full_name AS lecturer_name,
                  COALESCE(c.code, t.course_code) AS course_code,
@@ -729,6 +731,7 @@ $ttAll = $ttStmt->fetchAll();
         <table class="data-table"><thead><tr><th>Program Name</th><th>Code</th><th class="hide-mobile">Department</th><th class="hide-mobile">Duration</th><th class="hide-mobile">Students</th><th>Actions</th></tr></thead><tbody>
         <?php foreach($allPrograms as $p): ?>
         <?php
+ob_start();
           $pStudents = $pdo->prepare("SELECT COUNT(*) FROM users WHERE program_id=? AND role='student'");
           $pStudents->execute([$p['id']]); $pCount = $pStudents->fetchColumn();
           $pDept = $pdo->prepare("SELECT name FROM departments WHERE id=?");
@@ -872,6 +875,7 @@ $ttAll = $ttStmt->fetchAll();
       <div class="card"><div class="card-body" class="tbl-scroll">
         <table class="data-table"><thead><tr><th>Student</th><th class="hide-mobile">Index No.</th><th class="hide-mobile">Course</th><th>Status</th><th class="hide-mobile">Timestamp</th><th class="hide-mobile">Selfie</th></tr></thead><tbody>
         <?php
+ob_start();
         $__q=$pdo->prepare("SELECT a.*,u.full_name,u.index_no,s.course_code FROM attendance a JOIN users u ON a.student_id=u.id JOIN sessions s ON a.session_id=s.id WHERE u.institution_id=? ORDER BY a.timestamp DESC LIMIT 50");$__q->execute([$inst_id]);$records=$__q->fetchAll();
         if(empty($records)): ?><tr><td colspan="6" class="t-muted">No attendance records yet.</td></tr>
         <?php else: foreach($records as $r): ?>
@@ -1752,7 +1756,7 @@ async function deleteProgram(id,name){
       </div>
 
       <!-- Summary cards -->
-      <div id="admin-ca-cards" class="grid-auto-140"></div>
+      <div id="admin-ca-cards" class="grid-auto-140" style="display:none"></div>
 
       <!-- Scores table -->
       <div class="card">
@@ -1793,9 +1797,10 @@ async function adminCALoad() {
   if (!d.success || !d.scores?.length) {
     tbody.innerHTML = '<tr><td colspan="9" class="tbl-empty">No scores found.</td></tr>';
     if (count) count.textContent = '0 records';
-    if (cards) cards.innerHTML = '';
+    if (cards) { cards.innerHTML = ''; cards.style.display = 'none'; }
     return;
   }
+  if (cards) cards.style.display = 'grid';
 
   if (count) count.textContent = d.scores.length + ' records';
 

@@ -1,4 +1,5 @@
 <?php
+ob_start();
 require_once '../../includes/security.php';
 require_once '../../includes/db.php';
 require_once '../../includes/auth.php';
@@ -990,7 +991,7 @@ async function loadMyCA() {
   const cards = document.getElementById('ca-summary-cards');
 
   if (!d.success || !d.scores.length) {
-    tbody.innerHTML = '<tr><td colspan="7" class="tbl-empty">No CA scores uploaded yet.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="7" class="tbl-empty">No CA scores uploaded yet. Your lecturer will upload scores after assessments.</td></tr>';
     if (cards) cards.innerHTML = '';
     return;
   }

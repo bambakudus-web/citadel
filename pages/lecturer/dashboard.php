@@ -1,4 +1,5 @@
 <?php
+ob_start();
 require_once '../../includes/security.php';
 require_once '../../includes/db.php';
 require_once '../../includes/auth.php';
@@ -100,9 +101,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'start
 
     $pdo->prepare("UPDATE sessions SET active_status=0, end_time=NOW() WHERE lecturer_id=? AND active_status=1")->execute([$userId]);
     $progId = null;
-    if ($cId) {
+    if ($courseId) {
         $progRow = $pdo->prepare("SELECT program_id FROM courses WHERE id=?");
-        $progRow->execute([$cId]); $progRow = $progRow->fetch();
+        $progRow->execute([$courseId]); $progRow = $progRow->fetch();
         $progId = $progRow['program_id'] ?? null;
     }
     $isOnline    = isset($_POST['is_online']) ? 1 : 0;

@@ -706,7 +706,7 @@ document.addEventListener('DOMContentLoaded',function(){
     <div class="page-section" id="sec-history">
       <div class="section-header"><div class="section-title">Past <span>Sessions</span></div></div>
       <div class="card"><div class="card-body" style="overflow-x:auto;-webkit-overflow-scrolling:touch">
-        <table class="data-table"><thead><tr><th>Course</th><th>Date</th><th>Duration</th><th>Attended</th><th>Rate</th><th>Status</th></tr></thead>
+        <table class="data-table" style="min-width:480px"><thead><tr><th style="width:70px">Course</th><th style="width:120px">Date</th><th style="width:70px">Duration</th><th style="width:80px">Attended</th><th style="width:60px">Rate</th><th style="width:70px">Status</th></tr></thead>
         <tbody>
           <?php if(empty($pastSessions)): ?><tr><td colspan="6" class="t-muted">No sessions yet.</td></tr>
           <?php else: foreach($pastSessions as $ps):

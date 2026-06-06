@@ -602,7 +602,7 @@ document.addEventListener('DOMContentLoaded',function(){
         <div class="card"><div class="card-body" class="t-muted">No courses enrolled this semester. Contact admin.</div></div>
       <?php else: ?>
         <div class="card"><div class="card-body" style="overflow-x:auto;-webkit-overflow-scrolling:touch">
-          <div class="tbl-scroll"><table class="data-table"><thead><tr><th>Code</th><th>Course Name</th><th class="hide-mobile">Lecturer</th><th>Attended</th><th>Rate</th></tr></thead><tbody>
+          <table class="data-table" style="min-width:400px"><thead><tr><th style="width:80px">Code</th><th>Course Name</th><th class="hide-mobile" style="width:100px">Lecturer</th><th style="width:80px">Attended</th><th style="width:60px">Rate</th></tr></thead><tbody>
           <?php foreach($enrolledCourses as $c):
             $pct=$c['total_sessions']>0?round(($c['attended']/$c['total_sessions'])*100):0;
             $color=$pct>=75?'var(--success)':($pct>=50?'var(--warning)':'var(--danger)'); ?>
@@ -614,7 +614,7 @@ document.addEventListener('DOMContentLoaded',function(){
               <td><span style="color:<?= $color ?>;font-weight:600"><?= $pct ?>%</span><?php if($pct<75&&$c['total_sessions']>3): ?> <span class="t-danger"></span><?php endif; ?></td>
             </tr>
           <?php endforeach; ?>
-          </tbody></table></div>
+          </tbody></table>
         </div></div>
       <?php endif; ?>
     </div>

@@ -389,6 +389,11 @@ document.addEventListener('DOMContentLoaded',function(){
   var ov=document.getElementById('sidebar-overlay');
   if(ov)ov.onclick=function(){toggleSidebar();};
 });
+function toggleTheme(){
+  var isLight=document.body.classList.toggle('light');
+  localStorage.setItem('theme',isLight?'light':'dark');
+  document.querySelectorAll('.theme-btn').forEach(function(b){b.innerHTML=isLight?'&#9728;':'&#9790;';});
+}
 </script>
 
 </head>

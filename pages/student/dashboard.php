@@ -381,6 +381,8 @@ function showSection(name,el){
 }
 
 document.addEventListener('DOMContentLoaded',function(){
+  if(localStorage.getItem('theme')==='light'){document.body.classList.add('light');document.querySelectorAll('.theme-btn').forEach(b=>b.innerHTML='&#9728;');}
+
   var btn=document.getElementById('menu-btn')||document.getElementById('menu-toggle');
   if(btn)btn.onclick=function(e){e.stopPropagation();toggleSidebar();};
   var ov=document.getElementById('sidebar-overlay');

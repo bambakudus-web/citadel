@@ -302,6 +302,10 @@ input,select,textarea{font-size:16px!important}
 
 /*  MOBILE - CLEAN  */
 @media(max-width:768px){
+  .card{max-width:100%!important;overflow:hidden!important}
+  .content{max-width:100vw!important;overflow-x:hidden!important}
+  .page-section{max-width:100%!important}
+  .layout{overflow-x:hidden!important}
   .sidebar{
     width:260px!important;
     position:fixed!important;top:0!important;left:0!important;

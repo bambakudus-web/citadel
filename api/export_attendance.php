@@ -5,6 +5,7 @@ session_start();
 require_once '../includes/db.php';
 require_once '../includes/auth.php';
 requireRole('admin', 'rep');
+$inst_id = (int)($_SESSION['institution_id'] ?? 1);
 
 $courseCode = $_GET['course']      ?? '';
 $courseId   = (int)($_GET['course_id'] ?? 0);
@@ -16,12 +17,13 @@ $status     = $_GET['status'] ?? '';
 
 // Default to active semester if none specified
 if (!$semesterId && !$sessionId) {
-    $row = $pdo->query("SELECT id FROM semesters WHERE is_active=1 LIMIT 1")->fetch();
-    $semesterId = $row['id'] ?? 0;
+    $row = $pdo->prepare("SELECT id FROM semesters WHERE is_active=1 AND institution_id=? LIMIT 1");
+    $row->execute([$inst_id]);
+    $semesterId = $row->fetch()['id'] ?? 0;
 }
 
-$where  = ["a.status IN ('present','late','absent')"];
-$params = [];
+$where  = ["a.status IN ('present','late','absent')", "u.institution_id = ?"];
+$params = [$inst_id];
 
 if ($sessionId) {
     $where[]  = 'a.session_id = ?';

@@ -9,6 +9,7 @@ header('Content-Type: application/json');
 $method = $_SERVER['REQUEST_METHOD'];
 requireRole('admin');
 $inst_id = (int)($_SESSION['institution_id'] ?? 1);
+if (!in_array($method, ['GET', 'HEAD', 'OPTIONS'])) verifyCsrf();
 
 switch ($method) {
 
@@ -27,9 +28,9 @@ switch ($method) {
                 LEFT JOIN departments  d ON d.id = u.department_id
                 LEFT JOIN programs     p ON p.id = u.program_id
                 LEFT JOIN institutions i ON i.id = u.institution_id
-                WHERE u.id = ?
+                WHERE u.id = ? AND u.institution_id = ?
             ");
-            $stmt->execute([$_GET['id']]);
+            $stmt->execute([$_GET['id'], $inst_id]);
             $user = $stmt->fetch();
             if (!$user) { http_response_code(404); echo json_encode(['error' => 'User not found']); exit; }
 
@@ -64,12 +65,11 @@ switch ($method) {
             echo json_encode($user);
 
         } else {
-            $where = ['1=1']; $params = [];
+            $where = ['u.institution_id = ?']; $params = [$inst_id];
 
             if (!empty($_GET['role']))           { $where[] = 'u.role = ?';           $params[] = $_GET['role']; }
             if (!empty($_GET['program_id']))      { $where[] = 'u.program_id = ?';     $params[] = $_GET['program_id']; }
             if (!empty($_GET['department_id']))   { $where[] = 'u.department_id = ?';  $params[] = $_GET['department_id']; }
-            if (!empty($_GET['institution_id']))  { $where[] = 'u.institution_id = ?'; $params[] = $_GET['institution_id']; }
             if (!empty($_GET['level']))           { $where[] = 'u.level = ?';          $params[] = $_GET['level']; }
             if (isset($_GET['is_active']))        { $where[] = 'u.is_active = ?';      $params[] = (int)$_GET['is_active']; }
             if (!empty($_GET['search'])) {
@@ -113,7 +113,7 @@ switch ($method) {
         $full_name      = trim($data['full_name']);
         $role           = $data['role'];
         $index_no       = trim($data['index_no'] ?? '');
-        $institution_id = $data['institution_id'] ?? 1;
+        $institution_id = $inst_id;
         $department_id  = $data['department_id']  ?? null;
         $program_id     = $data['program_id']     ?? null;
         $level          = $data['level']          ?? null;
@@ -181,8 +181,8 @@ switch ($method) {
         $data = json_decode(file_get_contents('php://input'), true);
         if (empty($data['id'])) { http_response_code(400); echo json_encode(['error' => 'User ID required']); exit; }
 
-        $check = $pdo->prepare("SELECT id, role FROM users WHERE id = ?");
-        $check->execute([$data['id']]);
+        $check = $pdo->prepare("SELECT id, role FROM users WHERE id = ? AND institution_id = ?");
+        $check->execute([$data['id'], $inst_id]);
         $existing = $check->fetch();
         if (!$existing) { http_response_code(404); echo json_encode(['error' => 'User not found']); exit; }
 
@@ -205,8 +205,9 @@ switch ($method) {
 
         if (empty($fields)) { http_response_code(400); echo json_encode(['error' => 'No fields to update']); exit; }
 
-        $values[] = $data['id'];
-        $pdo->prepare("UPDATE users SET " . implode(', ', $fields) . " WHERE id = ?")->execute($values);
+        $values[] = (int)$data['id'];
+        $values[] = $inst_id;
+        $pdo->prepare("UPDATE users SET " . implode(', ', $fields) . " WHERE id = ? AND institution_id = ?")->execute($values);
 
         $pdo->prepare("INSERT INTO audit_log (actor_id, action, target_type, target_id, ip_address) VALUES (?, 'UPDATE_USER', 'user', ?, ?)")
             ->execute([$_SESSION['user_id'], $data['id'], $_SERVER['REMOTE_ADDR'] ?? null]);
@@ -226,9 +227,9 @@ switch ($method) {
             http_response_code(403); echo json_encode(['error' => 'Cannot deactivate your own account']); exit;
         }
 
-        $pdo->prepare("UPDATE users SET is_active = NOT is_active WHERE id = ?")->execute([$data['id']]);
-        $status = $pdo->prepare("SELECT is_active FROM users WHERE id = ?");
-        $status->execute([$data['id']]);
+        $pdo->prepare("UPDATE users SET is_active = NOT is_active WHERE id = ? AND institution_id = ?")->execute([$data['id'], $inst_id]);
+        $status = $pdo->prepare("SELECT is_active FROM users WHERE id = ? AND institution_id = ?");
+        $status->execute([$data['id'], $inst_id]);
         $row = $status->fetch();
 
         $pdo->prepare("INSERT INTO audit_log (actor_id, action, target_type, target_id, detail, ip_address) VALUES (?, 'TOGGLE_USER', 'user', ?, ?, ?)")
@@ -257,7 +258,7 @@ switch ($method) {
             exit;
         }
 
-        $pdo->prepare("DELETE FROM users WHERE id = ?")->execute([$data['id']]);
+        $pdo->prepare("DELETE FROM users WHERE id = ? AND institution_id = ?")->execute([$data['id'], $inst_id]);
 
         $pdo->prepare("INSERT INTO audit_log (actor_id, action, target_type, target_id, ip_address) VALUES (?, 'DELETE_USER', 'user', ?, ?)")
             ->execute([$_SESSION['user_id'], $data['id'], $_SERVER['REMOTE_ADDR'] ?? null]);

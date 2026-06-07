@@ -21,6 +21,7 @@ if (!$inputCode || !$sessionId) {
 $rlKey = 'verify_code_' . $userId . '_' . $sessionId;
 if (!checkRateLimit($rlKey, 10, 300)) {
     $wait = getRateLimitRemaining($rlKey, 300);
+    http_response_code(429);
     echo json_encode(['success' => false, 'message' => "Too many attempts. Try again in {$wait}s."]);
     exit;
 }

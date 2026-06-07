@@ -8,6 +8,7 @@ requireRole('admin');
 
 $inst_id = (int)($_SESSION['institution_id'] ?? 1);
 $method  = $_SERVER['REQUEST_METHOD'];
+if (!in_array($method, ['GET', 'HEAD', 'OPTIONS'])) verifyCsrf();
 
 switch ($method) {
 

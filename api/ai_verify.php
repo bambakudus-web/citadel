@@ -124,10 +124,9 @@ curl_close($ch);
 if ($httpCode !== 200) {
     $errorData = json_decode($response, true);
     echo json_encode([
-        'success' => false, 
+        'success' => false,
         'message' => 'AI service error: ' . ($errorData['error']['message'] ?? 'HTTP ' . $httpCode),
         'confidence' => 0,
-        'raw' => $response
     ]);
     exit;
 }

@@ -5,6 +5,7 @@ require_once '../includes/db.php';
 require_once '../includes/auth.php';
 require_once '../includes/guard.php';
 requireRole('lecturer');
+verifyCsrf();
 header('Content-Type: application/json');
 
 $data      = json_decode(file_get_contents('php://input'), true) ?? [];
@@ -46,6 +47,16 @@ if ($action === 'mark') {
     $status    = $data['status'] ?? 'present';
     if (!in_array($status, ['present','late','absent'])) { echo json_encode(['ok'=>false,'msg'=>'Invalid status']); exit; }
     if (!$sessionId || !$studentId) { echo json_encode(['ok'=>false,'msg'=>'Missing data']); exit; }
+
+    // Verify session belongs to this institution and lecturer
+    $sessCheck = $pdo->prepare("SELECT s.id FROM sessions s WHERE s.id = ? AND s.lecturer_id = ? AND s.active_status = 1");
+    $sessCheck->execute([$sessionId, $userId]);
+    if (!$sessCheck->fetch()) { echo json_encode(['ok'=>false,'msg'=>'Session not found']); exit; }
+
+    // Verify student belongs to this institution
+    $stuCheck = $pdo->prepare("SELECT id FROM users WHERE id = ? AND institution_id = ? AND is_active = 1");
+    $stuCheck->execute([$studentId, $inst_id]);
+    if (!$stuCheck->fetch()) { echo json_encode(['ok'=>false,'msg'=>'Student not found']); exit; }
 
     // Upsert attendance record
     $existing = $pdo->prepare("SELECT id FROM attendance WHERE session_id=? AND student_id=?");

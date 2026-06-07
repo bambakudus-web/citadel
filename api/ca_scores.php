@@ -3,12 +3,14 @@ require_once '../includes/security.php';
 require_once '../includes/db.php';
 require_once '../includes/logger.php';
 require_once '../includes/auth.php';
+requireLogin();
 header('Content-Type: application/json');
 
 $user = currentUser();
 $role = $user['role'] ?? '';
 $inst_id = (int)($_SESSION['institution_id'] ?? 1);
 $method = $_SERVER['REQUEST_METHOD'];
+if (!in_array($method, ['GET', 'HEAD', 'OPTIONS'])) verifyCsrf();
 
 // ── GET: fetch scores ──
 if ($method === 'GET') {

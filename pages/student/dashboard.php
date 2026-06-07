@@ -1052,5 +1052,11 @@ document.addEventListener('DOMContentLoaded', function() {
 #ca-summary-cards:empty,#rep-ca-cards,#admin-ca-cards{min-height:0!important}
 #ca-summary-cards:empty,#rep-ca-cards:empty,#admin-ca-cards:empty{display:none!important}
 </style>
+<script>
+const csrfToken="<?= csrfToken() ?>";
+document.querySelectorAll('form').forEach(form=>{if(!form.querySelector('[name="csrf_token"]')){const input=document.createElement('input');input.type='hidden';input.name='csrf_token';input.value=csrfToken;form.appendChild(input)}});
+const _origFetch=window.fetch;
+window.fetch=function(url,options={}){options.headers=options.headers||{};options.headers['X-CSRF-Token']=csrfToken;return _origFetch(url,options)};
+</script>
 </body>
 </html>

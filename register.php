@@ -26,7 +26,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $institution = $inst->fetch();
             if (!$institution) { $error = 'School code "'.strtoupper($schoolCode).'" not found.'; }
             else { $step = 2;
-                $programs = $pdo->query("SELECT p.* FROM programs p JOIN departments d ON d.id=p.department_id WHERE d.institution_id={$institution['id']} ORDER BY p.name")->fetchAll();
+                $pStmt = $pdo->prepare("SELECT p.* FROM programs p JOIN departments d ON d.id=p.department_id WHERE d.institution_id=? ORDER BY p.name");
+                $pStmt->execute([$institution['id']]);
+                $programs = $pStmt->fetchAll();
             }
         }
     }
@@ -58,6 +60,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if ($check->fetch()) { $error = 'Index number or email already registered.'; $step = 2; }
                 else {
                     // Get selected program
+                    $programId = (int)($_POST['program_id'] ?? 0);
+                    $level     = (int)($_POST['level'] ?? 1);
                     $prog = $pdo->prepare("SELECT p.id, p.department_id FROM programs p JOIN departments d ON d.id=p.department_id WHERE p.id=? AND d.institution_id=?");
                     $prog->execute([$programId, $institution['id']]); $prog = $prog->fetch();
                     if (!$prog) { $error = 'Invalid program selected.'; $step = 2; }

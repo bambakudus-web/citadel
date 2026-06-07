@@ -7,6 +7,7 @@ header('Content-Type: application/json');
 
 $method = $_SERVER['REQUEST_METHOD'];
 requireRole('admin');
+if (!in_array($method, ['GET', 'HEAD', 'OPTIONS'])) verifyCsrf();
 
 switch ($method) {
 

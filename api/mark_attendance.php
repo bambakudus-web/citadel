@@ -7,6 +7,7 @@ require_once '../includes/db.php';
 require_once '../includes/auth.php';
 require_once '../includes/logger.php';
 requireLogin();
+verifyCsrf();
 
 $user      = currentUser();
 $userId    = $_SESSION['user_id'];

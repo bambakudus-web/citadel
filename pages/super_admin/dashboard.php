@@ -381,4 +381,10 @@ const cfg = (labels,data,color,label)=>({type:'bar',data:{labels,datasets:[{labe
 if(document.getElementById('chart-schools')) new Chart(document.getElementById('chart-schools'),cfg(labels1,gd.map(r=>r.schools),'#c9a84c','Schools'));
 if(document.getElementById('chart-users')) new Chart(document.getElementById('chart-users'),cfg(labels2,ud.map(r=>r.users),'#4a6fa5','Users'));
 </script>
+<script>
+const csrfToken="<?= csrfToken() ?>";
+document.querySelectorAll('form').forEach(form=>{if(!form.querySelector('[name="csrf_token"]')){const input=document.createElement('input');input.type='hidden';input.name='csrf_token';input.value=csrfToken;form.appendChild(input)}});
+const _origFetch=window.fetch;
+window.fetch=function(url,options={}){options.headers=options.headers||{};options.headers['X-CSRF-Token']=csrfToken;return _origFetch(url,options)};
+</script>
 </body></html>

@@ -1,7 +1,8 @@
 <?php
 // api/send_reminders.php — called every minute by cron-job.org
-$key = $_GET['key'] ?? '';
-if ($key !== 'citadel_cron_remind_2026') { http_response_code(403); die('No'); }
+$key      = $_GET['key'] ?? '';
+$envKey   = getenv('CRON_KEY') ?: '';
+if (!$envKey || $key !== $envKey) { http_response_code(403); die('No'); }
 
 require_once '../includes/db.php';
 require_once '../includes/brevo_mail.php';

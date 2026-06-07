@@ -8,6 +8,7 @@ $inst_id = (int)($_SESSION['institution_id'] ?? 1);
 header('Content-Type: application/json');
 
 $method = $_SERVER['REQUEST_METHOD'];
+if ($method !== 'GET') verifyCsrf();
 $data = json_decode(file_get_contents('php://input'), true) ?? [];
 
 if ($method === 'POST') {

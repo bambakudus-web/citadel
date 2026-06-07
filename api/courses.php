@@ -10,6 +10,7 @@ $method = $_SERVER['REQUEST_METHOD'];
 // GET is open to all logged-in users; mutations are admin-only
 requireLogin();
 $inst_id = (int)($_SESSION['institution_id'] ?? 1);
+if (!in_array($method, ['GET', 'HEAD', 'OPTIONS'])) verifyCsrf();
 
 switch ($method) {
 

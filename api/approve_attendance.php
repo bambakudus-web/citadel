@@ -9,6 +9,7 @@ require_once '../includes/auth.php';
 
 
 requireRole('rep', 'admin');
+verifyCsrf();
 
 $input        = json_decode(file_get_contents('php://input'), true);
 $attendanceId = (int)($input['attendance_id'] ?? 0);

@@ -50,6 +50,7 @@ if ($_SERVER['REQUEST_METHOD']==='POST') {
         echo json_encode(['ok'=>true]);exit;
     }
     if ($action==='impersonate'){
+        if(isset($_SESSION['super_admin_origin'])){echo json_encode(['ok'=>false,'msg'=>'Already impersonating. Exit first.']);exit;}
         $instRow=$pdo->prepare("SELECT * FROM institutions WHERE id=? AND is_active=1 LIMIT 1");
         $instRow->execute([$id]);$inst=$instRow->fetch();
         if(!$inst){echo json_encode(['ok'=>false,'msg'=>'School not active']);exit;}

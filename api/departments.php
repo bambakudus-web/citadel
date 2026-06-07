@@ -9,6 +9,7 @@ requireRole('admin');
 $inst_id = (int)($_SESSION['institution_id'] ?? 1);
 
 $method = $_SERVER['REQUEST_METHOD'];
+if (!in_array($method, ['GET', 'HEAD', 'OPTIONS'])) verifyCsrf();
 $data   = json_decode(file_get_contents('php://input'), true) ?? [];
 
 if ($method === 'GET') {

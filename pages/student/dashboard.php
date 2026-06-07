@@ -554,7 +554,7 @@ function toggleTheme(){
               <div class="fs-72 t-gold">Step 3: Classroom Verification</div>
               <div id="step-class-sub" class="t-muted-78 mt-3">Flip your camera to show the classroom</div>
             </div>
-            <div class="camera-wrap"><video id="class-video" autoplay playsinline muted style="display:none"></video></div>
+            <div class="camera-wrap" id="class-camera-wrap" style="display:none"><video id="class-video" autoplay playsinline muted style="display:none"></video></div>
             <canvas id="class-canvas"></canvas>
             <img id="class-preview" class="selfie-preview" style="display:none">
             <div class="flex-gap8-mt10">
@@ -816,6 +816,7 @@ async function startClassCamera() {
     const video = document.getElementById('class-video');
     video.srcObject = classStream;
     await new Promise(r => video.onloadedmetadata = r);
+    document.getElementById('class-camera-wrap').style.display = 'block';
     video.style.display = 'block';
     video.play();
     btn.disabled = false;
@@ -951,9 +952,16 @@ async function submitAttendance(fromClassStep = false) {
       btn.disabled = false; btn.textContent = 'Submit →';
     }
   } catch(e) {
-    errEl.textContent = 'Connection error. Try again.';
-    errEl.style.display = 'block';
-    btn.disabled = false; btn.textContent = 'Submit →';
+    if (!btn._retried) {
+      btn._retried = true;
+      btn.textContent = 'Retrying...';
+      setTimeout(() => submitAttendance(fromClassStep), 2000);
+    } else {
+      btn._retried = false;
+      errEl.textContent = 'Connection error. Check your internet and try again.';
+      errEl.style.display = 'block';
+      btn.disabled = false; btn.textContent = 'Submit →';
+    }
   }
 }
 

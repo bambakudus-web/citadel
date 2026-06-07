@@ -795,6 +795,9 @@ let capturedClassroom = null;
 function startClassroomStep() {
   const selfieInClass = document.getElementById('selfie-in-class');
   if (selfieInClass && capturedSelfie) selfieInClass.src = capturedSelfie;
+  // Hide the face camera wrap to remove black box
+  const faceWrap = document.querySelector('#step-selfie-section .camera-wrap');
+  if (faceWrap) faceWrap.style.display = 'none';
   document.getElementById('step-selfie-section').style.display = 'none';
   document.getElementById('step-class-section').style.display = 'block';
   document.getElementById('dot-selfie').className = 'step-dot done';

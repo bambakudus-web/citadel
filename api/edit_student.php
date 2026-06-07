@@ -10,7 +10,7 @@ $id       = (int)($_POST['id']        ?? 0);
 $fullName = trim($_POST['full_name']  ?? '');
 $indexNo  = trim($_POST['index_no']   ?? '');
 $email    = trim($_POST['email']      ?? '');
-$role     = in_array($_POST['role'] ?? '', ['student','rep','lecturer','admin']) ? $_POST['role'] : 'student';
+$role     = in_array($_POST['role'] ?? '', ['student','rep']) ? $_POST['role'] : 'student';
 
 if ($id && $fullName && $indexNo) {
     $stmt = $pdo->prepare("UPDATE users SET full_name=?, index_no=?, email=?, role=? WHERE id=? AND institution_id=?");

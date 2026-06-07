@@ -25,7 +25,7 @@ if ($method === 'POST') {
     if (!$check->fetch()) { echo json_encode(['ok'=>false,'error'=>'Invalid department']); exit; }
 
     if ($id) {
-        $pdo->prepare("UPDATE programs SET name=?,code=?,department_id=?,duration_yrs=? WHERE id=?")->execute([$name,$code,$dept_id,$duration,$id]);
+        $pdo->prepare("UPDATE programs SET name=?,code=?,department_id=?,duration_yrs=? WHERE id=? AND department_id IN (SELECT id FROM departments WHERE institution_id=?)")->execute([$name,$code,$dept_id,$duration,$id,$inst_id]);
         audit('UPDATE_PROGRAM','program',$id);
     } else {
         $pdo->prepare("INSERT INTO programs (name,code,department_id,duration_yrs) VALUES (?,?,?,?)")->execute([$name,$code,$dept_id,$duration]);
@@ -37,7 +37,7 @@ if ($method === 'POST') {
 if ($method === 'DELETE') {
     $id = (int)($data['id'] ?? 0);
     if (!$id) { echo json_encode(['ok'=>false,'error'=>'ID required']); exit; }
-    $pdo->prepare("DELETE FROM programs WHERE id=?")->execute([$id]);
+    $pdo->prepare("DELETE FROM programs WHERE id=? AND department_id IN (SELECT id FROM departments WHERE institution_id=?)")->execute([$id,$inst_id]);
     audit('DELETE_PROGRAM','program',$id);
     echo json_encode(['ok'=>true]); exit;
 }

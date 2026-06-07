@@ -19,22 +19,23 @@ switch ($method) {
 
         // Default to active semester if none specified
         if (!$semester_id) {
-            $row = $pdo->query("SELECT id FROM semesters WHERE is_active = 1 LIMIT 1")->fetch();
-            $semester_id = $row['id'] ?? null;
+            $row = $pdo->prepare("SELECT id FROM semesters WHERE is_active = 1 AND institution_id = ? LIMIT 1");
+            $row->execute([$inst_id]);
+            $semester_id = $row->fetch()['id'] ?? null;
         }
 
         if (!empty($_GET['id'])) {
             $stmt = $pdo->prepare("
                 SELECT c.*, s.name AS semester_name, p.name AS program_name,
                        u.full_name AS lecturer_name
-                FROM courses c2 JOIN semesters s2 ON s2.id=c2.semester_id WHERE s2.institution_id=? c
+                FROM courses c
                 JOIN semesters s ON s.id = c.semester_id
                 JOIN programs  p ON p.id = c.program_id
                 LEFT JOIN course_assignments ca ON ca.course_id = c.id AND ca.semester_id = c.semester_id
                 LEFT JOIN users u ON u.id = ca.lecturer_id
-                WHERE c.id = ?
+                WHERE c.id = ? AND s.institution_id = ?
             ");
-            $stmt->execute([$_GET['id']]);
+            $stmt->execute([$_GET['id'], $inst_id]);
             $course = $stmt->fetch();
             if (!$course) { http_response_code(404); echo json_encode(['error' => 'Course not found']); exit; }
             // Get enrolled student count
@@ -43,10 +44,10 @@ switch ($method) {
             $course['enrolled_count'] = (int)$enroll->fetchColumn();
             echo json_encode($course);
         } else {
-            $where = []; $params = [];
+            $where = ['s.institution_id = ?']; $params = [$inst_id];
             if ($semester_id) { $where[] = 'c.semester_id = ?'; $params[] = $semester_id; }
             if ($program_id)  { $where[] = 'c.program_id = ?';  $params[] = $program_id; }
-            $whereSQL = $where ? 'WHERE ' . implode(' AND ', $where) : '';
+            $whereSQL = 'WHERE ' . implode(' AND ', $where);
             $stmt = $pdo->prepare("
                 SELECT c.*, s.name AS semester_name, p.name AS program_name,
                        u.full_name AS lecturer_name, u.id AS lecturer_id,

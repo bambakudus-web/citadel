@@ -54,6 +54,23 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         }
         header("Location: dashboard.php"); exit;
     }
+    if ($action === "end_session") {
+        $sid = (int)($_POST["session_id"] ?? 0);
+        if ($sid) {
+            $chk = $pdo->prepare("SELECT s.id, s.course_id FROM sessions s JOIN users u ON u.id=s.lecturer_id WHERE s.id=? AND u.institution_id=? AND s.active_status=1");
+            $chk->execute([$sid, $inst_id]);
+            $sess = $chk->fetch();
+            if ($sess) {
+                $pdo->prepare("UPDATE sessions SET active_status=0, end_time=NOW() WHERE id=?")->execute([$sid]);
+                $pdo->prepare("DELETE FROM attendance WHERE session_id=? AND status='pending'")->execute([$sid]);
+                if ($sess['course_id']) {
+                    $pdo->prepare("INSERT IGNORE INTO attendance (session_id,student_id,status,timestamp) SELECT ?,ce.student_id,'absent',NOW() FROM course_enrollments ce WHERE ce.course_id=? AND ce.status='active' AND ce.student_id NOT IN (SELECT student_id FROM attendance WHERE session_id=? AND status IN ('present','late'))")->execute([$sid,$sess['course_id'],$sid]);
+                }
+                audit('END_SESSION','session',$sid);
+            }
+        }
+        header("Location: dashboard.php"); exit;
+    }
 }
 
 $user = currentUser();
@@ -615,7 +632,7 @@ ob_start();
           AND (t.semester_id=? OR t.semester_id IS NULL OR ?=0)
           ORDER BY FIELD(t.day_of_week,'Monday','Tuesday','Wednesday','Thursday','Friday'), t.start_time
       ");
-$ttStmt->execute([$activeSemId, $activeSemId]);
+$ttStmt->execute([$inst_id, $activeSemId, $activeSemId]);
 $ttAll = $ttStmt->fetchAll();
       $days = ['Monday','Tuesday','Wednesday','Thursday','Friday'];
       foreach ($days as $day):
@@ -1403,6 +1420,205 @@ async function deleteProgram(id,name){
   const d=await r.json();
   if(d.ok){toast('success','Program deleted');setTimeout(()=>location.reload(),800);}
   else toast('error',d.error||'Error');
+}
+</script>
+
+<script>
+// ── Missing functions ──────────────────────────────────────────────────────
+
+function setActiveSemester(id, name) {
+  if (!confirm('Set "' + name + '" as the active semester?\nAll currently open sessions will be closed.')) return;
+  fetch(API + '/semesters.php', {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id: id, action: 'set_active' })
+  }).then(r => r.json()).then(d => {
+    if (d.success) location.reload();
+    else alert(d.error || 'Failed to set active semester');
+  });
+}
+
+function editCourse(id, code, name, lecturerId, credits, programId) {
+  document.getElementById('course-edit-id').value = id;
+  document.getElementById('course-code').value    = code;
+  document.getElementById('course-name').value    = name;
+  document.getElementById('course-credits').value = credits;
+  if (programId)  document.getElementById('course-program').value  = programId;
+  if (lecturerId) document.getElementById('course-lecturer').value = lecturerId;
+  document.getElementById('course-modal-title').textContent = 'EDIT COURSE';
+  openModal('modal-add-course');
+}
+
+async function saveCourse() {
+  const id = document.getElementById('course-edit-id').value;
+  const body = {
+    program_id:  document.getElementById('course-program').value,
+    semester_id: <?= (int)($activeSemId ?? 0) ?>,
+    code:        document.getElementById('course-code').value.trim(),
+    name:        document.getElementById('course-name').value.trim(),
+    credit_hrs:  document.getElementById('course-credits').value,
+    lecturer_id: document.getElementById('course-lecturer').value || null,
+    enroll_all:  document.getElementById('course-enroll-all').checked ? 1 : 0,
+  };
+  if (!body.program_id || !body.code || !body.name) { alert('Program, code and name are required'); return; }
+  if (id) { body.id = id; }
+  const r = await fetch(API + '/courses.php', {
+    method: id ? 'PUT' : 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+  const d = await r.json();
+  if (d.success || d.id) { closeModal('modal-add-course'); location.reload(); }
+  else alert(d.error || 'Failed to save course');
+}
+
+async function deleteCourse(id, code) {
+  if (!confirm('Delete course ' + code + '?')) return;
+  const r = await fetch(API + '/courses.php', {
+    method: 'DELETE',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id })
+  });
+  const d = await r.json();
+  if (d.success) location.reload();
+  else alert(d.error || 'Cannot delete course');
+}
+
+function editLecturer(id, name, email, isActive) {
+  document.getElementById('lecturer-edit-id').value = id;
+  document.getElementById('lecturer-name').value    = name;
+  document.getElementById('lecturer-email').value   = email;
+  document.getElementById('lecturer-modal-title').textContent = 'EDIT LECTURER';
+  openModal('modal-add-lecturer');
+}
+
+async function saveLecturer() {
+  const id = document.getElementById('lecturer-edit-id').value;
+  const body = {
+    full_name:      document.getElementById('lecturer-name').value.trim(),
+    email:          document.getElementById('lecturer-email').value.trim(),
+    phone:          document.getElementById('lecturer-phone').value.trim(),
+    role:           'lecturer',
+    institution_id: <?= $inst_id ?>,
+  };
+  if (!body.full_name || (!id && !body.email)) { alert('Name and email are required'); return; }
+  const pw = document.getElementById('lecturer-password').value.trim();
+  if (!id && pw) body.password = pw;
+  if (id) body.id = id;
+  const r = await fetch(API + '/users.php', {
+    method: id ? 'PUT' : 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+  const d = await r.json();
+  if (d.success || d.id) { closeModal('modal-add-lecturer'); location.reload(); }
+  else alert(d.error || 'Failed to save lecturer');
+}
+
+function toggleUser(id, isActive) {
+  const label = isActive ? 'Deactivate' : 'Activate';
+  if (!confirm(label + ' this user?')) return;
+  fetch(API + '/users.php', {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id: id })
+  }).then(r => r.json()).then(d => {
+    if (d.success) location.reload();
+    else alert(d.error || 'Failed');
+  });
+}
+
+function filterStudents() {
+  const q = document.getElementById('student-search').value.toLowerCase();
+  document.querySelectorAll('#student-table tbody tr').forEach(function(row) {
+    const match = (row.dataset.name || '').includes(q) || (row.dataset.index || '').includes(q);
+    row.style.display = match ? '' : 'none';
+  });
+}
+
+function editStudent(id, name, indexNo, email, role, isLocked, fingerprint) {
+  document.getElementById('edit-id').value        = id;
+  document.getElementById('edit-name').value      = name;
+  document.getElementById('edit-index').value     = indexNo;
+  document.getElementById('edit-email').value     = email;
+  document.getElementById('edit-role').value      = role;
+  document.getElementById('danger-user-id').value  = id;
+  document.getElementById('danger-user-id2').value = id;
+  openModal('modal-edit-student');
+}
+
+function closeSession(id) {
+  if (!confirm('Close this session? Students who have not submitted will be marked absent.')) return;
+  fetch(API + '/close_session.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id: id })
+  }).then(r => r.json()).then(d => {
+    if (d.success) location.reload();
+    else alert(d.message || 'Failed to close session');
+  });
+}
+
+async function saveSemester() {
+  const id = document.getElementById('sem-edit-id').value;
+  const body = {
+    name:          document.getElementById('sem-name').value.trim(),
+    academic_year: document.getElementById('sem-year').value.trim(),
+    semester_no:   document.getElementById('sem-no').value,
+    start_date:    document.getElementById('sem-start').value,
+    end_date:      document.getElementById('sem-end').value,
+  };
+  if (!body.name || !body.academic_year || !body.start_date || !body.end_date) {
+    alert('All fields are required'); return;
+  }
+  if (id) body.id = id;
+  const r = await fetch(API + '/semesters.php', {
+    method: id ? 'PUT' : 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+  const d = await r.json();
+  if (d.success) { closeModal('modal-add-semester'); location.reload(); }
+  else alert(d.error || 'Failed to save semester');
+}
+
+async function saveDept() {
+  const name = document.getElementById('dept-name').value.trim();
+  if (!name) { alert('Department name is required'); return; }
+  const r = await fetch(API + '/departments.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name: name })
+  });
+  const d = await r.json();
+  if (d.ok) { closeModal('modal-add-dept'); location.reload(); }
+  else alert(d.error || 'Failed to save department');
+}
+
+function uploadProgramCSV() {
+  const file = document.getElementById('prog-csv').files[0];
+  if (!file) { alert('Please select a CSV file'); return; }
+  const deptId = document.getElementById('prog-dept').value;
+  if (!deptId) { alert('Please select a department first'); return; }
+  const reader = new FileReader();
+  reader.onload = async function(e) {
+    const lines = e.target.result.split('\n').filter(function(l) { return l.trim(); });
+    let imported = 0, failed = 0;
+    for (const line of lines) {
+      const parts = line.split(',').map(function(p) { return p.trim(); });
+      if (parts.length < 2 || !parts[0] || !parts[1]) { failed++; continue; }
+      const r = await fetch('/api/programs.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: parts[0], code: parts[1], duration_yrs: parts[2] || 2, department_id: deptId })
+      });
+      const d = await r.json();
+      if (d.ok) imported++; else failed++;
+    }
+    alert(imported + ' program(s) imported, ' + failed + ' failed.');
+    if (imported > 0) { closeModal('modal-add-program'); location.reload(); }
+  };
+  reader.readAsText(file);
 }
 </script>
 </body>

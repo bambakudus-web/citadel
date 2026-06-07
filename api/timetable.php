@@ -8,13 +8,16 @@ header('Content-Type: application/json');
 
 $method = $_SERVER['REQUEST_METHOD'];
 requireRole('admin');
+$inst_id = (int)($_SESSION['institution_id'] ?? 1);
 
 switch ($method) {
 
     case 'GET':
         $day = $_GET['day'] ?? null;
-        $where = $day ? "WHERE t.day_of_week = ?" : "";
-        $params = $day ? [$day] : [];
+        $conditions = ['(u.institution_id = ? OR sm.institution_id = ?)'];
+        $params = [$inst_id, $inst_id];
+        if ($day) { $conditions[] = 't.day_of_week = ?'; $params[] = $day; }
+        $whereSQL = 'WHERE ' . implode(' AND ', $conditions);
         $stmt = $pdo->prepare("
             SELECT t.*, u.full_name AS lecturer_name,
                    COALESCE(c.code, t.course_code) AS course_code,
@@ -22,7 +25,8 @@ switch ($method) {
             FROM timetable t
             LEFT JOIN users u ON u.id = t.lecturer_id
             LEFT JOIN courses c ON c.id = t.course_id
-            $where
+            LEFT JOIN semesters sm ON sm.id = t.semester_id
+            $whereSQL
             ORDER BY FIELD(t.day_of_week,'Monday','Tuesday','Wednesday','Thursday','Friday'), t.start_time
         ");
         $stmt->execute($params);

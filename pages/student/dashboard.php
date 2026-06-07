@@ -793,6 +793,8 @@ let classStream = null;
 let capturedClassroom = null;
 
 function startClassroomStep() {
+  const selfieInClass = document.getElementById('selfie-in-class');
+  if (selfieInClass && capturedSelfie) selfieInClass.src = capturedSelfie;
   document.getElementById('step-selfie-section').style.display = 'none';
   document.getElementById('step-class-section').style.display = 'block';
   document.getElementById('dot-selfie').className = 'step-dot done';

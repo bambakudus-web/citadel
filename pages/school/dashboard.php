@@ -446,11 +446,11 @@ function toggleSidebar(){
 }
 
 function showSection(name,el){
+  window.scrollTo(0,0);
   document.querySelectorAll('.page-section').forEach(function(s){s.classList.remove('active');});
   document.querySelectorAll('.nav-item').forEach(function(n){n.classList.remove('active');});
   var sec=document.getElementById('sec-'+name);
   if(sec)sec.classList.add('active');
-  window.scrollTo({top:0,behavior:'smooth'});
   var title=document.getElementById('page-title');
   if(title)title.textContent=name.charAt(0).toUpperCase()+name.slice(1);
   if(el)el.classList.add('active');

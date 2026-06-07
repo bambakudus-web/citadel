@@ -340,11 +340,11 @@ function toggleSidebar(){
 }
 
 function showSection(name,el){
+  window.scrollTo(0,0);
   document.querySelectorAll('.page-section').forEach(function(s){s.classList.remove('active');});
   document.querySelectorAll('.nav-item').forEach(function(n){n.classList.remove('active');});
   var sec=document.getElementById('sec-'+name);
   if(sec)sec.classList.add('active');
-  window.scrollTo({top:0,behavior:'smooth'});
   var title=document.getElementById('page-title');
   if(title)title.textContent=name.charAt(0).toUpperCase()+name.slice(1);
   if(el)el.classList.add('active');
@@ -560,7 +560,7 @@ function toggleTheme(){
             <div class="flex-gap8-mt10">
               <button class="btn btn-ghost" id="retake-class-btn" onclick="retakeClass()" style="display:none">Retake</button>
               <button class="btn btn-gold" id="class-capture-btn" onclick="captureClassroom()" disabled>Starting camera...</button>
-              <button class="btn btn-gold" id="class-submit-btn" onclick="submitAttendance()" style="display:none">Submit →</button>
+              <button class="btn btn-gold" id="class-submit-btn" onclick="submitAttendance(true)" style="display:none">Submit →</button>
             </div>
             <div id="class-error" class="err-inline"></div>
           </div>
